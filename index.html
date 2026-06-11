@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Work Tracker" />
+  <title>Work Tracker</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: #f5f4f1; }
+    html, body, #root { height: 100%; }
+    #root { display: flex; flex-direction: column; height: 100dvh; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // ── SUPABASE CONFIG ─────────────────────────────────────────────
+    const SUPABASE_URL  = "https://whyklzysiavybgxltjzt.supabase.co";
+    const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndoeWtsenlzaWF2eWJneGx0anp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODIyODEsImV4cCI6MjA5Njc1ODI4MX0.x7yEeWHDhwgZreDP-SME3dWIC-B-kthc4EC0YOuphIg";
+    const TABLE = "work_tracker_items";
+    const sb = (SUPABASE_URL.startsWith("http"))
+      ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
+      : null;
+    // ────────────────────────────────────────────────────────────────
+
+    const STATUSES = ["Active","Waiting","In Progress","Blocked","Closed"];
+    const CATEGORIES = ["All","Commitment","Waiting On","Escalation","Relationship"];
+
+    const STATUS_COLORS = {
+      "Active":      { bg:"#e8f4e8", text:"#2d6a2d", dot:"#3a8a3a" },
+      "Waiting":     { bg:"#fef3e2", text:"#7a4f1a", dot:"#d4820a" },
+      "In Progress": { bg:"#e8eef8", text:"#1a3a6a", dot:"#2a5cbf" },
+      "Blocked":     { bg:"#fde8e8", text:"#7a1a1a", dot:"#c03030" },
+      "Closed":      { bg:"#f0f0f0", text:"#666",    dot:"#999"    }
+    };
+
+    const CATEGORY_ICONS = {
+      "Commitment":"◆","Waiting On":"◇","Escalation":"▲","Relationship":"●"
+    };
+
+    const DEFAULT_ITEMS = [
+      { id:1, person:"Joe LaBuda", company:"Aurora / Harris", category:"Escalation",
+        context:"Harris Group Leader escalating Shara Blackmore complaints. Three issues: AI Agent/KB/data capture not working, overnight migration outage, broken commitments.",
+        lastAction:"Forwarded to Callen for bullet points", nextAction:"Wait for Callen summary, then respond to Joe",
+        date:"2026-06-09", status:"Waiting", notes:"Do not respond until Callen call with Shara is complete. Peer-to-peer tone when responding." },
+      { id:2, person:"Kasandra", company:"ERTH", category:"Commitment",
+        context:"Trial live. Jeremy active on API and webhooks. June 30 close opportunity.",
+        lastAction:"Trial launched, June 30 timeline discussed", nextAction:"Book call with Kasandra",
+        date:"2026-06-02", status:"Active", notes:"Northstar renewal at $48K ARR through July 7. Cross-account TS integration is the bigger unlock." },
+      { id:3, person:"Joe Greeninger", company:"Amada", category:"Waiting On",
+        context:"Proposal sent. $53,400 / 50 seats / Infor SyteLine integration. Joe in Iceland until mid-June.",
+        lastAction:"Proposal sent, expires June 30", nextAction:"Follow up when Joe returns from Iceland",
+        date:"2026-05-29", status:"Waiting", notes:"Needs to get proposal to CEO. June 30 start, billing July 1." },
+      { id:4, person:"Grant Stanis", company:"TeamSupport", category:"Commitment",
+        context:"Grant forwarded Conquer demo follow-up.",
+        lastAction:"Received forwarded email", nextAction:"Review and reply to Grant with feedback",
+        date:"2026-06-04", status:"Active", notes:"" },
+      { id:5, person:"Karen Sebach", company:"CalcAir / Perseus", category:"Commitment",
+        context:"First TeamSupport One deal with Constellation. Blocked in legal over Perseus MSA before closing.",
+        lastAction:"Deal signed and closed", nextAction:"",
+        date:"2026-05-01", status:"Closed", notes:"RO Writer gets 5% referral. Kate Andresen managed legal resolution." },
+      { id:6, person:"Christie Smalec", company:"FIS", category:"Commitment",
+        context:"Annual data warehouse contract renewal.",
+        lastAction:"PO received and invoiced", nextAction:"",
+        date:"2026-06-01", status:"Closed", notes:"$173,250 invoiced. 5% increase. Separate from OIL/AI work with Darren Shane." },
+      { id:7, person:"Maria Clark", company:"Keysight Technologies", category:"Commitment",
+        context:"Annual renewal managed by Maria Clark.",
+        lastAction:"Renewal closed", nextAction:"",
+        date:"2026-04-09", status:"Closed", notes:"$39,690 ARR. Closed April." },
+      { id:8, person:"Gavin Sloan", company:"LCM", category:"Escalation",
+        context:"Hub SDK failure. 1:1 run, top tickets resolved, 85 widgets added. Payment dispute ~$20K still open.",
+        lastAction:"$3K ARR expansion closed. Biweekly cadence established.", nextAction:"",
+        date:"2026-05-01", status:"Closed", notes:"Payment dispute ongoing. Sentiment improved but not resolved." }
+    ];
+
+    const EMPTY_FORM = {
+      person:"", company:"", category:"Commitment", context:"",
+      lastAction:"", nextAction:"",
+      date: new Date().toISOString().split("T")[0],
+      status:"Active", notes:""
+    };
+
+    function formatDate(d) {
+      if (!d) return "";
+      return new Date(d + "T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"});
+    }
+
+    function Badge({ status }) {
+      const c = STATUS_COLORS[status] || STATUS_COLORS["Active"];
+      return (
+        <span style={{ background:c.bg, color:c.text, padding:"2px 9px", borderRadius:"20px",
+          fontSize:"11px", fontWeight:600, letterSpacing:"0.3px",
+          display:"inline-flex", alignItems:"center", gap:"5px", whiteSpace:"nowrap" }}>
+          <span style={{ width:5, height:5, borderRadius:"50%", background:c.dot, display:"inline-block", flexShrink:0 }} />
+          {status}
+        </span>
+      );
+    }
+
+    function Field({ label, value }) {
+      if (!value) return null;
+      return (
+        <div style={{ marginBottom:"14px" }}>
+          <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase", letterSpacing:"0.6px", marginBottom:"4px" }}>{label}</div>
+          <div style={{ fontSize:"13px", color:"#1a1a1a", lineHeight:"1.5" }}>{value}</div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [items, setItems]           = useState([]);
+      const [loaded, setLoaded]         = useState(false);
+      const [syncing, setSyncing]       = useState(false);
+      const [selected, setSelected]     = useState(null);
+      const [editing, setEditing]       = useState(false);
+      const [adding, setAdding]         = useState(false);
+      const [filterStatus, setFilterStatus] = useState("All");
+      const [filterCat, setFilterCat]   = useState("All");
+      const [form, setForm]             = useState(EMPTY_FORM);
+
+      // Load from Supabase or localStorage
+      useEffect(() => {
+        async function load() {
+          if (sb) {
+            setSyncing(true);
+            try {
+              const { data, error } = await sb.from(TABLE).select("*").order("date", { ascending: false });
+              if (!error && data && data.length > 0) {
+                setItems(data);
+                setLoaded(true);
+                setSyncing(false);
+                return;
+              }
+            } catch(e) {}
+            setSyncing(false);
+          }
+          // Fall back to localStorage
+          try {
+            const stored = localStorage.getItem("work-tracker-items");
+            if (stored) { const p = JSON.parse(stored); if (p && p.length) { setItems(p); setLoaded(true); return; } }
+          } catch(e) {}
+          // Fall back to defaults
+          setItems(DEFAULT_ITEMS);
+          setLoaded(true);
+        }
+        load();
+      }, []);
+
+      // Save to Supabase + localStorage on change
+      useEffect(() => {
+        if (!loaded) return;
+        localStorage.setItem("work-tracker-items", JSON.stringify(items));
+      }, [items, loaded]);
+
+      async function upsertItem(item) {
+        if (!sb) return;
+        await sb.from(TABLE).upsert(item);
+      }
+
+      async function removeItem(id) {
+        if (!sb) return;
+        await sb.from(TABLE).delete().eq("id", id);
+      }
+
+      let filtered = items;
+      if (filterStatus !== "All") filtered = filtered.filter(i => i.status === filterStatus);
+      if (filterCat !== "All")    filtered = filtered.filter(i => i.category === filterCat);
+
+      const sorted = [...filtered].sort((a,b) => {
+        const o = { "Blocked":0,"Active":1,"In Progress":2,"Waiting":3,"Closed":4 };
+        if (o[a.status] !== o[b.status]) return o[a.status] - o[b.status];
+        return new Date(b.date) - new Date(a.date);
+      });
+
+      const openCount   = items.filter(i => i.status !== "Closed").length;
+      const closedCount = items.filter(i => i.status === "Closed").length;
+
+      function openAdd() { setForm({...EMPTY_FORM}); setAdding(true); setSelected(null); setEditing(false); }
+      function openEdit(item) { setForm({...item}); setEditing(true); setAdding(false); }
+
+      async function saveForm() {
+        if (!form.person.trim()) return;
+        if (adding) {
+          const newItem = { ...form, id: Date.now() };
+          setItems(prev => [...prev, newItem]);
+          setSelected(newItem.id);
+          await upsertItem(newItem);
+        } else {
+          setItems(prev => prev.map(i => i.id === form.id ? {...form} : i));
+          setSelected(form.id);
+          await upsertItem(form);
+        }
+        setAdding(false); setEditing(false);
+      }
+
+      async function deleteItem(id) {
+        setItems(prev => prev.filter(i => i.id !== id));
+        setSelected(null);
+        await removeItem(id);
+      }
+
+      async function closeItem(id) {
+        const updated = items.map(i => i.id === id ? {...i, status:"Closed"} : i);
+        setItems(updated);
+        setSelected(null);
+        const item = updated.find(i => i.id === id);
+        if (item) await upsertItem(item);
+      }
+
+      const selectedItem = items.find(i => i.id === selected);
+      const panelOpen    = selected || adding;
+
+      const inputStyle = { width:"100%", border:"1px solid #e0dbd0", borderRadius:"6px",
+        padding:"7px 9px", fontSize:"12px", boxSizing:"border-box", outline:"none", fontFamily:"inherit" };
+      const labelStyle = { fontSize:"10px", fontWeight:600, color:"#aaa", marginBottom:"3px",
+        textTransform:"uppercase", letterSpacing:"0.5px", display:"block" };
+
+      return (
+        <div style={{ fontFamily:"-apple-system, BlinkMacSystemFont, Inter, sans-serif",
+          background:"#f5f4f1", height:"100dvh", display:"flex", flexDirection:"column", fontSize:"14px" }}>
+
+          {/* Header */}
+          <div style={{ background:"#1a1a1a", color:"#fff", padding:"12px 16px",
+            display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0 }}>
+            <div>
+              <div style={{ fontSize:"15px", fontWeight:700, letterSpacing:"-0.3px" }}>Work Tracker</div>
+              <div style={{ fontSize:"11px", color:"#888", marginTop:"1px" }}>
+                {openCount} open · {closedCount} closed
+                {syncing && <span style={{ color:"#c8a96e", marginLeft:"8px" }}>syncing...</span>}
+              </div>
+            </div>
+            <button onClick={openAdd} style={{ background:"#c8a96e", color:"#1a1a1a", border:"none",
+              borderRadius:"6px", padding:"7px 14px", fontSize:"12px", fontWeight:700, cursor:"pointer" }}>
+              + Add
+            </button>
+          </div>
+
+          {/* Status filter */}
+          <div style={{ background:"#fff", borderBottom:"1px solid #e8e4dc", padding:"0 12px",
+            display:"flex", gap:"2px", overflowX:"auto", flexShrink:0 }}>
+            {["All",...STATUSES].map(s => (
+              <button key={s} onClick={() => setFilterStatus(s)} style={{
+                border:"none", background:"none", padding:"9px 10px",
+                fontSize:"11px", fontWeight:filterStatus===s?700:400,
+                color:filterStatus===s?"#1a1a1a":"#999",
+                borderBottom:filterStatus===s?"2px solid #c8a96e":"2px solid transparent",
+                cursor:"pointer", whiteSpace:"nowrap" }}>
+                {s}
+              </button>
+            ))}
+          </div>
+
+          {/* Category filter */}
+          <div style={{ background:"#faf9f6", borderBottom:"1px solid #ede9e0", padding:"6px 12px",
+            display:"flex", gap:"6px", overflowX:"auto", flexShrink:0 }}>
+            {CATEGORIES.map(c => (
+              <button key={c} onClick={() => setFilterCat(c)} style={{
+                border:filterCat===c?"1px solid #c8a96e":"1px solid #e0dbd0",
+                background:filterCat===c?"#c8a96e":"#fff",
+                color:filterCat===c?"#1a1a1a":"#777",
+                borderRadius:"14px", padding:"4px 10px",
+                fontSize:"11px", fontWeight:filterCat===c?600:400,
+                cursor:"pointer", whiteSpace:"nowrap" }}>
+                {c !== "All" ? `${CATEGORY_ICONS[c]} ` : ""}{c}
+              </button>
+            ))}
+          </div>
+
+          {/* Main */}
+          <div style={{ flex:1, display:"flex", overflow:"hidden" }}>
+
+            {/* List */}
+            <div style={{ width:panelOpen?"42%":"100%", overflowY:"auto",
+              transition:"width 0.2s", minWidth:panelOpen?"150px":undefined }}>
+              {sorted.length === 0 && (
+                <div style={{ padding:"40px 20px", textAlign:"center", color:"#bbb", fontSize:"13px" }}>
+                  Nothing here. Hit + Add to start.
+                </div>
+              )}
+              {sorted.map(item => (
+                <div key={item.id}
+                  onClick={() => { setSelected(item.id); setEditing(false); setAdding(false); }}
+                  style={{ padding:"12px 14px", borderBottom:"1px solid #ede9e0",
+                    background:selected===item.id?"#fff":"transparent", cursor:"pointer",
+                    borderLeft:selected===item.id?"3px solid #c8a96e":"3px solid transparent",
+                    opacity:item.status==="Closed"?0.5:1 }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:"6px", marginBottom:"3px" }}>
+                    <div style={{ fontWeight:700, fontSize:"13px", color:"#1a1a1a", lineHeight:"1.3" }}>{item.person}</div>
+                    <Badge status={item.status} />
+                  </div>
+                  <div style={{ fontSize:"11px", color:"#999", marginBottom:"5px" }}>
+                    {CATEGORY_ICONS[item.category]} {item.category} &nbsp;·&nbsp; {item.company}
+                  </div>
+                  {!panelOpen && (
+                    <div style={{ fontSize:"12px", color:"#555", lineHeight:"1.4" }}>
+                      <span style={{ color:"#c8a96e", fontWeight:600 }}>Next: </span>{item.nextAction || "—"}
+                    </div>
+                  )}
+                  {item.date && <div style={{ fontSize:"10px", color:"#ccc", marginTop:"4px" }}>{formatDate(item.date)}</div>}
+                </div>
+              ))}
+            </div>
+
+            {/* Detail / Edit panel */}
+            {panelOpen && (
+              <div style={{ flex:1, background:"#fff", borderLeft:"1px solid #e8e4dc",
+                overflowY:"auto", padding:"18px 16px" }}>
+
+                {(editing || adding) ? (
+                  <div>
+                    <div style={{ fontSize:"13px", fontWeight:700, marginBottom:"16px", color:"#1a1a1a" }}>
+                      {adding ? "New Item" : "Edit Item"}
+                    </div>
+                    {[
+                      { label:"Person",      key:"person",      placeholder:"Name" },
+                      { label:"Company",     key:"company",     placeholder:"Company or team" },
+                      { label:"Context",     key:"context",     placeholder:"Background", textarea:true },
+                      { label:"Last Action", key:"lastAction",  placeholder:"What was last done" },
+                      { label:"Next Action", key:"nextAction",  placeholder:"What needs to happen next" },
+                    ].map(({ label, key, placeholder, textarea }) => (
+                      <div key={key} style={{ marginBottom:"11px" }}>
+                        <label style={labelStyle}>{label}</label>
+                        {textarea
+                          ? <textarea value={form[key]} onChange={e => setForm(f=>({...f,[key]:e.target.value}))}
+                              rows={2} placeholder={placeholder}
+                              style={{...inputStyle, resize:"vertical"}} />
+                          : <input value={form[key]} onChange={e => setForm(f=>({...f,[key]:e.target.value}))}
+                              placeholder={placeholder} style={inputStyle} />
+                        }
+                      </div>
+                    ))}
+                    <div style={{ display:"flex", gap:"8px", marginBottom:"11px" }}>
+                      <div style={{ flex:1 }}>
+                        <label style={labelStyle}>Category</label>
+                        <select value={form.category} onChange={e => setForm(f=>({...f,category:e.target.value}))}
+                          style={inputStyle}>
+                          {["Commitment","Waiting On","Escalation","Relationship"].map(s=><option key={s}>{s}</option>)}
+                        </select>
+                      </div>
+                      <div style={{ flex:1 }}>
+                        <label style={labelStyle}>Status</label>
+                        <select value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))}
+                          style={inputStyle}>
+                          {STATUSES.map(s=><option key={s}>{s}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div style={{ marginBottom:"11px" }}>
+                      <label style={labelStyle}>Date</label>
+                      <input type="date" value={form.date} onChange={e => setForm(f=>({...f,date:e.target.value}))}
+                        style={inputStyle} />
+                    </div>
+                    <div style={{ marginBottom:"18px" }}>
+                      <label style={labelStyle}>Notes</label>
+                      <textarea value={form.notes} onChange={e => setForm(f=>({...f,notes:e.target.value}))}
+                        rows={3} style={{...inputStyle, resize:"vertical"}} />
+                    </div>
+                    <div style={{ display:"flex", gap:"8px" }}>
+                      <button onClick={saveForm} style={{ flex:1, background:"#1a1a1a", color:"#fff",
+                        border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px",
+                        fontWeight:700, cursor:"pointer" }}>Save</button>
+                      <button onClick={() => { setEditing(false); setAdding(false); if(adding) setSelected(null); }}
+                        style={{ flex:1, background:"#f0ede8", color:"#444", border:"none",
+                          borderRadius:"6px", padding:"10px", fontSize:"13px", cursor:"pointer" }}>Cancel</button>
+                    </div>
+                  </div>
+
+                ) : selectedItem ? (
+                  <div>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start",
+                      gap:"8px", marginBottom:"2px" }}>
+                      <div style={{ fontSize:"16px", fontWeight:700, color:"#1a1a1a", lineHeight:"1.3" }}>
+                        {selectedItem.person}
+                      </div>
+                      <Badge status={selectedItem.status} />
+                    </div>
+                    <div style={{ fontSize:"11px", color:"#999", marginBottom:"16px" }}>
+                      {CATEGORY_ICONS[selectedItem.category]} {selectedItem.category} &nbsp;·&nbsp; {selectedItem.company}
+                    </div>
+                    <Field label="Context"     value={selectedItem.context} />
+                    <Field label="Last Action" value={selectedItem.lastAction} />
+                    {selectedItem.nextAction && (
+                      <div style={{ marginBottom:"14px" }}>
+                        <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase",
+                          letterSpacing:"0.6px", marginBottom:"4px" }}>Next Action</div>
+                        <div style={{ fontSize:"13px", color:"#1a1a1a", background:"#fffbf0",
+                          border:"1px solid #e8d9a0", borderRadius:"6px", padding:"8px 10px", lineHeight:"1.5" }}>
+                          {selectedItem.nextAction}
+                        </div>
+                      </div>
+                    )}
+                    <Field label="Date"  value={formatDate(selectedItem.date)} />
+                    {selectedItem.notes && (
+                      <div style={{ marginBottom:"20px" }}>
+                        <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase",
+                          letterSpacing:"0.6px", marginBottom:"4px" }}>Notes</div>
+                        <div style={{ fontSize:"13px", color:"#444", lineHeight:"1.5",
+                          background:"#f7f6f3", padding:"10px", borderRadius:"6px" }}>
+                          {selectedItem.notes}
+                        </div>
+                      </div>
+                    )}
+                    <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
+                      <button onClick={() => openEdit(selectedItem)}
+                        style={{ flex:1, minWidth:"80px", background:"#1a1a1a", color:"#fff",
+                          border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px",
+                          fontWeight:700, cursor:"pointer" }}>Edit</button>
+                      {selectedItem.status !== "Closed" && (
+                        <button onClick={() => closeItem(selectedItem.id)}
+                          style={{ flex:1, minWidth:"80px", background:"#f0ede8", color:"#444",
+                            border:"none", borderRadius:"6px", padding:"10px",
+                            fontSize:"13px", cursor:"pointer" }}>Close</button>
+                      )}
+                      <button onClick={() => deleteItem(selectedItem.id)}
+                        style={{ background:"#fee", color:"#c00", border:"none",
+                          borderRadius:"6px", padding:"10px 14px", fontSize:"13px", cursor:"pointer" }}>Delete</button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
