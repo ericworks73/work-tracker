@@ -506,15 +506,19 @@
                       </div>
                     )}
                     <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
+                      <button onClick={() => setSelected(null)}
+                        style={{ flex:1, minWidth:"80px", background:"#f0ede8", color:"#444",
+                          border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px",
+                          cursor:"pointer" }}>← Back</button>
                       <button onClick={() => openEdit(selectedItem)}
                         style={{ flex:1, minWidth:"80px", background:"#1a1a1a", color:"#fff",
                           border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px",
                           fontWeight:700, cursor:"pointer" }}>Edit</button>
                       {selectedItem.status !== "Closed" && (
                         <button onClick={() => closeItem(selectedItem.id)}
-                          style={{ flex:1, minWidth:"80px", background:"#f0ede8", color:"#444",
+                          style={{ flex:1, minWidth:"80px", background:"#e8f4e8", color:"#2d6a2d",
                             border:"none", borderRadius:"6px", padding:"10px",
-                            fontSize:"13px", cursor:"pointer" }}>Close</button>
+                            fontSize:"13px", cursor:"pointer" }}>Mark Closed</button>
                       )}
                       <button onClick={() => deleteItem(selectedItem.id)}
                         style={{ background:"#fee", color:"#c00", border:"none",
