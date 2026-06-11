@@ -65,17 +65,16 @@
       return <App />;
     }
 
-    // ── SUPABASE CONFIG ─────────────────────────────────────────────
     const SUPABASE_URL  = "https://whyklzysiavybgxltjzt.supabase.co";
     const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndoeWtsenlzaWF2eWJneGx0anp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODIyODEsImV4cCI6MjA5Njc1ODI4MX0.x7yEeWHDhwgZreDP-SME3dWIC-B-kthc4EC0YOuphIg";
     const TABLE = "work_tracker_items";
     const sb = (SUPABASE_URL.startsWith("http"))
       ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
       : null;
-    // ────────────────────────────────────────────────────────────────
 
-    const STATUSES = ["Active","Waiting","In Progress","Blocked","Closed"];
-    const CATEGORIES = ["All","Commitment","Waiting On","Escalation","Relationship"];
+    const STATUSES    = ["Active","Waiting","In Progress","Blocked","Closed"];
+    const CATEGORIES  = ["All","Commitment","Waiting On","Escalation","Relationship"];
+    const PRIORITIES  = ["High","Medium","Low"];
 
     const STATUS_COLORS = {
       "Active":      { bg:"#e8f4e8", text:"#2d6a2d", dot:"#3a8a3a" },
@@ -85,55 +84,59 @@
       "Closed":      { bg:"#f0f0f0", text:"#666",    dot:"#999"    }
     };
 
+    const PRIORITY_COLORS = {
+      "High":   { bg:"#fde8e8", text:"#9a1a1a" },
+      "Medium": { bg:"#fef3e2", text:"#7a4f1a" },
+      "Low":    { bg:"#f0f0f0", text:"#777"    }
+    };
+
     const CATEGORY_ICONS = {
       "Commitment":"◆","Waiting On":"◇","Escalation":"▲","Relationship":"●"
     };
-
-    const DEFAULT_ITEMS = [
-      { id:1, person:"Joe LaBuda", company:"Aurora / Harris", category:"Escalation",
-        context:"Harris Group Leader escalating Shara Blackmore complaints. Three issues: AI Agent/KB/data capture not working, overnight migration outage, broken commitments.",
-        lastAction:"Forwarded to Callen for bullet points", nextAction:"Wait for Callen summary, then respond to Joe",
-        date:"2026-06-09", status:"Waiting", notes:"Do not respond until Callen call with Shara is complete. Peer-to-peer tone when responding." },
-      { id:2, person:"Kasandra", company:"ERTH", category:"Commitment",
-        context:"Trial live. Jeremy active on API and webhooks. June 30 close opportunity.",
-        lastAction:"Trial launched, June 30 timeline discussed", nextAction:"Book call with Kasandra",
-        date:"2026-06-02", status:"Active", notes:"Northstar renewal at $48K ARR through July 7. Cross-account TS integration is the bigger unlock." },
-      { id:3, person:"Joe Greeninger", company:"Amada", category:"Waiting On",
-        context:"Proposal sent. $53,400 / 50 seats / Infor SyteLine integration. Joe in Iceland until mid-June.",
-        lastAction:"Proposal sent, expires June 30", nextAction:"Follow up when Joe returns from Iceland",
-        date:"2026-05-29", status:"Waiting", notes:"Needs to get proposal to CEO. June 30 start, billing July 1." },
-      { id:4, person:"Grant Stanis", company:"TeamSupport", category:"Commitment",
-        context:"Grant forwarded Conquer demo follow-up.",
-        lastAction:"Received forwarded email", nextAction:"Review and reply to Grant with feedback",
-        date:"2026-06-04", status:"Active", notes:"" },
-      { id:5, person:"Karen Sebach", company:"CalcAir / Perseus", category:"Commitment",
-        context:"First TeamSupport One deal with Constellation. Blocked in legal over Perseus MSA before closing.",
-        lastAction:"Deal signed and closed", nextAction:"",
-        date:"2026-05-01", status:"Closed", notes:"RO Writer gets 5% referral. Kate Andresen managed legal resolution." },
-      { id:6, person:"Christie Smalec", company:"FIS", category:"Commitment",
-        context:"Annual data warehouse contract renewal.",
-        lastAction:"PO received and invoiced", nextAction:"",
-        date:"2026-06-01", status:"Closed", notes:"$173,250 invoiced. 5% increase. Separate from OIL/AI work with Darren Shane." },
-      { id:7, person:"Maria Clark", company:"Keysight Technologies", category:"Commitment",
-        context:"Annual renewal managed by Maria Clark.",
-        lastAction:"Renewal closed", nextAction:"",
-        date:"2026-04-09", status:"Closed", notes:"$39,690 ARR. Closed April." },
-      { id:8, person:"Gavin Sloan", company:"LCM", category:"Escalation",
-        context:"Hub SDK failure. 1:1 run, top tickets resolved, 85 widgets added. Payment dispute ~$20K still open.",
-        lastAction:"$3K ARR expansion closed. Biweekly cadence established.", nextAction:"",
-        date:"2026-05-01", status:"Closed", notes:"Payment dispute ongoing. Sentiment improved but not resolved." }
-    ];
 
     const EMPTY_FORM = {
       person:"", company:"", category:"Commitment", context:"",
       lastAction:"", nextAction:"",
       date: new Date().toISOString().split("T")[0],
-      status:"Active", notes:""
+      status:"Active", notes:"", priority:"Medium", followUpDate:""
     };
 
     function formatDate(d) {
       if (!d) return "";
       return new Date(d + "T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"});
+    }
+
+    function daysUntil(d) {
+      if (!d) return null;
+      const diff = Math.ceil((new Date(d + "T12:00:00") - new Date()) / (1000*60*60*24));
+      return diff;
+    }
+
+    function FollowUpChip({ date }) {
+      if (!date) return null;
+      const days = daysUntil(date);
+      const overdue = days < 0;
+      const today   = days === 0;
+      const soon    = days > 0 && days <= 2;
+      const color   = overdue ? "#c03030" : today ? "#c8a96e" : soon ? "#d4820a" : "#999";
+      const label   = overdue ? `${Math.abs(days)}d overdue` : today ? "Today" : `${days}d`;
+      return (
+        <span style={{ fontSize:"10px", fontWeight:600, color, background: overdue||today ? (overdue?"#fde8e8":"#fff8ed") : "transparent",
+          padding: overdue||today ? "1px 6px" : "0", borderRadius:"10px", letterSpacing:"0.2px" }}>
+          ↻ {label}
+        </span>
+      );
+    }
+
+    function PriorityBadge({ priority }) {
+      if (!priority) return null;
+      const c = PRIORITY_COLORS[priority] || PRIORITY_COLORS["Medium"];
+      return (
+        <span style={{ background:c.bg, color:c.text, padding:"1px 7px",
+          borderRadius:"10px", fontSize:"10px", fontWeight:700, letterSpacing:"0.3px" }}>
+          {priority}
+        </span>
+      );
     }
 
     function Badge({ status }) {
@@ -169,7 +172,6 @@
       const [filterCat, setFilterCat]   = useState("All");
       const [form, setForm]             = useState(EMPTY_FORM);
 
-      // Load from Supabase or localStorage
       useEffect(() => {
         async function load() {
           if (sb) {
@@ -185,19 +187,15 @@
             } catch(e) {}
             setSyncing(false);
           }
-          // Fall back to localStorage
           try {
             const stored = localStorage.getItem("work-tracker-items");
             if (stored) { const p = JSON.parse(stored); if (p && p.length) { setItems(p); setLoaded(true); return; } }
           } catch(e) {}
-          // Fall back to defaults
-          setItems(DEFAULT_ITEMS);
           setLoaded(true);
         }
         load();
       }, []);
 
-      // Save to Supabase + localStorage on change
       useEffect(() => {
         if (!loaded) return;
         localStorage.setItem("work-tracker-items", JSON.stringify(items));
@@ -217,17 +215,26 @@
       if (filterStatus !== "All") filtered = filtered.filter(i => i.status === filterStatus);
       if (filterCat !== "All")    filtered = filtered.filter(i => i.category === filterCat);
 
-      const sorted = [...filtered].sort((a,b) => {
-        const o = { "Blocked":0,"Active":1,"In Progress":2,"Waiting":3,"Closed":4 };
-        if (o[a.status] !== o[b.status]) return o[a.status] - o[b.status];
-        return new Date(b.date) - new Date(a.date);
+      // Sort: priority first, then followUpDate, then date
+      const PRIORITY_ORDER = { "High":0, "Medium":1, "Low":2, null:3, undefined:3 };
+      const STATUS_ORDER   = { "Blocked":0, "Active":1, "In Progress":2, "Waiting":3, "Closed":4 };
+
+      const sorted = [...filtered].sort((a, b) => {
+        if (a.status === "Closed" && b.status !== "Closed") return 1;
+        if (b.status === "Closed" && a.status !== "Closed") return -1;
+        const pa = PRIORITY_ORDER[a.priority] ?? 3;
+        const pb = PRIORITY_ORDER[b.priority] ?? 3;
+        if (pa !== pb) return pa - pb;
+        const fa = a.followUpDate ? new Date(a.followUpDate) : new Date("9999-12-31");
+        const fb = b.followUpDate ? new Date(b.followUpDate) : new Date("9999-12-31");
+        return fa - fb;
       });
 
       const openCount   = items.filter(i => i.status !== "Closed").length;
       const closedCount = items.filter(i => i.status === "Closed").length;
 
       function openAdd() { setForm({...EMPTY_FORM}); setAdding(true); setSelected(null); setEditing(false); }
-      function openEdit(item) { setForm({...item}); setEditing(true); setAdding(false); }
+      function openEdit(item) { setForm({...item, followUpDate: item.followUpDate || "", priority: item.priority || "Medium"}); setEditing(true); setAdding(false); }
 
       async function saveForm() {
         if (!form.person.trim()) return;
@@ -331,23 +338,44 @@
               {sorted.map(item => (
                 <div key={item.id}
                   onClick={() => { setSelected(item.id); setEditing(false); setAdding(false); }}
-                  style={{ padding:"12px 14px", borderBottom:"1px solid #ede9e0",
+                  style={{ padding:"11px 14px", borderBottom:"1px solid #ede9e0",
                     background:selected===item.id?"#fff":"transparent", cursor:"pointer",
                     borderLeft:selected===item.id?"3px solid #c8a96e":"3px solid transparent",
                     opacity:item.status==="Closed"?0.5:1 }}>
-                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:"6px", marginBottom:"3px" }}>
+
+                  {/* Row 1: name + status badge */}
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:"6px", marginBottom:"2px" }}>
                     <div style={{ fontWeight:700, fontSize:"13px", color:"#1a1a1a", lineHeight:"1.3" }}>{item.person}</div>
                     <Badge status={item.status} />
                   </div>
-                  <div style={{ fontSize:"11px", color:"#999", marginBottom:"5px" }}>
+
+                  {/* Row 2: category + company */}
+                  <div style={{ fontSize:"11px", color:"#999", marginBottom:"4px" }}>
                     {CATEGORY_ICONS[item.category]} {item.category} &nbsp;·&nbsp; {item.company}
                   </div>
-                  {!panelOpen && (
-                    <div style={{ fontSize:"12px", color:"#555", lineHeight:"1.4" }}>
-                      <span style={{ color:"#c8a96e", fontWeight:600 }}>Next: </span>{item.nextAction || "—"}
+
+                  {/* Row 3: context tag — the "why it's on my list" */}
+                  {item.context && (
+                    <div style={{ fontSize:"11px", color:"#666", fontStyle:"italic", marginBottom:"5px",
+                      lineHeight:"1.3", display:"-webkit-box", WebkitLineClamp:1,
+                      WebkitBoxOrient:"vertical", overflow:"hidden" }}>
+                      ({item.context})
                     </div>
                   )}
-                  {item.date && <div style={{ fontSize:"10px", color:"#ccc", marginTop:"4px" }}>{formatDate(item.date)}</div>}
+
+                  {/* Row 4: next action — only when list is full width */}
+                  {!panelOpen && item.nextAction && (
+                    <div style={{ fontSize:"12px", color:"#555", lineHeight:"1.4", marginBottom:"5px" }}>
+                      <span style={{ color:"#c8a96e", fontWeight:600 }}>Next: </span>{item.nextAction}
+                    </div>
+                  )}
+
+                  {/* Row 5: priority + follow-up date + last-touch date */}
+                  <div style={{ display:"flex", alignItems:"center", gap:"8px", marginTop:"4px", flexWrap:"wrap" }}>
+                    {item.priority && <PriorityBadge priority={item.priority} />}
+                    {item.followUpDate && <FollowUpChip date={item.followUpDate} />}
+                    {item.date && <span style={{ fontSize:"10px", color:"#ccc" }}>{formatDate(item.date)}</span>}
+                  </div>
                 </div>
               ))}
             </div>
@@ -365,7 +393,7 @@
                     {[
                       { label:"Person",      key:"person",      placeholder:"Name" },
                       { label:"Company",     key:"company",     placeholder:"Company or team" },
-                      { label:"Context",     key:"context",     placeholder:"Background", textarea:true },
+                      { label:"Context (why it's on your list)", key:"context", placeholder:"Short reason — shown on card", textarea:true },
                       { label:"Last Action", key:"lastAction",  placeholder:"What was last done" },
                       { label:"Next Action", key:"nextAction",  placeholder:"What needs to happen next" },
                     ].map(({ label, key, placeholder, textarea }) => (
@@ -396,8 +424,22 @@
                         </select>
                       </div>
                     </div>
+                    <div style={{ display:"flex", gap:"8px", marginBottom:"11px" }}>
+                      <div style={{ flex:1 }}>
+                        <label style={labelStyle}>Priority</label>
+                        <select value={form.priority || "Medium"} onChange={e => setForm(f=>({...f,priority:e.target.value}))}
+                          style={inputStyle}>
+                          {PRIORITIES.map(p=><option key={p}>{p}</option>)}
+                        </select>
+                      </div>
+                      <div style={{ flex:1 }}>
+                        <label style={labelStyle}>Follow-up Date</label>
+                        <input type="date" value={form.followUpDate || ""} onChange={e => setForm(f=>({...f,followUpDate:e.target.value}))}
+                          style={inputStyle} />
+                      </div>
+                    </div>
                     <div style={{ marginBottom:"11px" }}>
-                      <label style={labelStyle}>Date</label>
+                      <label style={labelStyle}>Last Touch Date</label>
                       <input type="date" value={form.date} onChange={e => setForm(f=>({...f,date:e.target.value}))}
                         style={inputStyle} />
                     </div>
@@ -425,9 +467,21 @@
                       </div>
                       <Badge status={selectedItem.status} />
                     </div>
-                    <div style={{ fontSize:"11px", color:"#999", marginBottom:"16px" }}>
+                    <div style={{ fontSize:"11px", color:"#999", marginBottom:"8px" }}>
                       {CATEGORY_ICONS[selectedItem.category]} {selectedItem.category} &nbsp;·&nbsp; {selectedItem.company}
                     </div>
+
+                    {/* Priority + follow-up row */}
+                    <div style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"16px", flexWrap:"wrap" }}>
+                      {selectedItem.priority && <PriorityBadge priority={selectedItem.priority} />}
+                      {selectedItem.followUpDate && (
+                        <span style={{ fontSize:"11px", color:"#777" }}>
+                          Follow up: <strong>{formatDate(selectedItem.followUpDate)}</strong>
+                        </span>
+                      )}
+                      <FollowUpChip date={selectedItem.followUpDate} />
+                    </div>
+
                     <Field label="Context"     value={selectedItem.context} />
                     <Field label="Last Action" value={selectedItem.lastAction} />
                     {selectedItem.nextAction && (
@@ -440,7 +494,7 @@
                         </div>
                       </div>
                     )}
-                    <Field label="Date"  value={formatDate(selectedItem.date)} />
+                    <Field label="Last Touch"  value={formatDate(selectedItem.date)} />
                     {selectedItem.notes && (
                       <div style={{ marginBottom:"20px" }}>
                         <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase",
