@@ -517,6 +517,13 @@
                       <FollowUpChip date={selectedItem.followUpDate} />
                     </div>
 
+                    {selectedItem.nextAction && (
+                      <FieldBlock label="Next Action">
+                        <div style={{ background:"#fffbf0", border:"1px solid #e8d9a0", borderRadius:"6px", padding:"8px 10px" }}>
+                          <RichDisplay html={selectedItem.nextAction} className="next-action-display" />
+                        </div>
+                      </FieldBlock>
+                    )}
                     {selectedItem.context && (
                       <FieldBlock label="Context">
                         <RichDisplay html={selectedItem.context} />
@@ -525,13 +532,6 @@
                     {selectedItem.lastAction && (
                       <FieldBlock label="Last Action">
                         <RichDisplay html={selectedItem.lastAction} />
-                      </FieldBlock>
-                    )}
-                    {selectedItem.nextAction && (
-                      <FieldBlock label="Next Action">
-                        <div style={{ background:"#fffbf0", border:"1px solid #e8d9a0", borderRadius:"6px", padding:"8px 10px" }}>
-                          <RichDisplay html={selectedItem.nextAction} className="next-action-display" />
-                        </div>
                       </FieldBlock>
                     )}
                     <FieldBlock label="Last Touch">
