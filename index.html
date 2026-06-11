@@ -16,19 +16,51 @@
     body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: #f5f4f1; }
     html, body, #root { height: 100%; }
     #root { display: flex; flex-direction: column; height: 100dvh; }
+
+    .rte-toolbar { display:flex; gap:4px; padding:4px 6px; background:#f7f6f3; border:1px solid #e0dbd0; border-bottom:none; border-radius:6px 6px 0 0; flex-wrap:wrap; }
+    .rte-btn { border:none; background:transparent; padding:3px 7px; border-radius:4px; font-size:12px; cursor:pointer; color:#444; font-family:inherit; line-height:1.4; }
+    .rte-btn:hover { background:#e8e4dc; }
+    .rte-btn.active { background:#c8a96e; color:#1a1a1a; }
+    .rte-sep { width:1px; background:#e0dbd0; margin:2px 2px; }
+    .rte-body { border:1px solid #e0dbd0; border-radius:0 0 6px 6px; padding:8px 10px; font-size:13px; min-height:80px; outline:none; line-height:1.6; background:#fff; color:#1a1a1a; overflow-y:auto; }
+    .rte-body:focus { border-color:#c8a96e; }
+    .rte-body ul { padding-left:18px; margin:2px 0; }
+    .rte-body ol { padding-left:18px; margin:2px 0; }
+    .rte-body li { margin:1px 0; }
+    .rte-body b, .rte-body strong { font-weight:700; }
+    .rte-body i, .rte-body em { font-style:italic; }
+
+    .rich-display { font-size:13px; color:#1a1a1a; line-height:1.6; }
+    .rich-display ul { padding-left:18px; margin:2px 0; }
+    .rich-display ol { padding-left:18px; margin:2px 0; }
+    .rich-display li { margin:1px 0; }
+    .rich-display b, .rich-display strong { font-weight:700; }
+    .rich-display i, .rich-display em { font-style:italic; }
+    .rich-display p { margin:0 0 2px 0; }
+
+    .next-action-display { font-size:13px; color:#1a1a1a; line-height:1.6; }
+    .next-action-display ul { padding-left:18px; margin:2px 0; }
+    .next-action-display ol { padding-left:18px; margin:2px 0; }
+    .next-action-display li { margin:1px 0; }
+    .next-action-display b, .next-action-display strong { font-weight:700; }
+
+    .notes-display { font-size:13px; color:#444; line-height:1.6; }
+    .notes-display ul { padding-left:18px; margin:2px 0; }
+    .notes-display ol { padding-left:18px; margin:2px 0; }
+    .notes-display li { margin:1px 0; }
   </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState, useEffect, useRef, useCallback } = React;
 
     const APP_PASSWORD = "timmer-nyjpij-ryxRy7";
     const SESSION_KEY  = "wt-auth";
 
     function PasswordGate({ onUnlock }) {
-      const [val, setVal]   = useState("");
-      const [err, setErr]   = useState(false);
+      const [val, setVal] = useState("");
+      const [err, setErr] = useState(false);
       function attempt() {
         if (val === APP_PASSWORD) { sessionStorage.setItem(SESSION_KEY, "1"); onUnlock(); }
         else { setErr(true); setVal(""); setTimeout(() => setErr(false), 2000); }
@@ -38,20 +70,16 @@
           <div style={{ background:"#fff", borderRadius:"12px", padding:"32px 28px", width:"280px", textAlign:"center" }}>
             <div style={{ fontSize:"15px", fontWeight:700, color:"#1a1a1a", marginBottom:"6px" }}>Work Tracker</div>
             <div style={{ fontSize:"12px", color:"#999", marginBottom:"20px" }}>Enter your password to continue</div>
-            <input
-              type="password" value={val}
+            <input type="password" value={val}
               onChange={e => setVal(e.target.value)}
               onKeyDown={e => e.key === "Enter" && attempt()}
-              autoFocus
-              placeholder="Password"
+              autoFocus placeholder="Password"
               style={{ width:"100%", border: err ? "1px solid #c03030" : "1px solid #e0dbd0",
                 borderRadius:"6px", padding:"9px 12px", fontSize:"13px",
                 boxSizing:"border-box", outline:"none", marginBottom:"12px",
-                background: err ? "#fff0f0" : "#fff" }}
-            />
+                background: err ? "#fff0f0" : "#fff" }} />
             <button onClick={attempt} style={{ width:"100%", background:"#c8a96e", color:"#1a1a1a",
-              border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px",
-              fontWeight:700, cursor:"pointer" }}>
+              border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px", fontWeight:700, cursor:"pointer" }}>
               {err ? "Incorrect password" : "Unlock"}
             </button>
           </div>
@@ -68,13 +96,11 @@
     const SUPABASE_URL  = "https://whyklzysiavybgxltjzt.supabase.co";
     const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndoeWtsenlzaWF2eWJneGx0anp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODIyODEsImV4cCI6MjA5Njc1ODI4MX0.x7yEeWHDhwgZreDP-SME3dWIC-B-kthc4EC0YOuphIg";
     const TABLE = "work_tracker_items";
-    const sb = (SUPABASE_URL.startsWith("http"))
-      ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
-      : null;
+    const sb = SUPABASE_URL.startsWith("http") ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON) : null;
 
-    const STATUSES    = ["Active","Waiting","In Progress","Blocked","Closed"];
-    const CATEGORIES  = ["All","Commitment","Waiting On","Escalation","Relationship"];
-    const PRIORITIES  = ["High","Medium","Low"];
+    const STATUSES   = ["Active","Waiting","In Progress","Blocked","Closed"];
+    const CATEGORIES = ["All","Commitment","Waiting On","Escalation","Relationship"];
+    const PRIORITIES = ["High","Medium","Low"];
 
     const STATUS_COLORS = {
       "Active":      { bg:"#e8f4e8", text:"#2d6a2d", dot:"#3a8a3a" },
@@ -83,16 +109,12 @@
       "Blocked":     { bg:"#fde8e8", text:"#7a1a1a", dot:"#c03030" },
       "Closed":      { bg:"#f0f0f0", text:"#666",    dot:"#999"    }
     };
-
     const PRIORITY_COLORS = {
       "High":   { bg:"#fde8e8", text:"#9a1a1a" },
       "Medium": { bg:"#fef3e2", text:"#7a4f1a" },
       "Low":    { bg:"#f0f0f0", text:"#777"    }
     };
-
-    const CATEGORY_ICONS = {
-      "Commitment":"◆","Waiting On":"◇","Escalation":"▲","Relationship":"●"
-    };
+    const CATEGORY_ICONS = { "Commitment":"◆","Waiting On":"◇","Escalation":"▲","Relationship":"●" };
 
     const EMPTY_FORM = {
       person:"", company:"", category:"Commitment", context:"",
@@ -105,72 +127,125 @@
       if (!d) return "";
       return new Date(d + "T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"});
     }
-
     function daysUntil(d) {
       if (!d) return null;
-      const diff = Math.ceil((new Date(d + "T12:00:00") - new Date()) / (1000*60*60*24));
-      return diff;
+      return Math.ceil((new Date(d + "T12:00:00") - new Date()) / (1000*60*60*24));
+    }
+
+    // Strip HTML to plain text for card preview
+    function stripHtml(html) {
+      if (!html) return "";
+      return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
     }
 
     function FollowUpChip({ date }) {
       if (!date) return null;
       const days = daysUntil(date);
-      const overdue = days < 0;
-      const today   = days === 0;
-      const soon    = days > 0 && days <= 2;
-      const color   = overdue ? "#c03030" : today ? "#c8a96e" : soon ? "#d4820a" : "#999";
-      const label   = overdue ? `${Math.abs(days)}d overdue` : today ? "Today" : `${days}d`;
+      const overdue = days < 0, today = days === 0, soon = days > 0 && days <= 2;
+      const color = overdue ? "#c03030" : today ? "#c8a96e" : soon ? "#d4820a" : "#999";
+      const label = overdue ? `${Math.abs(days)}d overdue` : today ? "Today" : `${days}d`;
       return (
-        <span style={{ fontSize:"10px", fontWeight:600, color, background: overdue||today ? (overdue?"#fde8e8":"#fff8ed") : "transparent",
-          padding: overdue||today ? "1px 6px" : "0", borderRadius:"10px", letterSpacing:"0.2px" }}>
+        <span style={{ fontSize:"10px", fontWeight:600, color,
+          background: overdue||today ? (overdue?"#fde8e8":"#fff8ed") : "transparent",
+          padding: overdue||today ? "1px 6px" : "0", borderRadius:"10px" }}>
           ↻ {label}
         </span>
       );
     }
-
     function PriorityBadge({ priority }) {
       if (!priority) return null;
       const c = PRIORITY_COLORS[priority] || PRIORITY_COLORS["Medium"];
-      return (
-        <span style={{ background:c.bg, color:c.text, padding:"1px 7px",
-          borderRadius:"10px", fontSize:"10px", fontWeight:700, letterSpacing:"0.3px" }}>
-          {priority}
-        </span>
-      );
+      return <span style={{ background:c.bg, color:c.text, padding:"1px 7px", borderRadius:"10px", fontSize:"10px", fontWeight:700 }}>{priority}</span>;
     }
-
     function Badge({ status }) {
       const c = STATUS_COLORS[status] || STATUS_COLORS["Active"];
       return (
         <span style={{ background:c.bg, color:c.text, padding:"2px 9px", borderRadius:"20px",
-          fontSize:"11px", fontWeight:600, letterSpacing:"0.3px",
-          display:"inline-flex", alignItems:"center", gap:"5px", whiteSpace:"nowrap" }}>
+          fontSize:"11px", fontWeight:600, display:"inline-flex", alignItems:"center", gap:"5px", whiteSpace:"nowrap" }}>
           <span style={{ width:5, height:5, borderRadius:"50%", background:c.dot, display:"inline-block", flexShrink:0 }} />
           {status}
         </span>
       );
     }
 
-    function Field({ label, value }) {
-      if (!value) return null;
+    // Rich text editor component
+    function RichEditor({ value, onChange, placeholder, minHeight }) {
+      const ref = useRef(null);
+      const isInternalUpdate = useRef(false);
+
+      useEffect(() => {
+        if (ref.current && !isInternalUpdate.current) {
+          const current = ref.current.innerHTML;
+          if (current !== value) ref.current.innerHTML = value || "";
+        }
+        isInternalUpdate.current = false;
+      }, [value]);
+
+      function handleInput() {
+        isInternalUpdate.current = true;
+        onChange(ref.current.innerHTML);
+      }
+
+      function execCmd(cmd, val) {
+        ref.current.focus();
+        document.execCommand(cmd, false, val || null);
+        isInternalUpdate.current = true;
+        onChange(ref.current.innerHTML);
+      }
+
+      function isActive(cmd) {
+        try { return document.queryCommandState(cmd); } catch(e) { return false; }
+      }
+
+      return (
+        <div>
+          <div className="rte-toolbar">
+            <button type="button" className={`rte-btn${isActive("bold")?" active":""}`} onMouseDown={e=>{e.preventDefault();execCmd("bold")}}><b>B</b></button>
+            <button type="button" className={`rte-btn${isActive("italic")?" active":""}`} onMouseDown={e=>{e.preventDefault();execCmd("italic")}}><i>I</i></button>
+            <div className="rte-sep" />
+            <button type="button" className="rte-btn" onMouseDown={e=>{e.preventDefault();execCmd("insertUnorderedList")}}>• List</button>
+            <button type="button" className="rte-btn" onMouseDown={e=>{e.preventDefault();execCmd("insertOrderedList")}}>1. List</button>
+            <div className="rte-sep" />
+            <button type="button" className="rte-btn" onMouseDown={e=>{e.preventDefault();execCmd("removeFormat")}}>Clear</button>
+          </div>
+          <div
+            ref={ref}
+            className="rte-body"
+            contentEditable
+            suppressContentEditableWarning
+            onInput={handleInput}
+            style={{ minHeight: minHeight || "80px" }}
+            data-placeholder={placeholder}
+          />
+        </div>
+      );
+    }
+
+    // Render stored HTML safely in detail view
+    function RichDisplay({ html, className, style }) {
+      if (!html) return null;
+      return <div className={className || "rich-display"} style={style} dangerouslySetInnerHTML={{ __html: html }} />;
+    }
+
+    function FieldBlock({ label, children }) {
       return (
         <div style={{ marginBottom:"14px" }}>
-          <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase", letterSpacing:"0.6px", marginBottom:"4px" }}>{label}</div>
-          <div style={{ fontSize:"13px", color:"#1a1a1a", lineHeight:"1.5" }}>{value}</div>
+          <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase", letterSpacing:"0.6px", marginBottom:"6px" }}>{label}</div>
+          {children}
         </div>
       );
     }
 
     function App() {
-      const [items, setItems]           = useState([]);
-      const [loaded, setLoaded]         = useState(false);
-      const [syncing, setSyncing]       = useState(false);
-      const [selected, setSelected]     = useState(null);
-      const [editing, setEditing]       = useState(false);
-      const [adding, setAdding]         = useState(false);
+      const [items, setItems]       = useState([]);
+      const [loaded, setLoaded]     = useState(false);
+      const [syncing, setSyncing]   = useState(false);
+      const [selected, setSelected] = useState(null);
+      const [editing, setEditing]   = useState(false);
+      const [adding, setAdding]     = useState(false);
       const [filterStatus, setFilterStatus] = useState("All");
-      const [filterCat, setFilterCat]   = useState("All");
-      const [form, setForm]             = useState(EMPTY_FORM);
+      const [filterCat, setFilterCat]       = useState("All");
+      const [form, setForm]         = useState(EMPTY_FORM);
 
       useEffect(() => {
         async function load() {
@@ -178,12 +253,7 @@
             setSyncing(true);
             try {
               const { data, error } = await sb.from(TABLE).select("*").order("date", { ascending: false });
-              if (!error && data && data.length > 0) {
-                setItems(data);
-                setLoaded(true);
-                setSyncing(false);
-                return;
-              }
+              if (!error && data && data.length > 0) { setItems(data); setLoaded(true); setSyncing(false); return; }
             } catch(e) {}
             setSyncing(false);
           }
@@ -201,29 +271,18 @@
         localStorage.setItem("work-tracker-items", JSON.stringify(items));
       }, [items, loaded]);
 
-      async function upsertItem(item) {
-        if (!sb) return;
-        await sb.from(TABLE).upsert(item);
-      }
-
-      async function removeItem(id) {
-        if (!sb) return;
-        await sb.from(TABLE).delete().eq("id", id);
-      }
+      async function upsertItem(item) { if (sb) await sb.from(TABLE).upsert(item); }
+      async function removeItem(id)   { if (sb) await sb.from(TABLE).delete().eq("id", id); }
 
       let filtered = items;
       if (filterStatus !== "All") filtered = filtered.filter(i => i.status === filterStatus);
       if (filterCat !== "All")    filtered = filtered.filter(i => i.category === filterCat);
 
-      // Sort: priority first, then followUpDate, then date
-      const PRIORITY_ORDER = { "High":0, "Medium":1, "Low":2, null:3, undefined:3 };
-      const STATUS_ORDER   = { "Blocked":0, "Active":1, "In Progress":2, "Waiting":3, "Closed":4 };
-
+      const PRIORITY_ORDER = { "High":0, "Medium":1, "Low":2 };
       const sorted = [...filtered].sort((a, b) => {
         if (a.status === "Closed" && b.status !== "Closed") return 1;
         if (b.status === "Closed" && a.status !== "Closed") return -1;
-        const pa = PRIORITY_ORDER[a.priority] ?? 3;
-        const pb = PRIORITY_ORDER[b.priority] ?? 3;
+        const pa = PRIORITY_ORDER[a.priority] ?? 3, pb = PRIORITY_ORDER[b.priority] ?? 3;
         if (pa !== pb) return pa - pb;
         const fa = a.followUpDate ? new Date(a.followUpDate) : new Date("9999-12-31");
         const fb = b.followUpDate ? new Date(b.followUpDate) : new Date("9999-12-31");
@@ -233,7 +292,7 @@
       const openCount   = items.filter(i => i.status !== "Closed").length;
       const closedCount = items.filter(i => i.status === "Closed").length;
 
-      function openAdd() { setForm({...EMPTY_FORM}); setAdding(true); setSelected(null); setEditing(false); }
+      function openAdd()  { setForm({...EMPTY_FORM}); setAdding(true); setSelected(null); setEditing(false); }
       function openEdit(item) { setForm({...item, followUpDate: item.followUpDate || "", priority: item.priority || "Medium"}); setEditing(true); setAdding(false); }
 
       async function saveForm() {
@@ -251,16 +310,10 @@
         setAdding(false); setEditing(false);
       }
 
-      async function deleteItem(id) {
-        setItems(prev => prev.filter(i => i.id !== id));
-        setSelected(null);
-        await removeItem(id);
-      }
-
+      async function deleteItem(id) { setItems(prev => prev.filter(i => i.id !== id)); setSelected(null); await removeItem(id); }
       async function closeItem(id) {
         const updated = items.map(i => i.id === id ? {...i, status:"Closed"} : i);
-        setItems(updated);
-        setSelected(null);
+        setItems(updated); setSelected(null);
         const item = updated.find(i => i.id === id);
         if (item) await upsertItem(item);
       }
@@ -275,7 +328,7 @@
 
       return (
         <div style={{ fontFamily:"-apple-system, BlinkMacSystemFont, Inter, sans-serif",
-          background:"#f5f4f1", height:"100dvh", display:"flex", flexDirection:"column", fontSize:"14px" }}>
+          background:"#f5f4f1", height:"100dvh", display:"flex", flexDirection:"column" }}>
 
           {/* Header */}
           <div style={{ background:"#1a1a1a", color:"#fff", padding:"12px 16px",
@@ -288,9 +341,7 @@
               </div>
             </div>
             <button onClick={openAdd} style={{ background:"#c8a96e", color:"#1a1a1a", border:"none",
-              borderRadius:"6px", padding:"7px 14px", fontSize:"12px", fontWeight:700, cursor:"pointer" }}>
-              + Add
-            </button>
+              borderRadius:"6px", padding:"7px 14px", fontSize:"12px", fontWeight:700, cursor:"pointer" }}>+ Add</button>
           </div>
 
           {/* Status filter */}
@@ -298,13 +349,10 @@
             display:"flex", gap:"2px", overflowX:"auto", flexShrink:0 }}>
             {["All",...STATUSES].map(s => (
               <button key={s} onClick={() => setFilterStatus(s)} style={{
-                border:"none", background:"none", padding:"9px 10px",
-                fontSize:"11px", fontWeight:filterStatus===s?700:400,
-                color:filterStatus===s?"#1a1a1a":"#999",
+                border:"none", background:"none", padding:"9px 10px", fontSize:"11px",
+                fontWeight:filterStatus===s?700:400, color:filterStatus===s?"#1a1a1a":"#999",
                 borderBottom:filterStatus===s?"2px solid #c8a96e":"2px solid transparent",
-                cursor:"pointer", whiteSpace:"nowrap" }}>
-                {s}
-              </button>
+                cursor:"pointer", whiteSpace:"nowrap" }}>{s}</button>
             ))}
           </div>
 
@@ -314,11 +362,9 @@
             {CATEGORIES.map(c => (
               <button key={c} onClick={() => setFilterCat(c)} style={{
                 border:filterCat===c?"1px solid #c8a96e":"1px solid #e0dbd0",
-                background:filterCat===c?"#c8a96e":"#fff",
-                color:filterCat===c?"#1a1a1a":"#777",
-                borderRadius:"14px", padding:"4px 10px",
-                fontSize:"11px", fontWeight:filterCat===c?600:400,
-                cursor:"pointer", whiteSpace:"nowrap" }}>
+                background:filterCat===c?"#c8a96e":"#fff", color:filterCat===c?"#1a1a1a":"#777",
+                borderRadius:"14px", padding:"4px 10px", fontSize:"11px",
+                fontWeight:filterCat===c?600:400, cursor:"pointer", whiteSpace:"nowrap" }}>
                 {c !== "All" ? `${CATEGORY_ICONS[c]} ` : ""}{c}
               </button>
             ))}
@@ -328,12 +374,9 @@
           <div style={{ flex:1, display:"flex", overflow:"hidden" }}>
 
             {/* List */}
-            <div style={{ width:panelOpen?"42%":"100%", overflowY:"auto",
-              transition:"width 0.2s", minWidth:panelOpen?"150px":undefined }}>
+            <div style={{ width:panelOpen?"42%":"100%", overflowY:"auto", transition:"width 0.2s", minWidth:panelOpen?"150px":undefined }}>
               {sorted.length === 0 && (
-                <div style={{ padding:"40px 20px", textAlign:"center", color:"#bbb", fontSize:"13px" }}>
-                  Nothing here. Hit + Add to start.
-                </div>
+                <div style={{ padding:"40px 20px", textAlign:"center", color:"#bbb", fontSize:"13px" }}>Nothing here. Hit + Add to start.</div>
               )}
               {sorted.map(item => (
                 <div key={item.id}
@@ -342,35 +385,25 @@
                     background:selected===item.id?"#fff":"transparent", cursor:"pointer",
                     borderLeft:selected===item.id?"3px solid #c8a96e":"3px solid transparent",
                     opacity:item.status==="Closed"?0.5:1 }}>
-
-                  {/* Row 1: name + status badge */}
                   <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:"6px", marginBottom:"2px" }}>
                     <div style={{ fontWeight:700, fontSize:"13px", color:"#1a1a1a", lineHeight:"1.3" }}>{item.person}</div>
                     <Badge status={item.status} />
                   </div>
-
-                  {/* Row 2: category + company */}
                   <div style={{ fontSize:"11px", color:"#999", marginBottom:"4px" }}>
                     {CATEGORY_ICONS[item.category]} {item.category} &nbsp;·&nbsp; {item.company}
                   </div>
-
-                  {/* Row 3: context tag — the "why it's on my list" */}
                   {item.context && (
                     <div style={{ fontSize:"11px", color:"#666", fontStyle:"italic", marginBottom:"5px",
-                      lineHeight:"1.3", display:"-webkit-box", WebkitLineClamp:1,
-                      WebkitBoxOrient:"vertical", overflow:"hidden" }}>
-                      ({item.context})
+                      lineHeight:"1.3", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                      ({stripHtml(item.context)})
                     </div>
                   )}
-
-                  {/* Row 4: next action — only when list is full width */}
                   {!panelOpen && item.nextAction && (
                     <div style={{ fontSize:"12px", color:"#555", lineHeight:"1.4", marginBottom:"5px" }}>
-                      <span style={{ color:"#c8a96e", fontWeight:600 }}>Next: </span>{item.nextAction}
+                      <span style={{ color:"#c8a96e", fontWeight:600 }}>Next: </span>
+                      {stripHtml(item.nextAction)}
                     </div>
                   )}
-
-                  {/* Row 5: priority + follow-up date + last-touch date */}
                   <div style={{ display:"flex", alignItems:"center", gap:"8px", marginTop:"4px", flexWrap:"wrap" }}>
                     {item.priority && <PriorityBadge priority={item.priority} />}
                     {item.followUpDate && <FollowUpChip date={item.followUpDate} />}
@@ -382,44 +415,53 @@
 
             {/* Detail / Edit panel */}
             {panelOpen && (
-              <div style={{ flex:1, background:"#fff", borderLeft:"1px solid #e8e4dc",
-                overflowY:"auto", padding:"18px 16px" }}>
+              <div style={{ flex:1, background:"#fff", borderLeft:"1px solid #e8e4dc", overflowY:"auto", padding:"18px 16px" }}>
 
                 {(editing || adding) ? (
                   <div>
                     <div style={{ fontSize:"13px", fontWeight:700, marginBottom:"16px", color:"#1a1a1a" }}>
                       {adding ? "New Item" : "Edit Item"}
                     </div>
+
+                    {/* Plain text fields */}
                     {[
-                      { label:"Person",      key:"person",      placeholder:"Name" },
-                      { label:"Company",     key:"company",     placeholder:"Company or team" },
-                      { label:"Context (why it's on your list)", key:"context", placeholder:"Short reason — shown on card", textarea:true },
-                      { label:"Last Action", key:"lastAction",  placeholder:"What was last done" },
-                      { label:"Next Action", key:"nextAction",  placeholder:"What needs to happen next" },
-                    ].map(({ label, key, placeholder, textarea }) => (
+                      { label:"Person",  key:"person",  placeholder:"Name", plain:true },
+                      { label:"Company", key:"company", placeholder:"Company or team", plain:true },
+                    ].map(({ label, key, placeholder }) => (
                       <div key={key} style={{ marginBottom:"11px" }}>
                         <label style={labelStyle}>{label}</label>
-                        {textarea
-                          ? <textarea value={form[key]} onChange={e => setForm(f=>({...f,[key]:e.target.value}))}
-                              rows={2} placeholder={placeholder}
-                              style={{...inputStyle, resize:"vertical"}} />
-                          : <input value={form[key]} onChange={e => setForm(f=>({...f,[key]:e.target.value}))}
-                              placeholder={placeholder} style={inputStyle} />
-                        }
+                        <input value={form[key]} onChange={e => setForm(f=>({...f,[key]:e.target.value}))}
+                          placeholder={placeholder} style={inputStyle} />
                       </div>
                     ))}
+
+                    {/* Rich text fields */}
+                    {[
+                      { label:"Context (why it's on your list)", key:"context", placeholder:"Short reason — shown on card", minHeight:"60px" },
+                      { label:"Last Action", key:"lastAction", placeholder:"What was last done", minHeight:"80px" },
+                      { label:"Next Action", key:"nextAction", placeholder:"What needs to happen next", minHeight:"80px" },
+                    ].map(({ label, key, placeholder, minHeight }) => (
+                      <div key={key} style={{ marginBottom:"11px" }}>
+                        <label style={labelStyle}>{label}</label>
+                        <RichEditor
+                          value={form[key]}
+                          onChange={val => setForm(f=>({...f,[key]:val}))}
+                          placeholder={placeholder}
+                          minHeight={minHeight}
+                        />
+                      </div>
+                    ))}
+
                     <div style={{ display:"flex", gap:"8px", marginBottom:"11px" }}>
                       <div style={{ flex:1 }}>
                         <label style={labelStyle}>Category</label>
-                        <select value={form.category} onChange={e => setForm(f=>({...f,category:e.target.value}))}
-                          style={inputStyle}>
+                        <select value={form.category} onChange={e => setForm(f=>({...f,category:e.target.value}))} style={inputStyle}>
                           {["Commitment","Waiting On","Escalation","Relationship"].map(s=><option key={s}>{s}</option>)}
                         </select>
                       </div>
                       <div style={{ flex:1 }}>
                         <label style={labelStyle}>Status</label>
-                        <select value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))}
-                          style={inputStyle}>
+                        <select value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))} style={inputStyle}>
                           {STATUSES.map(s=><option key={s}>{s}</option>)}
                         </select>
                       </div>
@@ -427,31 +469,31 @@
                     <div style={{ display:"flex", gap:"8px", marginBottom:"11px" }}>
                       <div style={{ flex:1 }}>
                         <label style={labelStyle}>Priority</label>
-                        <select value={form.priority || "Medium"} onChange={e => setForm(f=>({...f,priority:e.target.value}))}
-                          style={inputStyle}>
+                        <select value={form.priority || "Medium"} onChange={e => setForm(f=>({...f,priority:e.target.value}))} style={inputStyle}>
                           {PRIORITIES.map(p=><option key={p}>{p}</option>)}
                         </select>
                       </div>
                       <div style={{ flex:1 }}>
                         <label style={labelStyle}>Follow-up Date</label>
-                        <input type="date" value={form.followUpDate || ""} onChange={e => setForm(f=>({...f,followUpDate:e.target.value}))}
-                          style={inputStyle} />
+                        <input type="date" value={form.followUpDate || ""} onChange={e => setForm(f=>({...f,followUpDate:e.target.value}))} style={inputStyle} />
                       </div>
                     </div>
                     <div style={{ marginBottom:"11px" }}>
                       <label style={labelStyle}>Last Touch Date</label>
-                      <input type="date" value={form.date} onChange={e => setForm(f=>({...f,date:e.target.value}))}
-                        style={inputStyle} />
+                      <input type="date" value={form.date} onChange={e => setForm(f=>({...f,date:e.target.value}))} style={inputStyle} />
                     </div>
                     <div style={{ marginBottom:"18px" }}>
                       <label style={labelStyle}>Notes</label>
-                      <textarea value={form.notes} onChange={e => setForm(f=>({...f,notes:e.target.value}))}
-                        rows={3} style={{...inputStyle, resize:"vertical"}} />
+                      <RichEditor
+                        value={form.notes}
+                        onChange={val => setForm(f=>({...f,notes:val}))}
+                        placeholder="Background context, relationship notes..."
+                        minHeight="100px"
+                      />
                     </div>
                     <div style={{ display:"flex", gap:"8px" }}>
                       <button onClick={saveForm} style={{ flex:1, background:"#1a1a1a", color:"#fff",
-                        border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px",
-                        fontWeight:700, cursor:"pointer" }}>Save</button>
+                        border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px", fontWeight:700, cursor:"pointer" }}>Save</button>
                       <button onClick={() => { setEditing(false); setAdding(false); if(adding) setSelected(null); }}
                         style={{ flex:1, background:"#f0ede8", color:"#444", border:"none",
                           borderRadius:"6px", padding:"10px", fontSize:"13px", cursor:"pointer" }}>Cancel</button>
@@ -460,65 +502,60 @@
 
                 ) : selectedItem ? (
                   <div>
-                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start",
-                      gap:"8px", marginBottom:"2px" }}>
-                      <div style={{ fontSize:"16px", fontWeight:700, color:"#1a1a1a", lineHeight:"1.3" }}>
-                        {selectedItem.person}
-                      </div>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:"8px", marginBottom:"2px" }}>
+                      <div style={{ fontSize:"16px", fontWeight:700, color:"#1a1a1a", lineHeight:"1.3" }}>{selectedItem.person}</div>
                       <Badge status={selectedItem.status} />
                     </div>
                     <div style={{ fontSize:"11px", color:"#999", marginBottom:"8px" }}>
                       {CATEGORY_ICONS[selectedItem.category]} {selectedItem.category} &nbsp;·&nbsp; {selectedItem.company}
                     </div>
-
-                    {/* Priority + follow-up row */}
                     <div style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"16px", flexWrap:"wrap" }}>
                       {selectedItem.priority && <PriorityBadge priority={selectedItem.priority} />}
                       {selectedItem.followUpDate && (
-                        <span style={{ fontSize:"11px", color:"#777" }}>
-                          Follow up: <strong>{formatDate(selectedItem.followUpDate)}</strong>
-                        </span>
+                        <span style={{ fontSize:"11px", color:"#777" }}>Follow up: <strong>{formatDate(selectedItem.followUpDate)}</strong></span>
                       )}
                       <FollowUpChip date={selectedItem.followUpDate} />
                     </div>
 
-                    <Field label="Context"     value={selectedItem.context} />
-                    <Field label="Last Action" value={selectedItem.lastAction} />
+                    {selectedItem.context && (
+                      <FieldBlock label="Context">
+                        <RichDisplay html={selectedItem.context} />
+                      </FieldBlock>
+                    )}
+                    {selectedItem.lastAction && (
+                      <FieldBlock label="Last Action">
+                        <RichDisplay html={selectedItem.lastAction} />
+                      </FieldBlock>
+                    )}
                     {selectedItem.nextAction && (
-                      <div style={{ marginBottom:"14px" }}>
-                        <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase",
-                          letterSpacing:"0.6px", marginBottom:"4px" }}>Next Action</div>
-                        <div style={{ fontSize:"13px", color:"#1a1a1a", background:"#fffbf0",
-                          border:"1px solid #e8d9a0", borderRadius:"6px", padding:"8px 10px", lineHeight:"1.5" }}>
-                          {selectedItem.nextAction}
+                      <FieldBlock label="Next Action">
+                        <div style={{ background:"#fffbf0", border:"1px solid #e8d9a0", borderRadius:"6px", padding:"8px 10px" }}>
+                          <RichDisplay html={selectedItem.nextAction} className="next-action-display" />
                         </div>
-                      </div>
+                      </FieldBlock>
                     )}
-                    <Field label="Last Touch"  value={formatDate(selectedItem.date)} />
+                    <FieldBlock label="Last Touch">
+                      <div style={{ fontSize:"13px", color:"#1a1a1a" }}>{formatDate(selectedItem.date)}</div>
+                    </FieldBlock>
                     {selectedItem.notes && (
-                      <div style={{ marginBottom:"20px" }}>
-                        <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase",
-                          letterSpacing:"0.6px", marginBottom:"4px" }}>Notes</div>
-                        <div style={{ fontSize:"13px", color:"#444", lineHeight:"1.5",
-                          background:"#f7f6f3", padding:"10px", borderRadius:"6px" }}>
-                          {selectedItem.notes}
+                      <FieldBlock label="Notes">
+                        <div style={{ background:"#f7f6f3", padding:"10px", borderRadius:"6px" }}>
+                          <RichDisplay html={selectedItem.notes} className="notes-display" />
                         </div>
-                      </div>
+                      </FieldBlock>
                     )}
+
                     <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
                       <button onClick={() => setSelected(null)}
                         style={{ flex:1, minWidth:"80px", background:"#f0ede8", color:"#444",
-                          border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px",
-                          cursor:"pointer" }}>← Back</button>
+                          border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px", cursor:"pointer" }}>← Back</button>
                       <button onClick={() => openEdit(selectedItem)}
                         style={{ flex:1, minWidth:"80px", background:"#1a1a1a", color:"#fff",
-                          border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px",
-                          fontWeight:700, cursor:"pointer" }}>Edit</button>
+                          border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px", fontWeight:700, cursor:"pointer" }}>Edit</button>
                       {selectedItem.status !== "Closed" && (
                         <button onClick={() => closeItem(selectedItem.id)}
                           style={{ flex:1, minWidth:"80px", background:"#e8f4e8", color:"#2d6a2d",
-                            border:"none", borderRadius:"6px", padding:"10px",
-                            fontSize:"13px", cursor:"pointer" }}>Mark Closed</button>
+                            border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px", cursor:"pointer" }}>Mark Closed</button>
                       )}
                       <button onClick={() => deleteItem(selectedItem.id)}
                         style={{ background:"#fee", color:"#c00", border:"none",
