@@ -24,36 +24,35 @@
     .rte-sep { width:1px; background:#e0dbd0; margin:2px 2px; }
     .rte-body { border:1px solid #e0dbd0; border-radius:0 0 6px 6px; padding:8px 10px; font-size:13px; min-height:80px; outline:none; line-height:1.6; background:#fff; color:#1a1a1a; overflow-y:auto; }
     .rte-body:focus { border-color:#c8a96e; }
-    .rte-body ul { padding-left:18px; margin:2px 0; }
-    .rte-body ol { padding-left:18px; margin:2px 0; }
+    .rte-body ul, .rte-body ol { padding-left:18px; margin:2px 0; }
     .rte-body li { margin:1px 0; }
     .rte-body b, .rte-body strong { font-weight:700; }
     .rte-body i, .rte-body em { font-style:italic; }
 
     .rich-display { font-size:13px; color:#1a1a1a; line-height:1.6; }
-    .rich-display ul { padding-left:18px; margin:2px 0; }
-    .rich-display ol { padding-left:18px; margin:2px 0; }
+    .rich-display ul, .rich-display ol { padding-left:18px; margin:2px 0; }
     .rich-display li { margin:1px 0; }
     .rich-display b, .rich-display strong { font-weight:700; }
     .rich-display i, .rich-display em { font-style:italic; }
     .rich-display p { margin:0 0 2px 0; }
 
     .next-action-display { font-size:13px; color:#1a1a1a; line-height:1.6; }
-    .next-action-display ul { padding-left:18px; margin:2px 0; }
-    .next-action-display ol { padding-left:18px; margin:2px 0; }
+    .next-action-display ul, .next-action-display ol { padding-left:18px; margin:2px 0; }
     .next-action-display li { margin:1px 0; }
     .next-action-display b, .next-action-display strong { font-weight:700; }
 
     .notes-display { font-size:13px; color:#444; line-height:1.6; }
-    .notes-display ul { padding-left:18px; margin:2px 0; }
-    .notes-display ol { padding-left:18px; margin:2px 0; }
+    .notes-display ul, .notes-display ol { padding-left:18px; margin:2px 0; }
     .notes-display li { margin:1px 0; }
+
+    .search-input { width:100%; border:none; background:transparent; outline:none; font-size:13px; font-family:inherit; color:#1a1a1a; }
+    .search-input::placeholder { color:#bbb; }
   </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="text/babel">
-    const { useState, useEffect, useRef, useCallback } = React;
+    const { useState, useEffect, useRef } = React;
 
     const APP_PASSWORD = "timmer-nyjpij-ryxRy7";
     const SESSION_KEY  = "wt-auth";
@@ -70,14 +69,11 @@
           <div style={{ background:"#fff", borderRadius:"12px", padding:"32px 28px", width:"280px", textAlign:"center" }}>
             <div style={{ fontSize:"15px", fontWeight:700, color:"#1a1a1a", marginBottom:"6px" }}>Work Tracker</div>
             <div style={{ fontSize:"12px", color:"#999", marginBottom:"20px" }}>Enter your password to continue</div>
-            <input type="password" value={val}
-              onChange={e => setVal(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && attempt()}
-              autoFocus placeholder="Password"
+            <input type="password" value={val} onChange={e => setVal(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && attempt()} autoFocus placeholder="Password"
               style={{ width:"100%", border: err ? "1px solid #c03030" : "1px solid #e0dbd0",
-                borderRadius:"6px", padding:"9px 12px", fontSize:"13px",
-                boxSizing:"border-box", outline:"none", marginBottom:"12px",
-                background: err ? "#fff0f0" : "#fff" }} />
+                borderRadius:"6px", padding:"9px 12px", fontSize:"13px", boxSizing:"border-box",
+                outline:"none", marginBottom:"12px", background: err ? "#fff0f0" : "#fff" }} />
             <button onClick={attempt} style={{ width:"100%", background:"#c8a96e", color:"#1a1a1a",
               border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px", fontWeight:700, cursor:"pointer" }}>
               {err ? "Incorrect password" : "Unlock"}
@@ -99,8 +95,8 @@
     const sb = SUPABASE_URL.startsWith("http") ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON) : null;
 
     const STATUSES   = ["Active","Waiting","In Progress","Blocked","Closed"];
-    const CATEGORIES = ["All","Commitment","Waiting On","Escalation","Relationship"];
     const PRIORITIES = ["High","Medium","Low"];
+    const CATEGORY_ICONS = { "Commitment":"◆","Waiting On":"◇","Escalation":"▲","Relationship":"●" };
 
     const STATUS_COLORS = {
       "Active":      { bg:"#e8f4e8", text:"#2d6a2d", dot:"#3a8a3a" },
@@ -114,7 +110,6 @@
       "Medium": { bg:"#fef3e2", text:"#7a4f1a" },
       "Low":    { bg:"#f0f0f0", text:"#777"    }
     };
-    const CATEGORY_ICONS = { "Commitment":"◆","Waiting On":"◇","Escalation":"▲","Relationship":"●" };
 
     const EMPTY_FORM = {
       person:"", company:"", category:"Commitment", context:"",
@@ -131,23 +126,22 @@
       if (!d) return null;
       return Math.ceil((new Date(d + "T12:00:00") - new Date()) / (1000*60*60*24));
     }
-
-    // Strip HTML to plain text for card preview
     function stripHtml(html) {
       if (!html) return "";
       return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
     }
+    function today() { return new Date().toISOString().split("T")[0]; }
 
     function FollowUpChip({ date }) {
       if (!date) return null;
       const days = daysUntil(date);
-      const overdue = days < 0, today = days === 0, soon = days > 0 && days <= 2;
-      const color = overdue ? "#c03030" : today ? "#c8a96e" : soon ? "#d4820a" : "#999";
-      const label = overdue ? `${Math.abs(days)}d overdue` : today ? "Today" : `${days}d`;
+      const overdue = days < 0, isToday = days === 0, soon = days > 0 && days <= 2;
+      const color = overdue ? "#c03030" : isToday ? "#c8a96e" : soon ? "#d4820a" : "#999";
+      const label = overdue ? `${Math.abs(days)}d overdue` : isToday ? "Today" : `${days}d`;
       return (
         <span style={{ fontSize:"10px", fontWeight:600, color,
-          background: overdue||today ? (overdue?"#fde8e8":"#fff8ed") : "transparent",
-          padding: overdue||today ? "1px 6px" : "0", borderRadius:"10px" }}>
+          background: overdue||isToday ? (overdue?"#fde8e8":"#fff8ed") : "transparent",
+          padding: overdue||isToday ? "1px 6px" : "0", borderRadius:"10px" }}>
           ↻ {label}
         </span>
       );
@@ -168,60 +162,34 @@
       );
     }
 
-    // Rich text editor component
     function RichEditor({ value, onChange, placeholder, minHeight }) {
       const ref = useRef(null);
       const isInternalUpdate = useRef(false);
-
       useEffect(() => {
         if (ref.current && !isInternalUpdate.current) {
-          const current = ref.current.innerHTML;
-          if (current !== value) ref.current.innerHTML = value || "";
+          if (ref.current.innerHTML !== value) ref.current.innerHTML = value || "";
         }
         isInternalUpdate.current = false;
       }, [value]);
-
-      function handleInput() {
-        isInternalUpdate.current = true;
-        onChange(ref.current.innerHTML);
-      }
-
-      function execCmd(cmd, val) {
-        ref.current.focus();
-        document.execCommand(cmd, false, val || null);
-        isInternalUpdate.current = true;
-        onChange(ref.current.innerHTML);
-      }
-
-      function isActive(cmd) {
-        try { return document.queryCommandState(cmd); } catch(e) { return false; }
-      }
-
+      function handleInput() { isInternalUpdate.current = true; onChange(ref.current.innerHTML); }
+      function execCmd(cmd) { ref.current.focus(); document.execCommand(cmd, false, null); isInternalUpdate.current = true; onChange(ref.current.innerHTML); }
       return (
         <div>
           <div className="rte-toolbar">
-            <button type="button" className={`rte-btn${isActive("bold")?" active":""}`} onMouseDown={e=>{e.preventDefault();execCmd("bold")}}><b>B</b></button>
-            <button type="button" className={`rte-btn${isActive("italic")?" active":""}`} onMouseDown={e=>{e.preventDefault();execCmd("italic")}}><i>I</i></button>
+            <button type="button" className="rte-btn" onMouseDown={e=>{e.preventDefault();execCmd("bold")}}><b>B</b></button>
+            <button type="button" className="rte-btn" onMouseDown={e=>{e.preventDefault();execCmd("italic")}}><i>I</i></button>
             <div className="rte-sep" />
             <button type="button" className="rte-btn" onMouseDown={e=>{e.preventDefault();execCmd("insertUnorderedList")}}>• List</button>
             <button type="button" className="rte-btn" onMouseDown={e=>{e.preventDefault();execCmd("insertOrderedList")}}>1. List</button>
             <div className="rte-sep" />
             <button type="button" className="rte-btn" onMouseDown={e=>{e.preventDefault();execCmd("removeFormat")}}>Clear</button>
           </div>
-          <div
-            ref={ref}
-            className="rte-body"
-            contentEditable
-            suppressContentEditableWarning
-            onInput={handleInput}
-            style={{ minHeight: minHeight || "80px" }}
-            data-placeholder={placeholder}
-          />
+          <div ref={ref} className="rte-body" contentEditable suppressContentEditableWarning
+            onInput={handleInput} style={{ minHeight: minHeight || "80px" }} data-placeholder={placeholder} />
         </div>
       );
     }
 
-    // Render stored HTML safely in detail view
     function RichDisplay({ html, className, style }) {
       if (!html) return null;
       return <div className={className || "rich-display"} style={style} dangerouslySetInnerHTML={{ __html: html }} />;
@@ -236,16 +204,78 @@
       );
     }
 
+    // Quick Update modal
+    function QuickUpdateModal({ item, onSave, onClose }) {
+      const [note, setNote] = useState("");
+      const [followUpDate, setFollowUpDate] = useState(item.followUpDate || "");
+      const [status, setStatus] = useState(item.status);
+      const inputStyle = { width:"100%", border:"1px solid #e0dbd0", borderRadius:"6px",
+        padding:"7px 9px", fontSize:"13px", boxSizing:"border-box", outline:"none", fontFamily:"inherit" };
+
+      function save() {
+        const todayStr = today();
+        const updatedLastAction = note.trim()
+          ? (item.lastAction ? item.lastAction + `<p><em>${formatDate(todayStr)}: ${note.trim()}</em></p>` : `<p>${note.trim()}</p>`)
+          : item.lastAction;
+        onSave({ ...item, lastAction: updatedLastAction, followUpDate, status, date: todayStr });
+      }
+
+      return (
+        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.4)", display:"flex",
+          alignItems:"flex-end", justifyContent:"center", zIndex:1000 }} onClick={onClose}>
+          <div style={{ background:"#fff", width:"100%", maxWidth:"500px", borderRadius:"16px 16px 0 0",
+            padding:"20px 18px 32px", boxShadow:"0 -4px 24px rgba(0,0,0,0.15)" }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ width:36, height:4, background:"#e0dbd0", borderRadius:2, margin:"0 auto 16px" }} />
+            <div style={{ fontWeight:700, fontSize:"14px", color:"#1a1a1a", marginBottom:"4px" }}>{item.person}</div>
+            <div style={{ fontSize:"11px", color:"#999", marginBottom:"16px" }}>{item.company}</div>
+
+            <div style={{ marginBottom:"12px" }}>
+              <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase", letterSpacing:"0.5px", marginBottom:"4px" }}>Quick note (appended to last action)</div>
+              <textarea value={note} onChange={e => setNote(e.target.value)} rows={3}
+                placeholder="What happened? One liner is fine."
+                style={{...inputStyle, resize:"none"}} />
+            </div>
+
+            <div style={{ display:"flex", gap:"8px", marginBottom:"16px" }}>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase", letterSpacing:"0.5px", marginBottom:"4px" }}>Status</div>
+                <select value={status} onChange={e => setStatus(e.target.value)} style={inputStyle}>
+                  {STATUSES.map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase", letterSpacing:"0.5px", marginBottom:"4px" }}>Next Follow-up</div>
+                <input type="date" value={followUpDate} onChange={e => setFollowUpDate(e.target.value)} style={inputStyle} />
+              </div>
+            </div>
+
+            <div style={{ display:"flex", gap:"8px" }}>
+              <button onClick={save} style={{ flex:1, background:"#1a1a1a", color:"#fff",
+                border:"none", borderRadius:"8px", padding:"12px", fontSize:"13px", fontWeight:700, cursor:"pointer" }}>
+                Save &amp; Touch Today
+              </button>
+              <button onClick={onClose} style={{ flex:1, background:"#f0ede8", color:"#444",
+                border:"none", borderRadius:"8px", padding:"12px", fontSize:"13px", cursor:"pointer" }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     function App() {
-      const [items, setItems]       = useState([]);
-      const [loaded, setLoaded]     = useState(false);
-      const [syncing, setSyncing]   = useState(false);
-      const [selected, setSelected] = useState(null);
-      const [editing, setEditing]   = useState(false);
-      const [adding, setAdding]     = useState(false);
+      const [items, setItems]           = useState([]);
+      const [loaded, setLoaded]         = useState(false);
+      const [syncing, setSyncing]       = useState(false);
+      const [selected, setSelected]     = useState(null);
+      const [editing, setEditing]       = useState(false);
+      const [adding, setAdding]         = useState(false);
       const [filterStatus, setFilterStatus] = useState("All");
-      const [filterCat, setFilterCat]       = useState("All");
-      const [form, setForm]         = useState(EMPTY_FORM);
+      const [search, setSearch]         = useState("");
+      const [quickUpdate, setQuickUpdate] = useState(null);
+      const [form, setForm]             = useState(EMPTY_FORM);
 
       useEffect(() => {
         async function load() {
@@ -266,17 +296,23 @@
         load();
       }, []);
 
-      useEffect(() => {
-        if (!loaded) return;
-        localStorage.setItem("work-tracker-items", JSON.stringify(items));
-      }, [items, loaded]);
+      useEffect(() => { if (loaded) localStorage.setItem("work-tracker-items", JSON.stringify(items)); }, [items, loaded]);
 
       async function upsertItem(item) { if (sb) await sb.from(TABLE).upsert(item); }
       async function removeItem(id)   { if (sb) await sb.from(TABLE).delete().eq("id", id); }
 
+      const overdueCount = items.filter(i => i.status !== "Closed" && i.followUpDate && daysUntil(i.followUpDate) < 0).length;
+
       let filtered = items;
       if (filterStatus !== "All") filtered = filtered.filter(i => i.status === filterStatus);
-      if (filterCat !== "All")    filtered = filtered.filter(i => i.category === filterCat);
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        filtered = filtered.filter(i =>
+          (i.person || "").toLowerCase().includes(q) ||
+          (i.company || "").toLowerCase().includes(q) ||
+          stripHtml(i.context || "").toLowerCase().includes(q)
+        );
+      }
 
       const PRIORITY_ORDER = { "High":0, "Medium":1, "Low":2 };
       const sorted = [...filtered].sort((a, b) => {
@@ -292,7 +328,7 @@
       const openCount   = items.filter(i => i.status !== "Closed").length;
       const closedCount = items.filter(i => i.status === "Closed").length;
 
-      function openAdd()  { setForm({...EMPTY_FORM}); setAdding(true); setSelected(null); setEditing(false); }
+      function openAdd()      { setForm({...EMPTY_FORM}); setAdding(true); setSelected(null); setEditing(false); }
       function openEdit(item) { setForm({...item, followUpDate: item.followUpDate || "", priority: item.priority || "Medium"}); setEditing(true); setAdding(false); }
 
       async function saveForm() {
@@ -308,6 +344,12 @@
           await upsertItem(form);
         }
         setAdding(false); setEditing(false);
+      }
+
+      async function saveQuickUpdate(updated) {
+        setItems(prev => prev.map(i => i.id === updated.id ? updated : i));
+        setQuickUpdate(null);
+        await upsertItem(updated);
       }
 
       async function deleteItem(id) { setItems(prev => prev.filter(i => i.id !== id)); setSelected(null); await removeItem(id); }
@@ -344,30 +386,39 @@
               borderRadius:"6px", padding:"7px 14px", fontSize:"12px", fontWeight:700, cursor:"pointer" }}>+ Add</button>
           </div>
 
-          {/* Status filter */}
-          <div style={{ background:"#fff", borderBottom:"1px solid #e8e4dc", padding:"0 12px",
-            display:"flex", gap:"2px", overflowX:"auto", flexShrink:0 }}>
-            {["All",...STATUSES].map(s => (
-              <button key={s} onClick={() => setFilterStatus(s)} style={{
-                border:"none", background:"none", padding:"9px 10px", fontSize:"11px",
-                fontWeight:filterStatus===s?700:400, color:filterStatus===s?"#1a1a1a":"#999",
-                borderBottom:filterStatus===s?"2px solid #c8a96e":"2px solid transparent",
-                cursor:"pointer", whiteSpace:"nowrap" }}>{s}</button>
-            ))}
-          </div>
+          {/* Overdue alert */}
+          {overdueCount > 0 && (
+            <div onClick={() => { setFilterStatus("All"); setSearch(""); }}
+              style={{ background:"#c03030", color:"#fff", padding:"7px 16px",
+                fontSize:"12px", fontWeight:600, cursor:"pointer", display:"flex",
+                alignItems:"center", justifyContent:"space-between", flexShrink:0 }}>
+              <span>⚠ {overdueCount} item{overdueCount > 1 ? "s" : ""} past follow-up date</span>
+              <span style={{ opacity:0.7, fontSize:"11px" }}>tap to see all →</span>
+            </div>
+          )}
 
-          {/* Category filter */}
-          <div style={{ background:"#faf9f6", borderBottom:"1px solid #ede9e0", padding:"6px 12px",
-            display:"flex", gap:"6px", overflowX:"auto", flexShrink:0 }}>
-            {CATEGORIES.map(c => (
-              <button key={c} onClick={() => setFilterCat(c)} style={{
-                border:filterCat===c?"1px solid #c8a96e":"1px solid #e0dbd0",
-                background:filterCat===c?"#c8a96e":"#fff", color:filterCat===c?"#1a1a1a":"#777",
-                borderRadius:"14px", padding:"4px 10px", fontSize:"11px",
-                fontWeight:filterCat===c?600:400, cursor:"pointer", whiteSpace:"nowrap" }}>
-                {c !== "All" ? `${CATEGORY_ICONS[c]} ` : ""}{c}
-              </button>
-            ))}
+          {/* Search + Status filter */}
+          <div style={{ background:"#fff", borderBottom:"1px solid #e8e4dc", flexShrink:0 }}>
+            {/* Search bar */}
+            <div style={{ padding:"8px 12px", borderBottom:"1px solid #f0ede8", display:"flex", alignItems:"center", gap:"8px" }}>
+              <span style={{ color:"#bbb", fontSize:"14px" }}>🔍</span>
+              <input className="search-input" value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Search person, company, or context..." />
+              {search && (
+                <button onClick={() => setSearch("")} style={{ border:"none", background:"none",
+                  color:"#bbb", fontSize:"14px", cursor:"pointer", padding:"0 2px" }}>✕</button>
+              )}
+            </div>
+            {/* Status tabs */}
+            <div style={{ padding:"0 12px", display:"flex", gap:"2px", overflowX:"auto" }}>
+              {["All",...STATUSES].map(s => (
+                <button key={s} onClick={() => setFilterStatus(s)} style={{
+                  border:"none", background:"none", padding:"9px 10px", fontSize:"11px",
+                  fontWeight:filterStatus===s?700:400, color:filterStatus===s?"#1a1a1a":"#999",
+                  borderBottom:filterStatus===s?"2px solid #c8a96e":"2px solid transparent",
+                  cursor:"pointer", whiteSpace:"nowrap" }}>{s}</button>
+              ))}
+            </div>
           </div>
 
           {/* Main */}
@@ -376,39 +427,53 @@
             {/* List */}
             <div style={{ width:panelOpen?"42%":"100%", overflowY:"auto", transition:"width 0.2s", minWidth:panelOpen?"150px":undefined }}>
               {sorted.length === 0 && (
-                <div style={{ padding:"40px 20px", textAlign:"center", color:"#bbb", fontSize:"13px" }}>Nothing here. Hit + Add to start.</div>
+                <div style={{ padding:"40px 20px", textAlign:"center", color:"#bbb", fontSize:"13px" }}>
+                  {search ? "No results." : "Nothing here. Hit + Add to start."}
+                </div>
               )}
               {sorted.map(item => (
-                <div key={item.id}
-                  onClick={() => { setSelected(item.id); setEditing(false); setAdding(false); }}
-                  style={{ padding:"11px 14px", borderBottom:"1px solid #ede9e0",
-                    background:selected===item.id?"#fff":"transparent", cursor:"pointer",
-                    borderLeft:selected===item.id?"3px solid #c8a96e":"3px solid transparent",
-                    opacity:item.status==="Closed"?0.5:1 }}>
-                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:"6px", marginBottom:"2px" }}>
-                    <div style={{ fontWeight:700, fontSize:"13px", color:"#1a1a1a", lineHeight:"1.3" }}>{item.person}</div>
-                    <Badge status={item.status} />
+                <div key={item.id} style={{ borderBottom:"1px solid #ede9e0", opacity:item.status==="Closed"?0.5:1 }}>
+                  <div onClick={() => { setSelected(item.id); setEditing(false); setAdding(false); }}
+                    style={{ padding:"11px 14px 6px", cursor:"pointer",
+                      background:selected===item.id?"#fff":"transparent",
+                      borderLeft:selected===item.id?"3px solid #c8a96e":"3px solid transparent" }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:"6px", marginBottom:"2px" }}>
+                      <div style={{ fontWeight:700, fontSize:"13px", color:"#1a1a1a", lineHeight:"1.3" }}>{item.person}</div>
+                      <Badge status={item.status} />
+                    </div>
+                    <div style={{ fontSize:"11px", color:"#999", marginBottom:"4px" }}>
+                      {CATEGORY_ICONS[item.category]} {item.category} &nbsp;·&nbsp; {item.company}
+                    </div>
+                    {item.context && (
+                      <div style={{ fontSize:"11px", color:"#666", fontStyle:"italic", marginBottom:"5px",
+                        lineHeight:"1.3", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                        ({stripHtml(item.context)})
+                      </div>
+                    )}
+                    {!panelOpen && item.nextAction && (
+                      <div style={{ fontSize:"12px", color:"#555", lineHeight:"1.4", marginBottom:"5px",
+                        overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                        <span style={{ color:"#c8a96e", fontWeight:600 }}>Next: </span>
+                        {stripHtml(item.nextAction)}
+                      </div>
+                    )}
+                    <div style={{ display:"flex", alignItems:"center", gap:"8px", marginTop:"4px", flexWrap:"wrap" }}>
+                      {item.priority && <PriorityBadge priority={item.priority} />}
+                      {item.followUpDate && <FollowUpChip date={item.followUpDate} />}
+                      {item.followUpDate && <span style={{ fontSize:"10px", color:"#aaa" }}>Follow up {formatDate(item.followUpDate)}</span>}
+                    </div>
                   </div>
-                  <div style={{ fontSize:"11px", color:"#999", marginBottom:"4px" }}>
-                    {CATEGORY_ICONS[item.category]} {item.category} &nbsp;·&nbsp; {item.company}
-                  </div>
-                  {item.context && (
-                    <div style={{ fontSize:"11px", color:"#666", fontStyle:"italic", marginBottom:"5px",
-                      lineHeight:"1.3", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                      ({stripHtml(item.context)})
+                  {/* Quick Update button */}
+                  {item.status !== "Closed" && (
+                    <div style={{ padding:"0 14px 8px", borderLeft:selected===item.id?"3px solid #c8a96e":"3px solid transparent",
+                      background:selected===item.id?"#fff":"transparent" }}>
+                      <button onClick={e => { e.stopPropagation(); setQuickUpdate(item); }}
+                        style={{ border:"1px solid #e0dbd0", background:"#faf9f6", color:"#777",
+                          borderRadius:"5px", padding:"3px 10px", fontSize:"11px", cursor:"pointer", fontFamily:"inherit" }}>
+                        ⚡ Quick Update
+                      </button>
                     </div>
                   )}
-                  {!panelOpen && item.nextAction && (
-                    <div style={{ fontSize:"12px", color:"#555", lineHeight:"1.4", marginBottom:"5px" }}>
-                      <span style={{ color:"#c8a96e", fontWeight:600 }}>Next: </span>
-                      {stripHtml(item.nextAction)}
-                    </div>
-                  )}
-                  <div style={{ display:"flex", alignItems:"center", gap:"8px", marginTop:"4px", flexWrap:"wrap" }}>
-                    {item.priority && <PriorityBadge priority={item.priority} />}
-                    {item.followUpDate && <FollowUpChip date={item.followUpDate} />}
-                    {item.followUpDate && <span style={{ fontSize:"10px", color:"#aaa" }}>Follow up {formatDate(item.followUpDate)}</span>}
-                  </div>
                 </div>
               ))}
             </div>
@@ -416,17 +481,14 @@
             {/* Detail / Edit panel */}
             {panelOpen && (
               <div style={{ flex:1, background:"#fff", borderLeft:"1px solid #e8e4dc", overflowY:"auto", padding:"18px 16px" }}>
-
                 {(editing || adding) ? (
                   <div>
                     <div style={{ fontSize:"13px", fontWeight:700, marginBottom:"16px", color:"#1a1a1a" }}>
                       {adding ? "New Item" : "Edit Item"}
                     </div>
-
-                    {/* Plain text fields */}
                     {[
-                      { label:"Person",  key:"person",  placeholder:"Name", plain:true },
-                      { label:"Company", key:"company", placeholder:"Company or team", plain:true },
+                      { label:"Person",  key:"person",  placeholder:"Name" },
+                      { label:"Company", key:"company", placeholder:"Company or team" },
                     ].map(({ label, key, placeholder }) => (
                       <div key={key} style={{ marginBottom:"11px" }}>
                         <label style={labelStyle}>{label}</label>
@@ -434,8 +496,6 @@
                           placeholder={placeholder} style={inputStyle} />
                       </div>
                     ))}
-
-                    {/* Rich text fields */}
                     {[
                       { label:"Context (why it's on your list)", key:"context", placeholder:"Short reason — shown on card", minHeight:"60px" },
                       { label:"Last Action", key:"lastAction", placeholder:"What was last done", minHeight:"80px" },
@@ -443,15 +503,10 @@
                     ].map(({ label, key, placeholder, minHeight }) => (
                       <div key={key} style={{ marginBottom:"11px" }}>
                         <label style={labelStyle}>{label}</label>
-                        <RichEditor
-                          value={form[key]}
-                          onChange={val => setForm(f=>({...f,[key]:val}))}
-                          placeholder={placeholder}
-                          minHeight={minHeight}
-                        />
+                        <RichEditor value={form[key]} onChange={val => setForm(f=>({...f,[key]:val}))}
+                          placeholder={placeholder} minHeight={minHeight} />
                       </div>
                     ))}
-
                     <div style={{ display:"flex", gap:"8px", marginBottom:"11px" }}>
                       <div style={{ flex:1 }}>
                         <label style={labelStyle}>Category</label>
@@ -484,12 +539,8 @@
                     </div>
                     <div style={{ marginBottom:"18px" }}>
                       <label style={labelStyle}>Notes</label>
-                      <RichEditor
-                        value={form.notes}
-                        onChange={val => setForm(f=>({...f,notes:val}))}
-                        placeholder="Background context, relationship notes..."
-                        minHeight="100px"
-                      />
+                      <RichEditor value={form.notes} onChange={val => setForm(f=>({...f,notes:val}))}
+                        placeholder="Background context, relationship notes..." minHeight="100px" />
                     </div>
                     <div style={{ display:"flex", gap:"8px" }}>
                       <button onClick={saveForm} style={{ flex:1, background:"#1a1a1a", color:"#fff",
@@ -516,7 +567,6 @@
                       )}
                       <FollowUpChip date={selectedItem.followUpDate} />
                     </div>
-
                     {selectedItem.nextAction && (
                       <FieldBlock label="Next Action">
                         <div style={{ background:"#fffbf0", border:"1px solid #e8d9a0", borderRadius:"6px", padding:"8px 10px" }}>
@@ -544,7 +594,6 @@
                         </div>
                       </FieldBlock>
                     )}
-
                     <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
                       <button onClick={() => setSelected(null)}
                         style={{ flex:1, minWidth:"80px", background:"#f0ede8", color:"#444",
@@ -566,6 +615,11 @@
               </div>
             )}
           </div>
+
+          {/* Quick Update modal */}
+          {quickUpdate && (
+            <QuickUpdateModal item={quickUpdate} onSave={saveQuickUpdate} onClose={() => setQuickUpdate(null)} />
+          )}
         </div>
       );
     }
