@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v2.5 -->
+<!DOCTYPE html><!-- v2.6 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -207,7 +207,7 @@
   </div>
 </div>
 
-<div id="version">v2.5</div>
+<div id="version">v2.6</div>
 
 <script>
 const PASSWORD = "timmer-nyjpij-ryxRy7";
@@ -253,7 +253,10 @@ function fmtDate(d) {
 }
 function daysUntil(d) {
   if (!d) return null;
-  return Math.ceil((new Date(d + "T12:00:00") - new Date()) / 86400000);
+  const now = new Date();
+  const local = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const target = new Date(d + "T00:00:00");
+  return Math.round((target - local) / 86400000);
 }
 function stripHtml(html) {
   if (!html) return "";
