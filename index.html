@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v2.2 -->
+<!DOCTYPE html><!-- v2.3 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -207,7 +207,7 @@
   </div>
 </div>
 
-<div id="version">v2.2</div>
+<div id="version">v2.3</div>
 
 <script>
 const PASSWORD = "timmer-nyjpij-ryxRy7";
@@ -364,7 +364,12 @@ function renderList() {
 
   if (filtered.length > 0) {
     const first = filtered[0];
-    console.log("First card - person:", first.person, "context:", first.context ? "HAS_CONTENT" : "EMPTY", "nextAction:", first.nextAction ? "HAS_CONTENT" : "EMPTY", "ctx stripped:", first.context ? stripHtml(first.context).substring(0,30) : "NONE");
+    const ctx = first.context ? stripHtml(first.context) : "";
+    const nxt = first.nextAction ? stripHtml(first.nextAction) : "";
+    console.log("ctx:", ctx.substring(0,40));
+    console.log("nxt:", nxt.substring(0,40));
+    const testHtml = ctx ? `<div class="card-context">(${ctx})</div>` : "";
+    console.log("testHtml:", testHtml);
   }
   pane.innerHTML = filtered.map(item => {
     const metaParts = [item.company, item.customerType, item.type].filter(Boolean).join(" · ");
