@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!-- v3 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -350,7 +350,7 @@
 
       async function deleteItem(id) { setItems(prev => prev.filter(i => i.id !== id)); setSelected(null); await removeItem(id); }
       async function closeItem(id) {
-        const updated = items.map(i => i.id === id ? {...i, status:"Closed"} : i);
+        const updated = items.map(i => i.id === id ? {...i, status:"Done"} : i);
         setItems(updated); setSelected(null);
         const item = updated.find(i => i.id === id);
         if (item) await upsertItem(item);
