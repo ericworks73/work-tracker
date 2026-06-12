@@ -655,6 +655,11 @@
           {quickUpdate && (
             <QuickUpdateModal item={quickUpdate} onSave={saveQuickUpdate} onClose={() => setQuickUpdate(null)} />
           )}
+
+          {/* Version stamp */}
+          <div style={{ position:"fixed", bottom:"6px", right:"10px", fontSize:"9px", color:"#ccc", pointerEvents:"none", zIndex:999 }}>
+            v1.4
+          </div>
         </div>
       );
     }
