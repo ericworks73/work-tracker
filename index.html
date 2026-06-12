@@ -94,16 +94,15 @@
     const TABLE = "work_tracker_items";
     const sb = SUPABASE_URL.startsWith("http") ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON) : null;
 
-    const STATUSES   = ["Active","Waiting","In Progress","Blocked","Closed"];
+    const STATUSES   = ["I Need To Act","Waiting On Them","Stuck","Done"];
     const PRIORITIES = ["High","Medium","Low"];
     const CATEGORY_ICONS = { "Commitment":"◆","Waiting On":"◇","Escalation":"▲","Relationship":"●" };
 
     const STATUS_COLORS = {
-      "Active":      { bg:"#e8f4e8", text:"#2d6a2d", dot:"#3a8a3a" },
-      "Waiting":     { bg:"#fef3e2", text:"#7a4f1a", dot:"#d4820a" },
-      "In Progress": { bg:"#e8eef8", text:"#1a3a6a", dot:"#2a5cbf" },
-      "Blocked":     { bg:"#fde8e8", text:"#7a1a1a", dot:"#c03030" },
-      "Closed":      { bg:"#f0f0f0", text:"#666",    dot:"#999"    }
+      "I Need To Act":   { bg:"#e8f4e8", text:"#2d6a2d", dot:"#3a8a3a" },
+      "Waiting On Them": { bg:"#fef3e2", text:"#7a4f1a", dot:"#d4820a" },
+      "Stuck":           { bg:"#fde8e8", text:"#7a1a1a", dot:"#c03030" },
+      "Done":            { bg:"#f0f0f0", text:"#666",    dot:"#999"    }
     };
     const PRIORITY_COLORS = {
       "High":   { bg:"#fde8e8", text:"#9a1a1a" },
@@ -115,7 +114,7 @@
       person:"", company:"", category:"Commitment", context:"",
       lastAction:"", nextAction:"",
       date: new Date().toISOString().split("T")[0],
-      status:"Active", notes:"", priority:"Medium", followUpDate:""
+      status:"I Need To Act", notes:"", priority:"Medium", followUpDate:"", coWorkers:""
     };
 
     function formatDate(d) {
@@ -306,7 +305,7 @@
       async function upsertItem(item) { if (sb) await sb.from(TABLE).upsert(item); }
       async function removeItem(id)   { if (sb) await sb.from(TABLE).delete().eq("id", id); }
 
-      const overdueCount = items.filter(i => i.status !== "Closed" && i.followUpDate && daysUntil(i.followUpDate) < 0).length;
+      const overdueCount = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) < 0).length;
 
       let filtered = items;
       if (filterStatus !== "All") filtered = filtered.filter(i => i.status === filterStatus);
@@ -321,8 +320,8 @@
 
       const PRIORITY_ORDER = { "High":0, "Medium":1, "Low":2 };
       const sorted = [...filtered].sort((a, b) => {
-        if (a.status === "Closed" && b.status !== "Closed") return 1;
-        if (b.status === "Closed" && a.status !== "Closed") return -1;
+        if (a.status === "Done" && b.status !== "Done") return 1;
+        if (b.status === "Done" && a.status !== "Done") return -1;
         const pa = PRIORITY_ORDER[a.priority] ?? 3, pb = PRIORITY_ORDER[b.priority] ?? 3;
         if (pa !== pb) return pa - pb;
         const fa = a.followUpDate ? new Date(a.followUpDate) : new Date("9999-12-31");
@@ -330,8 +329,8 @@
         return fa - fb;
       });
 
-      const openCount   = items.filter(i => i.status !== "Closed").length;
-      const closedCount = items.filter(i => i.status === "Closed").length;
+      const openCount   = items.filter(i => i.status !== "Done").length;
+      const closedCount = items.filter(i => i.status === "Done").length;
 
       function openAdd()      { setForm({...EMPTY_FORM}); setAdding(true); setSelected(null); setEditing(false); }
       function openEdit(item) { setForm({...item, followUpDate: item.followUpDate || "", priority: item.priority || "Medium"}); setEditing(true); setAdding(false); }
@@ -469,7 +468,7 @@
                     </div>
                   </div>
                   {/* Quick Update button */}
-                  {item.status !== "Closed" && (
+                  {item.status !== "Done" && (
                     <div style={{ padding:"0 14px 8px", borderLeft:selected===item.id?"3px solid #c8a96e":"3px solid transparent",
                       background:selected===item.id?"#fff":"transparent" }}>
                       <button onClick={e => { e.stopPropagation(); setQuickUpdate(item); }}
@@ -512,19 +511,16 @@
                           placeholder={placeholder} minHeight={minHeight} />
                       </div>
                     ))}
-                    <div style={{ display:"flex", gap:"8px", marginBottom:"11px" }}>
-                      <div style={{ flex:1 }}>
-                        <label style={labelStyle}>Category</label>
-                        <select value={form.category} onChange={e => setForm(f=>({...f,category:e.target.value}))} style={inputStyle}>
-                          {["Commitment","Waiting On","Escalation","Relationship"].map(s=><option key={s}>{s}</option>)}
-                        </select>
-                      </div>
-                      <div style={{ flex:1 }}>
-                        <label style={labelStyle}>Status</label>
-                        <select value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))} style={inputStyle}>
-                          {STATUSES.map(s=><option key={s}>{s}</option>)}
-                        </select>
-                      </div>
+                    <div style={{ marginBottom:"11px" }}>
+                      <label style={labelStyle}>Status</label>
+                      <select value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))} style={inputStyle}>
+                        {STATUSES.map(s=><option key={s}>{s}</option>)}
+                      </select>
+                    </div>
+                    <div style={{ marginBottom:"11px" }}>
+                      <label style={labelStyle}>Co-Workers Involved</label>
+                      <input value={form.coWorkers || ""} onChange={e => setForm(f=>({...f,coWorkers:e.target.value}))}
+                        placeholder="e.g. Callen, Jonathan" style={inputStyle} />
                     </div>
                     <div style={{ display:"flex", gap:"8px", marginBottom:"11px" }}>
                       <div style={{ flex:1 }}>
@@ -562,9 +558,14 @@
                       <div style={{ fontSize:"16px", fontWeight:700, color:"#1a1a1a", lineHeight:"1.3" }}>{selectedItem.person}</div>
                       <Badge status={selectedItem.status} />
                     </div>
-                    <div style={{ fontSize:"11px", color:"#999", marginBottom:"8px" }}>
-                      {CATEGORY_ICONS[selectedItem.category]} {selectedItem.category} &nbsp;·&nbsp; {selectedItem.company}
+                    <div style={{ fontSize:"11px", color:"#999", marginBottom:"4px" }}>
+                      {selectedItem.company}
                     </div>
+                    {selectedItem.coWorkers && (
+                      <div style={{ fontSize:"11px", color:"#999", marginBottom:"8px" }}>
+                        👥 {selectedItem.coWorkers}
+                      </div>
+                    )}
                     <div style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"16px", flexWrap:"wrap" }}>
                       {selectedItem.priority && <PriorityBadge priority={selectedItem.priority} />}
                       {selectedItem.followUpDate && (
@@ -606,7 +607,7 @@
                       <button onClick={() => openEdit(selectedItem)}
                         style={{ flex:1, minWidth:"80px", background:"#1a1a1a", color:"#fff",
                           border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px", fontWeight:700, cursor:"pointer" }}>Edit</button>
-                      {selectedItem.status !== "Closed" && (
+                      {selectedItem.status !== "Done" && (
                         <button onClick={() => closeItem(selectedItem.id)}
                           style={{ flex:1, minWidth:"80px", background:"#e8f4e8", color:"#2d6a2d",
                             border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px", cursor:"pointer" }}>Mark Closed</button>
