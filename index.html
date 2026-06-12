@@ -220,7 +220,7 @@
         let updatedLastAction = item.lastAction || "";
         if (note.trim()) {
           const noteHtml = `<p><em><strong>${formatDate(todayStr)}:</strong> ${note.trim()}</em></p>`;
-          updatedLastAction = updatedLastAction ? updatedLastAction + noteHtml : noteHtml;
+          updatedLastAction = updatedLastAction ? noteHtml + updatedLastAction : noteHtml;
         }
         onSave({ ...item, lastAction: updatedLastAction, followUpDate, status, date: todayStr });
       }
