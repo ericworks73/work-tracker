@@ -314,7 +314,8 @@
         filtered = filtered.filter(i =>
           (i.person || "").toLowerCase().includes(q) ||
           (i.company || "").toLowerCase().includes(q) ||
-          stripHtml(i.context || "").toLowerCase().includes(q)
+          stripHtml(i.context || "").toLowerCase().includes(q) ||
+          (i.coWorkers || "").toLowerCase().includes(q)
         );
       }
 
