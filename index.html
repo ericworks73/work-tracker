@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v3.0 -->
+<!DOCTYPE html><!-- v2.9 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -207,7 +207,7 @@
   </div>
 </div>
 
-<div id="version">v3.0</div>
+<div id="version">v2.9</div>
 
 <script>
 const PASSWORD = "timmer-nyjpij-ryxRy7";
@@ -283,14 +283,6 @@ function followChipHtml(date) {
 
 // Load
 async function loadItems() {
-  const { error: signInError } = await sb.auth.signInWithPassword({
-    email: "worktracker@local.dev",
-    password: "wusnuZ-sehku6-byjsix"
-  });
-  if (signInError) {
-    console.error("Auth error:", signInError.message);
-    return;
-  }
   const { data, error } = await sb.from(TABLE).select("*");
   if (!error && data) {
     items = data;
