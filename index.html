@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v2.6 -->
+<!DOCTYPE html><!-- v2.7 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -207,7 +207,7 @@
   </div>
 </div>
 
-<div id="version">v2.6</div>
+<div id="version">v2.7</div>
 
 <script>
 const PASSWORD = "timmer-nyjpij-ryxRy7";
@@ -312,6 +312,8 @@ function getFiltered() {
   return f.sort((a, b) => {
     if (a.status === "Done" && b.status !== "Done") return 1;
     if (b.status === "Done" && a.status !== "Done") return -1;
+    if (a.featured && !b.featured) return -1;
+    if (b.featured && !a.featured) return 1;
     const fa = a.followUpDate ? new Date(a.followUpDate) : new Date("9999-12-31");
     const fb = b.followUpDate ? new Date(b.followUpDate) : new Date("9999-12-31");
     return fa - fb;
@@ -372,6 +374,7 @@ function renderList() {
   }
   pane.innerHTML = filtered.map(item => {
     const metaParts = [item.company, item.customerType, item.type].filter(Boolean).join(" · ");
+        const starHtml = item.featured ? '<span style="color:#c8a96e;font-size:14px;margin-right:3px;">★</span>' : '';
     const coworkers = item.coWorkers ? ` · 👥 ${item.coWorkers}` : "";
     const ctx = item.context ? stripHtml(item.context) : "";
     const nxt = item.nextAction ? stripHtml(item.nextAction) : "";
@@ -380,7 +383,7 @@ function renderList() {
     return `<div class="card${selectedId === item.id ? " selected" : ""}${item.status === "Done" ? " done" : ""}" data-id="${item.id}">
       <div class="card-body">
         <div class="card-row1">
-          <div class="card-name">${item.person}</div>
+          <div class="card-name">${starHtml}${item.person}</div>
           ${item.priority ? `<span class="pri-badge pri-${item.priority}">${item.priority}</span>` : ""}
         </div>
         <div class="card-row2">
@@ -436,6 +439,7 @@ function renderPanel() {
 
   detail.className = "open";
   const metaParts = [item.company, item.customerType, item.type].filter(Boolean).join(" · ");
+        const starHtml = item.featured ? '<span style="color:#c8a96e;font-size:14px;margin-right:3px;">★</span>' : '';
 
   detail.innerHTML = `
     <div class="detail-header">
