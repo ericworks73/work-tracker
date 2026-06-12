@@ -114,7 +114,7 @@
       person:"", company:"", category:"Commitment", context:"",
       lastAction:"", nextAction:"",
       date: new Date().toISOString().split("T")[0],
-      status:"I Need To Act", notes:"", priority:"Medium", followUpDate:"", coWorkers:"", customerType:""
+      status:"I Need To Act", notes:"", priority:"Medium", followUpDate:"", coWorkers:"", customerType:"", type:""
     };
 
     function formatDate(d) {
@@ -449,6 +449,7 @@
                     <div style={{ fontSize:"11px", color:"#999", marginBottom:"4px" }}>
                       {item.company}
                       {item.customerType && <span style={{ color:"#bbb" }}> · {item.customerType}</span>}
+                      {item.type && <span style={{ color:"#bbb" }}> · {item.type}</span>}
                       {item.coWorkers && <span style={{ color:"#bbb" }}> · 👥 {item.coWorkers}</span>}
                     </div>
                     {item.context && (
@@ -530,10 +531,20 @@
                         <label style={labelStyle}>Customer Type</label>
                         <select value={form.customerType || ""} onChange={e => setForm(f=>({...f,customerType:e.target.value}))} style={inputStyle}>
                           <option value="">Not set</option>
-                          <option value="New Customer">New Customer</option>
+                          <option value="Prospect">Prospect</option>
                           <option value="Current Customer">Current Customer</option>
                         </select>
                       </div>
+                    </div>
+                    <div style={{ marginBottom:"11px" }}>
+                      <label style={labelStyle}>Type</label>
+                      <select value={form.type || ""} onChange={e => setForm(f=>({...f,type:e.target.value}))} style={inputStyle}>
+                        <option value="">Not set</option>
+                        <option value="Sales Opportunity">Sales Opportunity</option>
+                        <option value="Renewal">Renewal</option>
+                        <option value="Escalation">Escalation</option>
+                        <option value="Internal">Internal</option>
+                      </select>
                     </div>
                     <div style={{ display:"flex", gap:"8px", marginBottom:"11px" }}>
                       <div style={{ flex:1 }}>
@@ -574,6 +585,7 @@
                     <div style={{ fontSize:"11px", color:"#999", marginBottom:"4px" }}>
                       {selectedItem.company}
                       {selectedItem.customerType && <span style={{ color:"#bbb" }}> · {selectedItem.customerType}</span>}
+                      {selectedItem.type && <span style={{ color:"#bbb" }}> · {selectedItem.type}</span>}
                     </div>
                     {selectedItem.coWorkers && (
                       <div style={{ fontSize:"11px", color:"#999", marginBottom:"8px" }}>
