@@ -423,12 +423,17 @@
             {/* List */}
             <div style={{ width:panelOpen?"42%":"100%", overflowY:"auto", transition:"width 0.2s",
               minWidth:panelOpen?"150px":undefined, padding:"10px 10px", display:"flex", flexDirection:"column", gap:"8px", background:"#f5f4f1" }}>
-              {sorted.length === 0 && (
+              {!loaded && (
+                <div style={{ padding:"40px 20px", textAlign:"center", color:"#bbb", fontSize:"13px" }}>
+                  Loading...
+                </div>
+              )}
+              {loaded && sorted.length === 0 && (
                 <div style={{ padding:"40px 20px", textAlign:"center", color:"#bbb", fontSize:"13px" }}>
                   {search ? "No results." : "Nothing here. Hit + Add to start."}
                 </div>
               )}
-              {sorted.map(item => (
+              {loaded && sorted.map(item => (
                 <div key={item.id}
                   style={{ background:"#fff", borderRadius:"10px", border: selected===item.id ? "1.5px solid #c8a96e" : "0.5px solid #e0dbd0",
                     opacity:item.status==="Done"?0.45:1, overflow:"hidden" }}>
