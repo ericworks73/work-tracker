@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v3 -->
+<!DOCTYPE html><!-- v2.0 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -7,656 +7,603 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Work Tracker" />
   <title>Work Tracker</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: #f5f4f1; }
-    html, body, #root { height: 100%; }
-    #root { display: flex; flex-direction: column; height: 100dvh; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: #f5f4f1; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-    .rte-toolbar { display:flex; gap:4px; padding:4px 6px; background:#f7f6f3; border:1px solid #e0dbd0; border-bottom:none; border-radius:6px 6px 0 0; flex-wrap:wrap; }
-    .rte-btn { border:none; background:transparent; padding:3px 7px; border-radius:4px; font-size:12px; cursor:pointer; color:#444; font-family:inherit; line-height:1.4; }
-    .rte-btn:hover { background:#e8e4dc; }
-    .rte-btn.active { background:#c8a96e; color:#1a1a1a; }
-    .rte-sep { width:1px; background:#e0dbd0; margin:2px 2px; }
-    .rte-body { border:1px solid #e0dbd0; border-radius:0 0 6px 6px; padding:8px 10px; font-size:13px; min-height:80px; outline:none; line-height:1.6; background:#fff; color:#1a1a1a; overflow-y:auto; }
-    .rte-body:focus { border-color:#c8a96e; }
-    .rte-body ul, .rte-body ol { padding-left:18px; margin:2px 0; }
-    .rte-body li { margin:1px 0; }
-    .rte-body b, .rte-body strong { font-weight:700; }
-    .rte-body i, .rte-body em { font-style:italic; }
+    #lock-screen { position: fixed; inset: 0; background: #1a1a1a; display: flex; align-items: center; justify-content: center; z-index: 999; }
+    #lock-box { background: #fff; border-radius: 12px; padding: 32px 28px; width: 280px; text-align: center; }
+    #lock-box h2 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    #lock-box p { font-size: 12px; color: #999; margin-bottom: 20px; }
+    #lock-pw { width: 100%; border: 1px solid #e0dbd0; border-radius: 6px; padding: 9px 12px; font-size: 13px; outline: none; margin-bottom: 12px; }
+    #lock-btn { width: 100%; background: #c8a96e; color: #1a1a1a; border: none; border-radius: 6px; padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
 
-    .rich-display { font-size:13px; color:#1a1a1a; line-height:1.6; }
-    .rich-display ul, .rich-display ol { padding-left:18px; margin:2px 0; }
-    .rich-display li { margin:1px 0; }
-    .rich-display b, .rich-display strong { font-weight:700; }
-    .rich-display i, .rich-display em { font-style:italic; }
-    .rich-display p { margin:0 0 2px 0; }
+    #header { background: #1a1a1a; color: #fff; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    #header-title { font-size: 15px; font-weight: 700; }
+    #header-sub { font-size: 11px; color: #888; margin-top: 1px; }
+    #add-btn { background: #c8a96e; color: #1a1a1a; border: none; border-radius: 6px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; }
 
-    .next-action-display { font-size:13px; color:#1a1a1a; line-height:1.6; }
-    .next-action-display ul, .next-action-display ol { padding-left:18px; margin:2px 0; }
-    .next-action-display li { margin:1px 0; }
-    .next-action-display b, .next-action-display strong { font-weight:700; }
+    #overdue-bar { background: #c03030; color: #fff; padding: 7px 16px; font-size: 12px; font-weight: 600; cursor: pointer; display: none; align-items: center; justify-content: space-between; flex-shrink: 0; }
 
-    .notes-display { font-size:13px; color:#444; line-height:1.6; }
-    .notes-display ul, .notes-display ol { padding-left:18px; margin:2px 0; }
-    .notes-display li { margin:1px 0; }
+    #search-bar { background: #fff; border-bottom: 1px solid #e8e4dc; flex-shrink: 0; }
+    #search-row { padding: 8px 12px; border-bottom: 1px solid #f0ede8; display: flex; align-items: center; gap: 8px; }
+    #search-input { flex: 1; border: none; background: transparent; outline: none; font-size: 13px; font-family: inherit; color: #1a1a1a; }
+    #search-input::placeholder { color: #bbb; }
+    #search-clear { border: none; background: none; color: #bbb; font-size: 14px; cursor: pointer; display: none; }
+    #status-tabs { padding: 0 12px; display: flex; gap: 2px; overflow-x: auto; }
+    .tab-btn { border: none; background: none; padding: 9px 10px; font-size: 11px; font-weight: 400; color: #999; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; font-family: inherit; }
+    .tab-btn.active { font-weight: 700; color: #1a1a1a; border-bottom-color: #c8a96e; }
 
-    .search-input { width:100%; border:none; background:transparent; outline:none; font-size:13px; font-family:inherit; color:#1a1a1a; }
-    .search-input::placeholder { color:#bbb; }
+    #main { flex: 1; display: flex; overflow: hidden; }
+
+    #list-pane { width: 100%; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; background: #f5f4f1; transition: width 0.2s; }
+    #list-pane.narrow { width: 42%; min-width: 150px; }
+
+    .card { background: #fff; border-radius: 10px; border: 0.5px solid #e0dbd0; overflow: hidden; cursor: pointer; }
+    .card.selected { border: 1.5px solid #c8a96e; }
+    .card.done { opacity: 0.45; }
+    .card-body { padding: 12px 14px 8px; }
+    .card-row1 { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 3px; }
+    .card-name { font-weight: 700; font-size: 13px; color: #1a1a1a; }
+    .card-row2 { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; flex-wrap: wrap; }
+    .card-meta { font-size: 11px; color: #999; }
+    .card-context { font-size: 11px; color: #666; font-style: italic; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.3; }
+    .card-next { font-size: 12px; color: #444; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.4; }
+    .card-next-label { color: #c8a96e; font-weight: 600; }
+    .card-footer { display: flex; align-items: center; gap: 8px; }
+    .card-quick { padding: 0 14px 10px; }
+    .quick-btn { border: 1px solid #e8e4dc; background: #faf9f6; color: #888; border-radius: 6px; padding: 4px 12px; font-size: 11px; cursor: pointer; font-family: inherit; }
+
+    .pri-badge { padding: 1px 7px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+    .pri-High { background: #fde8e8; color: #9a1a1a; }
+    .pri-Medium { background: #fef3e2; color: #7a4f1a; }
+    .pri-Low { background: #f0f0f0; color: #777; }
+
+    .status-badge { padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .status-dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .s-act { background: #e8f4e8; color: #2d6a2d; } .s-act .status-dot { background: #3a8a3a; }
+    .s-wait { background: #fef3e2; color: #7a4f1a; } .s-wait .status-dot { background: #d4820a; }
+    .s-stuck { background: #fde8e8; color: #7a1a1a; } .s-stuck .status-dot { background: #c03030; }
+    .s-done { background: #f0f0f0; color: #666; } .s-done .status-dot { background: #999; }
+
+    .follow-chip { font-size: 10px; font-weight: 600; border-radius: 10px; }
+    .follow-overdue { color: #c03030; background: #fde8e8; padding: 1px 6px; }
+    .follow-today { color: #c8a96e; background: #fff8ed; padding: 1px 6px; }
+    .follow-soon { color: #d4820a; }
+    .follow-normal { color: #999; }
+    .follow-date { font-size: 10px; color: #aaa; }
+
+    #detail-pane { flex: 1; background: #fff; border-left: 1px solid #e8e4dc; overflow-y: auto; padding: 18px 16px; display: none; }
+    #detail-pane.open { display: block; }
+
+    .detail-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 2px; }
+    .detail-name { font-size: 16px; font-weight: 700; color: #1a1a1a; }
+    .detail-meta { font-size: 11px; color: #999; margin-bottom: 4px; }
+    .detail-coworkers { font-size: 11px; color: #999; margin-bottom: 8px; }
+    .detail-chips { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .follow-label { font-size: 11px; color: #777; }
+    .field-block { margin-bottom: 14px; }
+    .field-label { font-size: 10px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+    .field-content { font-size: 13px; color: #1a1a1a; line-height: 1.6; }
+    .field-content ul, .field-content ol { padding-left: 18px; margin: 2px 0; }
+    .field-content li { margin: 1px 0; }
+    .field-content b, .field-content strong { font-weight: 700; }
+    .field-content i, .field-content em { font-style: italic; }
+    .field-content p { margin: 0 0 2px; }
+    .next-action-box { background: #fffbf0; border: 1px solid #e8d9a0; border-radius: 6px; padding: 8px 10px; }
+    .notes-box { background: #f7f6f3; padding: 10px; border-radius: 6px; }
+    .notes-box .field-content { color: #444; }
+    .detail-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .btn { border: none; border-radius: 6px; padding: 10px; font-size: 13px; cursor: pointer; font-family: inherit; flex: 1; min-width: 80px; }
+    .btn-back { background: #f0ede8; color: #444; }
+    .btn-edit { background: #1a1a1a; color: #fff; font-weight: 700; }
+    .btn-close { background: #e8f4e8; color: #2d6a2d; }
+    .btn-delete { background: #fee; color: #c00; flex: 0; padding: 10px 14px; }
+
+    /* Edit form */
+    #edit-pane { flex: 1; background: #fff; border-left: 1px solid #e8e4dc; overflow-y: auto; padding: 18px 16px; display: none; }
+    #edit-pane.open { display: block; }
+    .form-title { font-size: 13px; font-weight: 700; margin-bottom: 16px; color: #1a1a1a; }
+    .form-field { margin-bottom: 11px; }
+    .form-label { font-size: 10px; font-weight: 600; color: #aaa; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.5px; display: block; }
+    .form-input { width: 100%; border: 1px solid #e0dbd0; border-radius: 6px; padding: 7px 9px; font-size: 12px; outline: none; font-family: inherit; }
+    .form-row { display: flex; gap: 8px; margin-bottom: 11px; }
+    .form-row .form-field { flex: 1; margin-bottom: 0; }
+    .form-btns { display: flex; gap: 8px; }
+
+    .rte-wrap { border: 1px solid #e0dbd0; border-radius: 6px; overflow: hidden; }
+    .rte-toolbar { display: flex; gap: 4px; padding: 4px 6px; background: #f7f6f3; border-bottom: 1px solid #e0dbd0; flex-wrap: wrap; }
+    .rte-btn { border: none; background: transparent; padding: 3px 7px; border-radius: 4px; font-size: 12px; cursor: pointer; color: #444; font-family: inherit; line-height: 1.4; }
+    .rte-btn:hover { background: #e8e4dc; }
+    .rte-sep { width: 1px; background: #e0dbd0; margin: 2px; }
+    .rte-body { padding: 8px 10px; font-size: 13px; min-height: 80px; outline: none; line-height: 1.6; background: #fff; color: #1a1a1a; }
+    .rte-body:focus { border-color: #c8a96e; }
+    .rte-body ul, .rte-body ol { padding-left: 18px; margin: 2px 0; }
+    .rte-body li { margin: 1px 0; }
+
+    /* Quick update modal */
+    #quick-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: flex-end; justify-content: center; z-index: 100; }
+    #quick-modal.open { display: flex; }
+    #quick-box { background: #fff; width: 100%; max-width: 500px; border-radius: 16px 16px 0 0; padding: 20px 18px 32px; }
+    #quick-handle { width: 36px; height: 4px; background: #e0dbd0; border-radius: 2px; margin: 0 auto 16px; }
+    #quick-name { font-weight: 700; font-size: 14px; color: #1a1a1a; margin-bottom: 4px; }
+    #quick-company { font-size: 11px; color: #999; margin-bottom: 16px; }
+    .quick-field { margin-bottom: 12px; }
+    .quick-label { font-size: 10px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block; }
+    .quick-input { width: 100%; border: 1px solid #e0dbd0; border-radius: 6px; padding: 7px 9px; font-size: 13px; outline: none; font-family: inherit; }
+    #quick-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    #quick-row .quick-field { flex: 1; margin-bottom: 0; }
+    #quick-save { flex: 1; background: #1a1a1a; color: #fff; border: none; border-radius: 8px; padding: 12px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    #quick-cancel { flex: 1; background: #f0ede8; color: #444; border: none; border-radius: 8px; padding: 12px; font-size: 13px; cursor: pointer; font-family: inherit; }
+    #quick-btns { display: flex; gap: 8px; }
+
+    #version { position: fixed; bottom: 6px; right: 10px; font-size: 9px; color: #ccc; pointer-events: none; z-index: 999; }
+    .loading-msg { padding: 40px 20px; text-align: center; color: #bbb; font-size: 13px; }
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
 
-    const APP_PASSWORD = "timmer-nyjpij-ryxRy7";
-    const SESSION_KEY  = "wt-auth";
+<div id="lock-screen">
+  <div id="lock-box">
+    <h2>Work Tracker</h2>
+    <p>Enter your password to continue</p>
+    <input type="password" id="lock-pw" placeholder="Password" />
+    <button id="lock-btn">Unlock</button>
+  </div>
+</div>
 
-    function PasswordGate({ onUnlock }) {
-      const [val, setVal] = useState("");
-      const [err, setErr] = useState(false);
-      function attempt() {
-        if (val === APP_PASSWORD) { sessionStorage.setItem(SESSION_KEY, "1"); onUnlock(); }
-        else { setErr(true); setVal(""); setTimeout(() => setErr(false), 2000); }
-      }
-      return (
-        <div style={{ height:"100dvh", background:"#1a1a1a", display:"flex", alignItems:"center", justifyContent:"center" }}>
-          <div style={{ background:"#fff", borderRadius:"12px", padding:"32px 28px", width:"280px", textAlign:"center" }}>
-            <div style={{ fontSize:"15px", fontWeight:700, color:"#1a1a1a", marginBottom:"6px" }}>Work Tracker</div>
-            <div style={{ fontSize:"12px", color:"#999", marginBottom:"20px" }}>Enter your password to continue</div>
-            <input type="password" value={val} onChange={e => setVal(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && attempt()} autoFocus placeholder="Password"
-              style={{ width:"100%", border: err ? "1px solid #c03030" : "1px solid #e0dbd0",
-                borderRadius:"6px", padding:"9px 12px", fontSize:"13px", boxSizing:"border-box",
-                outline:"none", marginBottom:"12px", background: err ? "#fff0f0" : "#fff" }} />
-            <button onClick={attempt} style={{ width:"100%", background:"#c8a96e", color:"#1a1a1a",
-              border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px", fontWeight:700, cursor:"pointer" }}>
-              {err ? "Incorrect password" : "Unlock"}
-            </button>
-          </div>
+<div id="header">
+  <div>
+    <div id="header-title">Work Tracker</div>
+    <div id="header-sub">— open · — closed</div>
+  </div>
+  <button id="add-btn">+ Add</button>
+</div>
+
+<div id="overdue-bar">
+  <span id="overdue-text"></span>
+  <span style="opacity:0.7;font-size:11px;">tap to see all →</span>
+</div>
+
+<div id="search-bar">
+  <div id="search-row">
+    <span style="color:#bbb;font-size:14px;">🔍</span>
+    <input type="text" id="search-input" placeholder="Search person, company, or context..." />
+    <button id="search-clear">✕</button>
+  </div>
+  <div id="status-tabs"></div>
+</div>
+
+<div id="main">
+  <div id="list-pane"><div class="loading-msg">Loading...</div></div>
+  <div id="detail-pane"></div>
+  <div id="edit-pane"></div>
+</div>
+
+<div id="quick-modal">
+  <div id="quick-box">
+    <div id="quick-handle"></div>
+    <div id="quick-name"></div>
+    <div id="quick-company"></div>
+    <div class="quick-field">
+      <label class="quick-label">Quick note (added to last action)</label>
+      <textarea id="quick-note" class="quick-input" rows="3" placeholder="What happened? One liner is fine."></textarea>
+    </div>
+    <div id="quick-row">
+      <div class="quick-field">
+        <label class="quick-label">Status</label>
+        <select id="quick-status" class="quick-input"></select>
+      </div>
+      <div class="quick-field">
+        <label class="quick-label">Next Follow-up</label>
+        <input type="date" id="quick-date" class="quick-input" />
+      </div>
+    </div>
+    <div id="quick-btns">
+      <button id="quick-save">Save &amp; Touch Today</button>
+      <button id="quick-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="version">v2.0</div>
+
+<script>
+const PASSWORD = "timmer-nyjpij-ryxRy7";
+const SESSION_KEY = "wt-auth";
+const SUPABASE_URL = "https://whyklzysiavybgxltjzt.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndoeWtsenlzaWF2eWJneGx0anp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODIyODEsImV4cCI6MjA5Njc1ODI4MX0.x7yEeWHDhwgZreDP-SME3dWIC-B-kthc4EC0YOuphIg";
+const TABLE = "work_tracker_items";
+const STATUSES = ["I Need To Act","Waiting On Them","Stuck","Done"];
+const PRIORITIES = ["High","Medium","Low"];
+const TYPES = ["Sales Opportunity","Renewal","Escalation","Internal"];
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let items = [];
+let selectedId = null;
+let filterStatus = "All";
+let searchQuery = "";
+let quickItem = null;
+let editingItem = null;
+let isAdding = false;
+
+// Lock screen
+if (sessionStorage.getItem(SESSION_KEY)) {
+  document.getElementById("lock-screen").style.display = "none";
+}
+document.getElementById("lock-btn").onclick = () => {
+  if (document.getElementById("lock-pw").value === PASSWORD) {
+    sessionStorage.setItem(SESSION_KEY, "1");
+    document.getElementById("lock-screen").style.display = "none";
+    loadItems();
+  } else {
+    document.getElementById("lock-pw").style.border = "1px solid #c03030";
+    document.getElementById("lock-pw").value = "";
+    setTimeout(() => document.getElementById("lock-pw").style.border = "1px solid #e0dbd0", 2000);
+  }
+};
+document.getElementById("lock-pw").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("lock-btn").click(); });
+
+// Helpers
+function fmtDate(d) {
+  if (!d) return "";
+  return new Date(d + "T12:00:00").toLocaleDateString("en-US", {month:"short", day:"numeric"});
+}
+function daysUntil(d) {
+  if (!d) return null;
+  return Math.ceil((new Date(d + "T12:00:00") - new Date()) / 86400000);
+}
+function stripHtml(html) {
+  if (!html) return "";
+  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function statusClass(s) {
+  if (s === "I Need To Act") return "s-act";
+  if (s === "Waiting On Them") return "s-wait";
+  if (s === "Stuck") return "s-stuck";
+  return "s-done";
+}
+function followChipHtml(date) {
+  if (!date) return "";
+  const days = daysUntil(date);
+  if (days < 0) return `<span class="follow-chip follow-overdue">↻ ${Math.abs(days)}d overdue</span>`;
+  if (days === 0) return `<span class="follow-chip follow-today">↻ Today</span>`;
+  if (days <= 2) return `<span class="follow-chip follow-soon">↻ ${days}d</span>`;
+  return `<span class="follow-chip follow-normal">↻ ${days}d</span>`;
+}
+
+// Load
+async function loadItems() {
+  const { data, error } = await sb.from(TABLE).select("*");
+  if (!error && data) {
+    items = data;
+    render();
+  }
+}
+
+// Save
+async function upsert(item) { await sb.from(TABLE).upsert(item); }
+async function remove(id) { await sb.from(TABLE).delete().eq("id", id); }
+
+// Render
+function getFiltered() {
+  let f = items.filter(i => filterStatus === "All" || i.status === filterStatus);
+  if (searchQuery.trim()) {
+    const q = searchQuery.toLowerCase();
+    f = f.filter(i =>
+      (i.person||"").toLowerCase().includes(q) ||
+      (i.company||"").toLowerCase().includes(q) ||
+      stripHtml(i.context||"").toLowerCase().includes(q) ||
+      (i.coWorkers||"").toLowerCase().includes(q)
+    );
+  }
+  return f.sort((a, b) => {
+    if (a.status === "Done" && b.status !== "Done") return 1;
+    if (b.status === "Done" && a.status !== "Done") return -1;
+    const fa = a.followUpDate ? new Date(a.followUpDate) : new Date("9999-12-31");
+    const fb = b.followUpDate ? new Date(b.followUpDate) : new Date("9999-12-31");
+    return fa - fb;
+  });
+}
+
+function render() {
+  renderHeader();
+  renderOverdue();
+  renderTabs();
+  renderList();
+  renderPanel();
+}
+
+function renderHeader() {
+  const open = items.filter(i => i.status !== "Done").length;
+  const closed = items.filter(i => i.status === "Done").length;
+  document.getElementById("header-sub").textContent = `${open} open · ${closed} closed`;
+}
+
+function renderOverdue() {
+  const count = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) < 0).length;
+  const bar = document.getElementById("overdue-bar");
+  if (count > 0) {
+    bar.style.display = "flex";
+    document.getElementById("overdue-text").textContent = `⚠ ${count} item${count > 1 ? "s" : ""} past follow-up date`;
+  } else {
+    bar.style.display = "none";
+  }
+}
+
+function renderTabs() {
+  const container = document.getElementById("status-tabs");
+  const tabs = ["All", ...STATUSES];
+  container.innerHTML = tabs.map(s => `<button class="tab-btn${filterStatus === s ? " active" : ""}" data-status="${s}">${s}</button>`).join("");
+  container.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.onclick = () => { filterStatus = btn.dataset.status; render(); };
+  });
+}
+
+function renderList() {
+  const pane = document.getElementById("list-pane");
+  const panelOpen = selectedId || isAdding;
+  pane.className = panelOpen ? "narrow" : "";
+
+  const filtered = getFiltered();
+  if (filtered.length === 0) {
+    pane.innerHTML = `<div class="loading-msg">${searchQuery ? "No results." : "Nothing here. Hit + Add to start."}</div>`;
+    return;
+  }
+
+  pane.innerHTML = filtered.map(item => {
+    const metaParts = [item.company, item.customerType, item.type].filter(Boolean).join(" · ");
+    const coworkers = item.coWorkers ? ` · 👥 ${item.coWorkers}` : "";
+    const ctx = item.context ? stripHtml(item.context) : "";
+    const nxt = item.nextAction ? stripHtml(item.nextAction) : "";
+    const followUp = item.followUpDate ? `${followChipHtml(item.followUpDate)} <span class="follow-date">Follow up ${fmtDate(item.followUpDate)}</span>` : "";
+
+    return `<div class="card${selectedId === item.id ? " selected" : ""}${item.status === "Done" ? " done" : ""}" data-id="${item.id}">
+      <div class="card-body">
+        <div class="card-row1">
+          <div class="card-name">${item.person}</div>
+          ${item.priority ? `<span class="pri-badge pri-${item.priority}">${item.priority}</span>` : ""}
         </div>
-      );
-    }
+        <div class="card-row2">
+          <span class="card-meta">${metaParts}${coworkers}</span>
+          <span class="status-badge ${statusClass(item.status)}"><span class="status-dot"></span>${item.status}</span>
+        </div>
+        ${ctx ? `<div class="card-context">(${ctx})</div>` : ""}
+        ${nxt ? `<div class="card-next"><span class="card-next-label">Next: </span>${nxt}</div>` : ""}
+        <div class="card-footer">${followUp}</div>
+      </div>
+      ${item.status !== "Done" ? `<div class="card-quick"><button class="quick-btn" data-id="${item.id}">⚡ Quick Update</button></div>` : ""}
+    </div>`;
+  }).join("");
 
-    function Root() {
-      const [unlocked, setUnlocked] = useState(!!sessionStorage.getItem(SESSION_KEY));
-      if (!unlocked) return <PasswordGate onUnlock={() => setUnlocked(true)} />;
-      return <App />;
-    }
+  pane.querySelectorAll(".card").forEach(card => {
+    card.addEventListener("click", e => {
+      if (e.target.closest(".quick-btn")) return;
+      selectedId = parseInt(card.dataset.id);
+      isAdding = false;
+      editingItem = null;
+      render();
+    });
+  });
 
-    const SUPABASE_URL  = "https://whyklzysiavybgxltjzt.supabase.co";
-    const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndoeWtsenlzaWF2eWJneGx0anp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODIyODEsImV4cCI6MjA5Njc1ODI4MX0.x7yEeWHDhwgZreDP-SME3dWIC-B-kthc4EC0YOuphIg";
-    const TABLE = "work_tracker_items";
-    const sb = SUPABASE_URL.startsWith("http") ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON) : null;
+  pane.querySelectorAll(".quick-btn").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      openQuick(parseInt(btn.dataset.id));
+    });
+  });
+}
 
-    const STATUSES   = ["I Need To Act","Waiting On Them","Stuck","Done"];
-    const PRIORITIES = ["High","Medium","Low"];
-    const CATEGORY_ICONS = { "Commitment":"◆","Waiting On":"◇","Escalation":"▲","Relationship":"●" };
+function renderPanel() {
+  const detail = document.getElementById("detail-pane");
+  const editP = document.getElementById("edit-pane");
 
-    const STATUS_COLORS = {
-      "I Need To Act":   { bg:"#e8f4e8", text:"#2d6a2d", dot:"#3a8a3a" },
-      "Waiting On Them": { bg:"#fef3e2", text:"#7a4f1a", dot:"#d4820a" },
-      "Stuck":           { bg:"#fde8e8", text:"#7a1a1a", dot:"#c03030" },
-      "Done":            { bg:"#f0f0f0", text:"#666",    dot:"#999"    }
+  if (isAdding || editingItem) {
+    detail.className = "";
+    editP.className = "open";
+    renderEditForm();
+    return;
+  }
+
+  editP.className = "";
+
+  if (!selectedId) {
+    detail.className = "";
+    return;
+  }
+
+  const item = items.find(i => i.id === selectedId);
+  if (!item) { detail.className = ""; return; }
+
+  detail.className = "open";
+  const metaParts = [item.company, item.customerType, item.type].filter(Boolean).join(" · ");
+
+  detail.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-name">${item.person}</div>
+      <span class="status-badge ${statusClass(item.status)}"><span class="status-dot"></span>${item.status}</span>
+    </div>
+    <div class="detail-meta">${metaParts}</div>
+    ${item.coWorkers ? `<div class="detail-coworkers">👥 ${item.coWorkers}</div>` : ""}
+    <div class="detail-chips">
+      ${item.priority ? `<span class="pri-badge pri-${item.priority}">${item.priority}</span>` : ""}
+      ${item.followUpDate ? `<span class="follow-label">Follow up: <strong>${fmtDate(item.followUpDate)}</strong></span> ${followChipHtml(item.followUpDate)}` : ""}
+    </div>
+    ${item.nextAction ? `<div class="field-block"><div class="field-label">Next Action</div><div class="next-action-box field-content">${item.nextAction}</div></div>` : ""}
+    ${item.context ? `<div class="field-block"><div class="field-label">Context</div><div class="field-content">${item.context}</div></div>` : ""}
+    ${item.lastAction ? `<div class="field-block"><div class="field-label">Last Action</div><div class="field-content">${item.lastAction}</div></div>` : ""}
+    <div class="field-block"><div class="field-label">Last Touch</div><div class="field-content">${fmtDate(item.date)}</div></div>
+    ${item.notes ? `<div class="field-block"><div class="field-label">Notes</div><div class="notes-box field-content">${item.notes}</div></div>` : ""}
+    <div class="detail-btns">
+      <button class="btn btn-back" id="btn-back">← Back</button>
+      <button class="btn btn-edit" id="btn-edit">Edit</button>
+      ${item.status !== "Done" ? `<button class="btn btn-close" id="btn-close">Mark Closed</button>` : ""}
+      <button class="btn btn-delete" id="btn-delete">Delete</button>
+    </div>`;
+
+  document.getElementById("btn-back").onclick = () => { selectedId = null; render(); };
+  document.getElementById("btn-edit").onclick = () => { editingItem = item; render(); };
+  document.getElementById("btn-delete").onclick = async () => {
+    await remove(item.id);
+    items = items.filter(i => i.id !== item.id);
+    selectedId = null;
+    render();
+  };
+  const closeBtn = document.getElementById("btn-close");
+  if (closeBtn) {
+    closeBtn.onclick = async () => {
+      item.status = "Done";
+      await upsert(item);
+      selectedId = null;
+      render();
     };
-    const PRIORITY_COLORS = {
-      "High":   { bg:"#fde8e8", text:"#9a1a1a" },
-      "Medium": { bg:"#fef3e2", text:"#7a4f1a" },
-      "Low":    { bg:"#f0f0f0", text:"#777"    }
+  }
+}
+
+function renderEditForm() {
+  const pane = document.getElementById("edit-pane");
+  const item = editingItem || {};
+  const isNew = isAdding;
+
+  pane.innerHTML = `
+    <div class="form-title">${isNew ? "New Item" : "Edit Item"}</div>
+    <div class="form-field"><label class="form-label">Person</label><input class="form-input" id="f-person" value="${item.person||""}" placeholder="Name" /></div>
+    <div class="form-field"><label class="form-label">Company</label><input class="form-input" id="f-company" value="${item.company||""}" placeholder="Company or team" /></div>
+    <div class="form-field"><label class="form-label">Context (why it's on your list)</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-context")}</div><div class="rte-body" id="f-context" contenteditable="true">${item.context||""}</div></div></div>
+    <div class="form-field"><label class="form-label">Last Action</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-lastAction")}</div><div class="rte-body" id="f-lastAction" contenteditable="true">${item.lastAction||""}</div></div></div>
+    <div class="form-field"><label class="form-label">Next Action</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-nextAction")}</div><div class="rte-body" id="f-nextAction" contenteditable="true">${item.nextAction||""}</div></div></div>
+    <div class="form-field"><label class="form-label">Status</label><select class="form-input" id="f-status">${STATUSES.map(s => `<option${(item.status||"I Need To Act")===s?" selected":""}>${s}</option>`).join("")}</select></div>
+    <div class="form-row">
+      <div class="form-field"><label class="form-label">Co-Workers Involved</label><input class="form-input" id="f-coWorkers" value="${item.coWorkers||""}" placeholder="Names" /></div>
+      <div class="form-field"><label class="form-label">Customer Type</label><select class="form-input" id="f-customerType"><option value="">Not set</option><option${item.customerType==="Prospect"?" selected":""}>Prospect</option><option${item.customerType==="Current Customer"?" selected":""}>Current Customer</option></select></div>
+    </div>
+    <div class="form-field"><label class="form-label">Type</label><select class="form-input" id="f-type"><option value="">Not set</option>${TYPES.map(t => `<option${item.type===t?" selected":""}>${t}</option>`).join("")}</select></div>
+    <div class="form-row">
+      <div class="form-field"><label class="form-label">Priority</label><select class="form-input" id="f-priority">${PRIORITIES.map(p => `<option${(item.priority||"Medium")===p?" selected":""}>${p}</option>`).join("")}</select></div>
+      <div class="form-field"><label class="form-label">Follow-up Date</label><input type="date" class="form-input" id="f-followUpDate" value="${item.followUpDate||""}" /></div>
+    </div>
+    <div class="form-field"><label class="form-label">Last Touch Date</label><input type="date" class="form-input" id="f-date" value="${item.date||todayStr()}" /></div>
+    <div class="form-field"><label class="form-label">Notes</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-notes")}</div><div class="rte-body" id="f-notes" contenteditable="true" style="min-height:100px">${item.notes||""}</div></div></div>
+    <div class="form-btns">
+      <button class="btn btn-edit" id="f-save">Save</button>
+      <button class="btn btn-back" id="f-cancel">Cancel</button>
+    </div>`;
+
+  setupRteToolbars();
+
+  document.getElementById("f-save").onclick = async () => {
+    const updated = {
+      id: isNew ? Date.now() : item.id,
+      person: document.getElementById("f-person").value,
+      company: document.getElementById("f-company").value,
+      context: document.getElementById("f-context").innerHTML,
+      lastAction: document.getElementById("f-lastAction").innerHTML,
+      nextAction: document.getElementById("f-nextAction").innerHTML,
+      status: document.getElementById("f-status").value,
+      coWorkers: document.getElementById("f-coWorkers").value,
+      customerType: document.getElementById("f-customerType").value,
+      type: document.getElementById("f-type").value,
+      priority: document.getElementById("f-priority").value,
+      followUpDate: document.getElementById("f-followUpDate").value,
+      date: document.getElementById("f-date").value,
+      notes: document.getElementById("f-notes").innerHTML,
+      category: item.category || "Commitment"
     };
+    await upsert(updated);
+    if (isNew) { items.push(updated); selectedId = updated.id; }
+    else { items = items.map(i => i.id === updated.id ? updated : i); selectedId = updated.id; }
+    isAdding = false; editingItem = null;
+    render();
+  };
 
-    const EMPTY_FORM = {
-      person:"", company:"", category:"Commitment", context:"",
-      lastAction:"", nextAction:"",
-      date: new Date().toISOString().split("T")[0],
-      status:"I Need To Act", notes:"", priority:"Medium", followUpDate:"", coWorkers:"", customerType:"", type:""
+  document.getElementById("f-cancel").onclick = () => {
+    isAdding = false; editingItem = null;
+    render();
+  };
+}
+
+function rteToolbar(fieldId) {
+  return `<button class="rte-btn" data-cmd="bold" data-field="${fieldId}"><b>B</b></button>
+    <button class="rte-btn" data-cmd="italic" data-field="${fieldId}"><i>I</i></button>
+    <span class="rte-sep"></span>
+    <button class="rte-btn" data-cmd="insertUnorderedList" data-field="${fieldId}">• List</button>
+    <button class="rte-btn" data-cmd="insertOrderedList" data-field="${fieldId}">1. List</button>
+    <span class="rte-sep"></span>
+    <button class="rte-btn" data-cmd="removeFormat" data-field="${fieldId}">Clear</button>`;
+}
+
+function setupRteToolbars() {
+  document.querySelectorAll(".rte-btn[data-cmd]").forEach(btn => {
+    btn.onmousedown = e => {
+      e.preventDefault();
+      const field = document.getElementById(btn.dataset.field);
+      field.focus();
+      document.execCommand(btn.dataset.cmd, false, null);
     };
+  });
+}
 
-    function formatDate(d) {
-      if (!d) return "";
-      return new Date(d + "T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"});
-    }
-    function daysUntil(d) {
-      if (!d) return null;
-      return Math.ceil((new Date(d + "T12:00:00") - new Date()) / (1000*60*60*24));
-    }
-    function stripHtml(html) {
-      if (!html) return "";
-      return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-    }
-    function today() {
-      const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    }
+// Quick update
+function openQuick(id) {
+  quickItem = items.find(i => i.id === id);
+  if (!quickItem) return;
+  document.getElementById("quick-name").textContent = quickItem.person;
+  document.getElementById("quick-company").textContent = quickItem.company;
+  document.getElementById("quick-note").value = "";
+  document.getElementById("quick-date").value = quickItem.followUpDate || "";
+  const sel = document.getElementById("quick-status");
+  sel.innerHTML = STATUSES.map(s => `<option${quickItem.status===s?" selected":""}>${s}</option>`).join("");
+  document.getElementById("quick-modal").className = "open";
+}
 
-    function FollowUpChip({ date }) {
-      if (!date) return null;
-      const days = daysUntil(date);
-      const overdue = days < 0, isToday = days === 0, soon = days > 0 && days <= 2;
-      const color = overdue ? "#c03030" : isToday ? "#c8a96e" : soon ? "#d4820a" : "#999";
-      const label = overdue ? `${Math.abs(days)}d overdue` : isToday ? "Today" : `${days}d`;
-      return (
-        <span style={{ fontSize:"10px", fontWeight:600, color,
-          background: overdue||isToday ? (overdue?"#fde8e8":"#fff8ed") : "transparent",
-          padding: overdue||isToday ? "1px 6px" : "0", borderRadius:"10px" }}>
-          ↻ {label}
-        </span>
-      );
-    }
-    function PriorityBadge({ priority }) {
-      if (!priority) return null;
-      const c = PRIORITY_COLORS[priority] || PRIORITY_COLORS["Medium"];
-      return <span style={{ background:c.bg, color:c.text, padding:"1px 7px", borderRadius:"10px", fontSize:"10px", fontWeight:700 }}>{priority}</span>;
-    }
-    function Badge({ status }) {
-      const c = STATUS_COLORS[status] || STATUS_COLORS["Active"];
-      return (
-        <span style={{ background:c.bg, color:c.text, padding:"2px 9px", borderRadius:"20px",
-          fontSize:"11px", fontWeight:600, display:"inline-flex", alignItems:"center", gap:"5px", whiteSpace:"nowrap" }}>
-          <span style={{ width:5, height:5, borderRadius:"50%", background:c.dot, display:"inline-block", flexShrink:0 }} />
-          {status}
-        </span>
-      );
-    }
+document.getElementById("quick-save").onclick = async () => {
+  const note = document.getElementById("quick-note").value.trim();
+  const today = todayStr();
+  let lastAction = quickItem.lastAction || "";
+  if (note) {
+    const noteHtml = `<p><em><strong>${fmtDate(today)}:</strong> ${note}</em></p>`;
+    lastAction = noteHtml + lastAction;
+  }
+  const updated = { ...quickItem, lastAction, status: document.getElementById("quick-status").value, followUpDate: document.getElementById("quick-date").value, date: today };
+  await upsert(updated);
+  items = items.map(i => i.id === updated.id ? updated : i);
+  document.getElementById("quick-modal").className = "";
+  quickItem = null;
+  render();
+};
 
-    function RichEditor({ value, onChange, placeholder, minHeight }) {
-      const ref = useRef(null);
-      const isInternalUpdate = useRef(false);
-      useEffect(() => {
-        if (ref.current && !isInternalUpdate.current) {
-          if (ref.current.innerHTML !== value) ref.current.innerHTML = value || "";
-        }
-        isInternalUpdate.current = false;
-      }, [value]);
-      function handleInput() { isInternalUpdate.current = true; onChange(ref.current.innerHTML); }
-      function execCmd(cmd) { ref.current.focus(); document.execCommand(cmd, false, null); isInternalUpdate.current = true; onChange(ref.current.innerHTML); }
-      return (
-        <div>
-          <div className="rte-toolbar">
-            <button type="button" className="rte-btn" onMouseDown={e=>{e.preventDefault();execCmd("bold")}}><b>B</b></button>
-            <button type="button" className="rte-btn" onMouseDown={e=>{e.preventDefault();execCmd("italic")}}><i>I</i></button>
-            <div className="rte-sep" />
-            <button type="button" className="rte-btn" onMouseDown={e=>{e.preventDefault();execCmd("insertUnorderedList")}}>• List</button>
-            <button type="button" className="rte-btn" onMouseDown={e=>{e.preventDefault();execCmd("insertOrderedList")}}>1. List</button>
-            <div className="rte-sep" />
-            <button type="button" className="rte-btn" onMouseDown={e=>{e.preventDefault();execCmd("removeFormat")}}>Clear</button>
-          </div>
-          <div ref={ref} className="rte-body" contentEditable suppressContentEditableWarning
-            onInput={handleInput} style={{ minHeight: minHeight || "80px" }} data-placeholder={placeholder} />
-        </div>
-      );
-    }
+document.getElementById("quick-cancel").onclick = () => { document.getElementById("quick-modal").className = ""; quickItem = null; };
+document.getElementById("quick-modal").onclick = e => { if (e.target === document.getElementById("quick-modal")) { document.getElementById("quick-modal").className = ""; quickItem = null; } };
 
-    function RichDisplay({ html, className, style }) {
-      if (!html) return null;
-      return <div className={className || "rich-display"} style={style} dangerouslySetInnerHTML={{ __html: html }} />;
-    }
+// Search
+document.getElementById("search-input").addEventListener("input", e => {
+  searchQuery = e.target.value;
+  document.getElementById("search-clear").style.display = searchQuery ? "block" : "none";
+  renderList();
+});
+document.getElementById("search-clear").onclick = () => {
+  searchQuery = ""; document.getElementById("search-input").value = "";
+  document.getElementById("search-clear").style.display = "none";
+  renderList();
+};
 
-    function FieldBlock({ label, children }) {
-      return (
-        <div style={{ marginBottom:"14px" }}>
-          <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase", letterSpacing:"0.6px", marginBottom:"6px" }}>{label}</div>
-          {children}
-        </div>
-      );
-    }
+// Add btn
+document.getElementById("add-btn").onclick = () => { isAdding = true; editingItem = null; selectedId = null; render(); };
 
-    // Quick Update modal
-    function QuickUpdateModal({ item, onSave, onClose }) {
-      const [note, setNote] = useState("");
-      const [followUpDate, setFollowUpDate] = useState(item.followUpDate || "");
-      const [status, setStatus] = useState(item.status);
-      const inputStyle = { width:"100%", border:"1px solid #e0dbd0", borderRadius:"6px",
-        padding:"7px 9px", fontSize:"13px", boxSizing:"border-box", outline:"none", fontFamily:"inherit" };
+// Overdue bar
+document.getElementById("overdue-bar").onclick = () => { filterStatus = "All"; searchQuery = ""; document.getElementById("search-input").value = ""; render(); };
 
-      function save() {
-        const todayStr = today();
-        let updatedLastAction = item.lastAction || "";
-        if (note.trim()) {
-          const noteHtml = `<p><em><strong>${formatDate(todayStr)}:</strong> ${note.trim()}</em></p>`;
-          updatedLastAction = updatedLastAction ? noteHtml + updatedLastAction : noteHtml;
-        }
-        onSave({ ...item, lastAction: updatedLastAction, followUpDate, status, date: todayStr });
-      }
-
-      return (
-        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.4)", display:"flex",
-          alignItems:"flex-end", justifyContent:"center", zIndex:1000 }} onClick={onClose}>
-          <div style={{ background:"#fff", width:"100%", maxWidth:"500px", borderRadius:"16px 16px 0 0",
-            padding:"20px 18px 32px", boxShadow:"0 -4px 24px rgba(0,0,0,0.15)" }}
-            onClick={e => e.stopPropagation()}>
-            <div style={{ width:36, height:4, background:"#e0dbd0", borderRadius:2, margin:"0 auto 16px" }} />
-            <div style={{ fontWeight:700, fontSize:"14px", color:"#1a1a1a", marginBottom:"4px" }}>{item.person}</div>
-            <div style={{ fontSize:"11px", color:"#999", marginBottom:"16px" }}>{item.company}</div>
-
-            <div style={{ marginBottom:"12px" }}>
-              <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase", letterSpacing:"0.5px", marginBottom:"4px" }}>Quick note (appended to last action)</div>
-              <textarea value={note} onChange={e => setNote(e.target.value)} rows={3}
-                placeholder="What happened? One liner is fine."
-                style={{...inputStyle, resize:"none"}} />
-            </div>
-
-            <div style={{ display:"flex", gap:"8px", marginBottom:"16px" }}>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase", letterSpacing:"0.5px", marginBottom:"4px" }}>Status</div>
-                <select value={status} onChange={e => setStatus(e.target.value)} style={inputStyle}>
-                  {STATUSES.map(s => <option key={s}>{s}</option>)}
-                </select>
-              </div>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:"10px", fontWeight:600, color:"#aaa", textTransform:"uppercase", letterSpacing:"0.5px", marginBottom:"4px" }}>Next Follow-up</div>
-                <input type="date" value={followUpDate} onChange={e => setFollowUpDate(e.target.value)} style={inputStyle} />
-              </div>
-            </div>
-
-            <div style={{ display:"flex", gap:"8px" }}>
-              <button onClick={save} style={{ flex:1, background:"#1a1a1a", color:"#fff",
-                border:"none", borderRadius:"8px", padding:"12px", fontSize:"13px", fontWeight:700, cursor:"pointer" }}>
-                Save &amp; Touch Today
-              </button>
-              <button onClick={onClose} style={{ flex:1, background:"#f0ede8", color:"#444",
-                border:"none", borderRadius:"8px", padding:"12px", fontSize:"13px", cursor:"pointer" }}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    function App() {
-      const [items, setItems]           = useState([]);
-      const [loaded, setLoaded]         = useState(false);
-      const [syncing, setSyncing]       = useState(false);
-      const [selected, setSelected]     = useState(null);
-      const [editing, setEditing]       = useState(false);
-      const [adding, setAdding]         = useState(false);
-      const [filterStatus, setFilterStatus] = useState("All");
-      const [search, setSearch]         = useState("");
-      const [quickUpdate, setQuickUpdate] = useState(null);
-      const [form, setForm]             = useState(EMPTY_FORM);
-
-      useEffect(() => {
-        async function load() {
-          setSyncing(true);
-          try {
-            const { data, error } = await sb.from(TABLE).select("*").order("followUpDate", { ascending: true, nullsFirst: false });
-            if (!error && data) { setItems(data); }
-          } catch(e) {}
-          setSyncing(false);
-          setLoaded(true);
-        }
-        load();
-      }, []);
-
-
-
-      async function upsertItem(item) { if (sb) await sb.from(TABLE).upsert(item); }
-      async function removeItem(id)   { if (sb) await sb.from(TABLE).delete().eq("id", id); }
-
-      const overdueCount = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) < 0).length;
-
-      let filtered = items;
-      if (filterStatus !== "All") filtered = filtered.filter(i => i.status === filterStatus);
-      if (search.trim()) {
-        const q = search.toLowerCase();
-        filtered = filtered.filter(i =>
-          (i.person || "").toLowerCase().includes(q) ||
-          (i.company || "").toLowerCase().includes(q) ||
-          stripHtml(i.context || "").toLowerCase().includes(q) ||
-          (i.coWorkers || "").toLowerCase().includes(q)
-        );
-      }
-
-      const sorted = [...filtered].sort((a, b) => {
-        if (a.status === "Done" && b.status !== "Done") return 1;
-        if (b.status === "Done" && a.status !== "Done") return -1;
-        const fa = a.followUpDate ? new Date(a.followUpDate) : new Date("9999-12-31");
-        const fb = b.followUpDate ? new Date(b.followUpDate) : new Date("9999-12-31");
-        return fa - fb;
-      });
-
-      const openCount   = items.filter(i => i.status !== "Done").length;
-      const closedCount = items.filter(i => i.status === "Done").length;
-
-      function openAdd()      { setForm({...EMPTY_FORM}); setAdding(true); setSelected(null); setEditing(false); }
-      function openEdit(item) { setForm({...item, followUpDate: item.followUpDate || "", priority: item.priority || "Medium"}); setEditing(true); setAdding(false); }
-
-      async function saveForm() {
-        if (!form.person.trim()) return;
-        if (adding) {
-          const newItem = { ...form, id: Date.now() };
-          setItems(prev => [...prev, newItem]);
-          setSelected(newItem.id);
-          await upsertItem(newItem);
-        } else {
-          setItems(prev => prev.map(i => i.id === form.id ? {...form} : i));
-          setSelected(form.id);
-          await upsertItem(form);
-        }
-        setAdding(false); setEditing(false);
-      }
-
-      async function saveQuickUpdate(updated) {
-        setItems(prev => prev.map(i => i.id === updated.id ? updated : i));
-        setQuickUpdate(null);
-        await upsertItem(updated);
-      }
-
-      async function deleteItem(id) { setItems(prev => prev.filter(i => i.id !== id)); setSelected(null); await removeItem(id); }
-      async function closeItem(id) {
-        const updated = items.map(i => i.id === id ? {...i, status:"Done"} : i);
-        setItems(updated); setSelected(null);
-        const item = updated.find(i => i.id === id);
-        if (item) await upsertItem(item);
-      }
-
-      const selectedItem = items.find(i => i.id === selected);
-      const panelOpen    = selected || adding;
-
-      const inputStyle = { width:"100%", border:"1px solid #e0dbd0", borderRadius:"6px",
-        padding:"7px 9px", fontSize:"12px", boxSizing:"border-box", outline:"none", fontFamily:"inherit" };
-      const labelStyle = { fontSize:"10px", fontWeight:600, color:"#aaa", marginBottom:"3px",
-        textTransform:"uppercase", letterSpacing:"0.5px", display:"block" };
-
-      return (
-        <div style={{ fontFamily:"-apple-system, BlinkMacSystemFont, Inter, sans-serif",
-          background:"#f5f4f1", height:"100dvh", display:"flex", flexDirection:"column" }}>
-
-          {/* Header */}
-          <div style={{ background:"#1a1a1a", color:"#fff", padding:"12px 16px",
-            display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0 }}>
-            <div>
-              <div style={{ fontSize:"15px", fontWeight:700, letterSpacing:"-0.3px" }}>Work Tracker</div>
-              <div style={{ fontSize:"11px", color:"#888", marginTop:"1px" }}>
-                {openCount} open · {closedCount} closed
-                {syncing && <span style={{ color:"#c8a96e", marginLeft:"8px" }}>syncing...</span>}
-              </div>
-            </div>
-            <button onClick={openAdd} style={{ background:"#c8a96e", color:"#1a1a1a", border:"none",
-              borderRadius:"6px", padding:"7px 14px", fontSize:"12px", fontWeight:700, cursor:"pointer" }}>+ Add</button>
-          </div>
-
-          {/* Overdue alert */}
-          {overdueCount > 0 && (
-            <div onClick={() => { setFilterStatus("All"); setSearch(""); }}
-              style={{ background:"#c03030", color:"#fff", padding:"7px 16px",
-                fontSize:"12px", fontWeight:600, cursor:"pointer", display:"flex",
-                alignItems:"center", justifyContent:"space-between", flexShrink:0 }}>
-              <span>⚠ {overdueCount} item{overdueCount > 1 ? "s" : ""} past follow-up date</span>
-              <span style={{ opacity:0.7, fontSize:"11px" }}>tap to see all →</span>
-            </div>
-          )}
-
-          {/* Search + Status filter */}
-          <div style={{ background:"#fff", borderBottom:"1px solid #e8e4dc", flexShrink:0 }}>
-            {/* Search bar */}
-            <div style={{ padding:"8px 12px", borderBottom:"1px solid #f0ede8", display:"flex", alignItems:"center", gap:"8px" }}>
-              <span style={{ color:"#bbb", fontSize:"14px" }}>🔍</span>
-              <input className="search-input" value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="Search person, company, or context..." />
-              {search && (
-                <button onClick={() => setSearch("")} style={{ border:"none", background:"none",
-                  color:"#bbb", fontSize:"14px", cursor:"pointer", padding:"0 2px" }}>✕</button>
-              )}
-            </div>
-            {/* Status tabs */}
-            <div style={{ padding:"0 12px", display:"flex", gap:"2px", overflowX:"auto" }}>
-              {["All",...STATUSES].map(s => (
-                <button key={s} onClick={() => setFilterStatus(s)} style={{
-                  border:"none", background:"none", padding:"9px 10px", fontSize:"11px",
-                  fontWeight:filterStatus===s?700:400, color:filterStatus===s?"#1a1a1a":"#999",
-                  borderBottom:filterStatus===s?"2px solid #c8a96e":"2px solid transparent",
-                  cursor:"pointer", whiteSpace:"nowrap" }}>{s}</button>
-              ))}
-            </div>
-          </div>
-
-          {/* Main */}
-          <div style={{ flex:1, display:"flex", overflow:"hidden" }}>
-
-            {/* List */}
-            <div style={{ width:panelOpen?"42%":"100%", overflowY:"auto", transition:"width 0.2s",
-              minWidth:panelOpen?"150px":undefined, padding:"10px 10px", display:"flex", flexDirection:"column", gap:"8px", background:"#f5f4f1" }}>
-              {!loaded && (
-                <div style={{ padding:"40px 20px", textAlign:"center", color:"#bbb", fontSize:"13px" }}>
-                  Loading...
-                </div>
-              )}
-              {loaded && sorted.length === 0 && (
-                <div style={{ padding:"40px 20px", textAlign:"center", color:"#bbb", fontSize:"13px" }}>
-                  {search ? "No results." : "Nothing here. Hit + Add to start."}
-                </div>
-              )}
-              {loaded && sorted.map(item => (
-                <div key={item.id}
-                  style={{ background:"#fff", borderRadius:"10px", border: selected===item.id ? "1.5px solid #c8a96e" : "0.5px solid #e0dbd0",
-                    opacity:item.status==="Done"?0.45:1, overflow:"hidden" }}>
-                  <div onClick={() => { setSelected(item.id); setEditing(false); setAdding(false); }}
-                    style={{ padding:"12px 14px 8px", cursor:"pointer" }}>
-                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:"6px", marginBottom:"3px" }}>
-                      <div style={{ fontWeight:700, fontSize:"13px", color:"#1a1a1a" }}>{item.person}</div>
-                      {item.priority ? <PriorityBadge priority={item.priority} /> : null}
-                    </div>
-                    <div style={{ display:"flex", alignItems:"center", gap:"6px", marginBottom:"5px", flexWrap:"wrap" }}>
-                      <span style={{ fontSize:"11px", color:"#999" }}>
-                        {item.company}{item.customerType ? " · " + item.customerType : ""}{item.type ? " · " + item.type : ""}{item.coWorkers ? " · 👥 " + item.coWorkers : ""}
-                      </span>
-                      <Badge status={item.status} />
-                    </div>
-                    {item.context ? (
-                      <div style={{ fontSize:"11px", color:"#666", fontStyle:"italic", marginBottom:"5px",
-                        lineHeight:"1.3", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                        ({stripHtml(item.context)})
-                      </div>
-                    ) : null}
-                    {item.nextAction ? (
-                      <div style={{ fontSize:"12px", color:"#444", lineHeight:"1.4", marginBottom:"6px",
-                        overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
-                        <span style={{ color:"#c8a96e", fontWeight:600 }}>Next: </span>
-                        {stripHtml(item.nextAction)}
-                      </div>
-                    ) : null}
-                    <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
-                      {item.followUpDate ? <FollowUpChip date={item.followUpDate} /> : null}
-                      {item.followUpDate ? <span style={{ fontSize:"10px", color:"#aaa" }}>Follow up {formatDate(item.followUpDate)}</span> : null}
-                    </div>
-                  </div>
-                  {/* Quick Update */}
-                  {item.status !== "Done" && (
-                    <div style={{ padding:"0 14px 10px" }}>
-                      <button onClick={e => { e.stopPropagation(); setQuickUpdate(item); }}
-                        style={{ border:"1px solid #e8e4dc", background:"#faf9f6", color:"#888",
-                          borderRadius:"6px", padding:"4px 12px", fontSize:"11px", cursor:"pointer", fontFamily:"inherit" }}>
-                        ⚡ Quick Update
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Detail / Edit panel */}
-            {panelOpen && (
-              <div style={{ flex:1, background:"#fff", borderLeft:"1px solid #e8e4dc", overflowY:"auto", padding:"18px 16px" }}>
-                {(editing || adding) ? (
-                  <div>
-                    <div style={{ fontSize:"13px", fontWeight:700, marginBottom:"16px", color:"#1a1a1a" }}>
-                      {adding ? "New Item" : "Edit Item"}
-                    </div>
-                    {[
-                      { label:"Person",  key:"person",  placeholder:"Name" },
-                      { label:"Company", key:"company", placeholder:"Company or team" },
-                    ].map(({ label, key, placeholder }) => (
-                      <div key={key} style={{ marginBottom:"11px" }}>
-                        <label style={labelStyle}>{label}</label>
-                        <input value={form[key]} onChange={e => setForm(f=>({...f,[key]:e.target.value}))}
-                          placeholder={placeholder} style={inputStyle} />
-                      </div>
-                    ))}
-                    {[
-                      { label:"Context (why it's on your list)", key:"context", placeholder:"Short reason — shown on card", minHeight:"60px" },
-                      { label:"Last Action", key:"lastAction", placeholder:"What was last done", minHeight:"80px" },
-                      { label:"Next Action", key:"nextAction", placeholder:"What needs to happen next", minHeight:"80px" },
-                    ].map(({ label, key, placeholder, minHeight }) => (
-                      <div key={key} style={{ marginBottom:"11px" }}>
-                        <label style={labelStyle}>{label}</label>
-                        <RichEditor value={form[key]} onChange={val => setForm(f=>({...f,[key]:val}))}
-                          placeholder={placeholder} minHeight={minHeight} />
-                      </div>
-                    ))}
-                    <div style={{ marginBottom:"11px" }}>
-                      <label style={labelStyle}>Status</label>
-                      <select value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))} style={inputStyle}>
-                        {STATUSES.map(s=><option key={s}>{s}</option>)}
-                      </select>
-                    </div>
-                    <div style={{ display:"flex", gap:"8px", marginBottom:"11px" }}>
-                      <div style={{ flex:1 }}>
-                        <label style={labelStyle}>Co-Workers Involved</label>
-                        <input value={form.coWorkers || ""} onChange={e => setForm(f=>({...f,coWorkers:e.target.value}))}
-                          placeholder="Names" style={inputStyle} />
-                      </div>
-                      <div style={{ flex:1 }}>
-                        <label style={labelStyle}>Customer Type</label>
-                        <select value={form.customerType || ""} onChange={e => setForm(f=>({...f,customerType:e.target.value}))} style={inputStyle}>
-                          <option value="">Not set</option>
-                          <option value="Prospect">Prospect</option>
-                          <option value="Current Customer">Current Customer</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div style={{ marginBottom:"11px" }}>
-                      <label style={labelStyle}>Type</label>
-                      <select value={form.type || ""} onChange={e => setForm(f=>({...f,type:e.target.value}))} style={inputStyle}>
-                        <option value="">Not set</option>
-                        <option value="Sales Opportunity">Sales Opportunity</option>
-                        <option value="Renewal">Renewal</option>
-                        <option value="Escalation">Escalation</option>
-                        <option value="Internal">Internal</option>
-                      </select>
-                    </div>
-                    <div style={{ display:"flex", gap:"8px", marginBottom:"11px" }}>
-                      <div style={{ flex:1 }}>
-                        <label style={labelStyle}>Priority</label>
-                        <select value={form.priority || "Medium"} onChange={e => setForm(f=>({...f,priority:e.target.value}))} style={inputStyle}>
-                          {PRIORITIES.map(p=><option key={p}>{p}</option>)}
-                        </select>
-                      </div>
-                      <div style={{ flex:1 }}>
-                        <label style={labelStyle}>Follow-up Date</label>
-                        <input type="date" value={form.followUpDate || ""} onChange={e => setForm(f=>({...f,followUpDate:e.target.value}))} style={inputStyle} />
-                      </div>
-                    </div>
-                    <div style={{ marginBottom:"11px" }}>
-                      <label style={labelStyle}>Last Touch Date</label>
-                      <input type="date" value={form.date} onChange={e => setForm(f=>({...f,date:e.target.value}))} style={inputStyle} />
-                    </div>
-                    <div style={{ marginBottom:"18px" }}>
-                      <label style={labelStyle}>Notes</label>
-                      <RichEditor value={form.notes} onChange={val => setForm(f=>({...f,notes:val}))}
-                        placeholder="Background context, relationship notes..." minHeight="100px" />
-                    </div>
-                    <div style={{ display:"flex", gap:"8px" }}>
-                      <button onClick={saveForm} style={{ flex:1, background:"#1a1a1a", color:"#fff",
-                        border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px", fontWeight:700, cursor:"pointer" }}>Save</button>
-                      <button onClick={() => { setEditing(false); setAdding(false); if(adding) setSelected(null); }}
-                        style={{ flex:1, background:"#f0ede8", color:"#444", border:"none",
-                          borderRadius:"6px", padding:"10px", fontSize:"13px", cursor:"pointer" }}>Cancel</button>
-                    </div>
-                  </div>
-
-                ) : selectedItem ? (
-                  <div>
-                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:"8px", marginBottom:"2px" }}>
-                      <div style={{ fontSize:"16px", fontWeight:700, color:"#1a1a1a", lineHeight:"1.3" }}>{selectedItem.person}</div>
-                      <Badge status={selectedItem.status} />
-                    </div>
-                    <div style={{ fontSize:"11px", color:"#999", marginBottom:"4px" }}>
-                      {selectedItem.company}
-                      {selectedItem.customerType && <span style={{ color:"#bbb" }}> · {selectedItem.customerType}</span>}
-                      {selectedItem.type && <span style={{ color:"#bbb" }}> · {selectedItem.type}</span>}
-                    </div>
-                    {selectedItem.coWorkers && (
-                      <div style={{ fontSize:"11px", color:"#999", marginBottom:"8px" }}>
-                        👥 {selectedItem.coWorkers}
-                      </div>
-                    )}
-                    <div style={{ display:"flex", alignItems:"center", gap:"8px", marginBottom:"16px", flexWrap:"wrap" }}>
-                      {selectedItem.priority && <PriorityBadge priority={selectedItem.priority} />}
-                      {selectedItem.followUpDate && (
-                        <span style={{ fontSize:"11px", color:"#777" }}>Follow up: <strong>{formatDate(selectedItem.followUpDate)}</strong></span>
-                      )}
-                      <FollowUpChip date={selectedItem.followUpDate} />
-                    </div>
-                    {selectedItem.nextAction && (
-                      <FieldBlock label="Next Action">
-                        <div style={{ background:"#fffbf0", border:"1px solid #e8d9a0", borderRadius:"6px", padding:"8px 10px" }}>
-                          <RichDisplay html={selectedItem.nextAction} className="next-action-display" />
-                        </div>
-                      </FieldBlock>
-                    )}
-                    {selectedItem.context && (
-                      <FieldBlock label="Context">
-                        <RichDisplay html={selectedItem.context} />
-                      </FieldBlock>
-                    )}
-                    {selectedItem.lastAction && (
-                      <FieldBlock label="Last Action">
-                        <RichDisplay html={selectedItem.lastAction} />
-                      </FieldBlock>
-                    )}
-                    <FieldBlock label="Last Touch">
-                      <div style={{ fontSize:"13px", color:"#1a1a1a" }}>{formatDate(selectedItem.date)}</div>
-                    </FieldBlock>
-                    {selectedItem.notes && (
-                      <FieldBlock label="Notes">
-                        <div style={{ background:"#f7f6f3", padding:"10px", borderRadius:"6px" }}>
-                          <RichDisplay html={selectedItem.notes} className="notes-display" />
-                        </div>
-                      </FieldBlock>
-                    )}
-                    <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
-                      <button onClick={() => setSelected(null)}
-                        style={{ flex:1, minWidth:"80px", background:"#f0ede8", color:"#444",
-                          border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px", cursor:"pointer" }}>← Back</button>
-                      <button onClick={() => openEdit(selectedItem)}
-                        style={{ flex:1, minWidth:"80px", background:"#1a1a1a", color:"#fff",
-                          border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px", fontWeight:700, cursor:"pointer" }}>Edit</button>
-                      {selectedItem.status !== "Done" && (
-                        <button onClick={() => closeItem(selectedItem.id)}
-                          style={{ flex:1, minWidth:"80px", background:"#e8f4e8", color:"#2d6a2d",
-                            border:"none", borderRadius:"6px", padding:"10px", fontSize:"13px", cursor:"pointer" }}>Mark Closed</button>
-                      )}
-                      <button onClick={() => deleteItem(selectedItem.id)}
-                        style={{ background:"#fee", color:"#c00", border:"none",
-                          borderRadius:"6px", padding:"10px 14px", fontSize:"13px", cursor:"pointer" }}>Delete</button>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            )}
-          </div>
-
-          {/* Quick Update modal */}
-          {quickUpdate && (
-            <QuickUpdateModal item={quickUpdate} onSave={saveQuickUpdate} onClose={() => setQuickUpdate(null)} />
-          )}
-
-          {/* Version stamp */}
-          <div style={{ position:"fixed", bottom:"6px", right:"10px", fontSize:"9px", color:"#ccc", pointerEvents:"none", zIndex:999 }}>
-            v1.5
-          </div>
-        </div>
-      );
-    }
-
-    ReactDOM.createRoot(document.getElementById("root")).render(<Root />);
-  </script>
+// Init
+if (sessionStorage.getItem(SESSION_KEY)) {
+  document.getElementById("lock-screen").style.display = "none";
+  loadItems();
+}
+</script>
 </body>
 </html>
