@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v2.7 -->
+<!DOCTYPE html><!-- v2.8 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -207,7 +207,7 @@
   </div>
 </div>
 
-<div id="version">v2.7</div>
+<div id="version">v2.8</div>
 
 <script>
 const PASSWORD = "timmer-nyjpij-ryxRy7";
@@ -394,7 +394,10 @@ function renderList() {
         ${nxt ? `<div class="card-next"><span class="card-next-label">Next: </span>${nxt}</div>` : ""}
         <div class="card-footer">${followUp}</div>
       </div>
-      ${item.status !== "Done" ? `<div class="card-quick"><button class="quick-btn" data-id="${item.id}">⚡ Quick Update</button></div>` : ""}
+      <div class="card-quick" style="display:flex;gap:8px;align-items:center;">
+        ${item.status !== "Done" ? `<button class="quick-btn" data-id="${item.id}">⚡ Quick Update</button>` : ""}
+        <button class="star-btn" data-id="${item.id}" style="border:none;background:none;font-size:16px;cursor:pointer;padding:2px 4px;opacity:${item.featured ? '1' : '0.25'};" title="${item.featured ? 'Unstar' : 'Star'}">★</button>
+      </div>
     </div>`;
   }).join("");
 
@@ -412,6 +415,18 @@ function renderList() {
     btn.addEventListener("click", e => {
       e.stopPropagation();
       openQuick(parseInt(btn.dataset.id));
+    });
+  });
+
+  pane.querySelectorAll(".star-btn").forEach(btn => {
+    btn.addEventListener("click", async e => {
+      e.stopPropagation();
+      const id = parseInt(btn.dataset.id);
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+      item.featured = !item.featured;
+      await upsert(item);
+      renderList();
     });
   });
 }
