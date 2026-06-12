@@ -130,7 +130,10 @@
       if (!html) return "";
       return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
     }
-    function today() { return new Date().toISOString().split("T")[0]; }
+    function today() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
 
     function FollowUpChip({ date }) {
       if (!date) return null;
@@ -214,9 +217,11 @@
 
       function save() {
         const todayStr = today();
-        const updatedLastAction = note.trim()
-          ? (item.lastAction ? item.lastAction + `<p><em>${formatDate(todayStr)}: ${note.trim()}</em></p>` : `<p>${note.trim()}</p>`)
-          : item.lastAction;
+        let updatedLastAction = item.lastAction || "";
+        if (note.trim()) {
+          const noteHtml = `<p><em><strong>${formatDate(todayStr)}:</strong> ${note.trim()}</em></p>`;
+          updatedLastAction = updatedLastAction ? updatedLastAction + noteHtml : noteHtml;
+        }
         onSave({ ...item, lastAction: updatedLastAction, followUpDate, status, date: todayStr });
       }
 
