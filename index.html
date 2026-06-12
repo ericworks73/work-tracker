@@ -407,7 +407,7 @@
                   <div style={{ display:"flex", alignItems:"center", gap:"8px", marginTop:"4px", flexWrap:"wrap" }}>
                     {item.priority && <PriorityBadge priority={item.priority} />}
                     {item.followUpDate && <FollowUpChip date={item.followUpDate} />}
-                    {item.date && <span style={{ fontSize:"10px", color:"#ccc" }}>{formatDate(item.date)}</span>}
+                    {item.followUpDate && <span style={{ fontSize:"10px", color:"#aaa" }}>Follow up {formatDate(item.followUpDate)}</span>}
                   </div>
                 </div>
               ))}
