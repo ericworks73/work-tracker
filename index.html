@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v2.4 -->
+<!DOCTYPE html><!-- v2.5 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -207,7 +207,7 @@
   </div>
 </div>
 
-<div id="version">v2.4</div>
+<div id="version">v2.5</div>
 
 <script>
 const PASSWORD = "timmer-nyjpij-ryxRy7";
@@ -283,10 +283,8 @@ async function loadItems() {
   const { data, error } = await sb.from(TABLE).select("*");
   if (!error && data) {
     items = data;
-    console.log("Loaded items:", data.length);
     if (data.length > 0) {
       const sample = data[0];
-      console.log("Sample item:", sample.person, "| context:", sample.context ? sample.context.substring(0,50) : "EMPTY", "| nextAction:", sample.nextAction ? sample.nextAction.substring(0,50) : "EMPTY");
     }
     render();
   }
@@ -366,10 +364,8 @@ function renderList() {
     const first = filtered[0];
     const ctx = first.context ? stripHtml(first.context) : "";
     const nxt = first.nextAction ? stripHtml(first.nextAction) : "";
-    console.log("ctx:", ctx.substring(0,40));
-    console.log("nxt:", nxt.substring(0,40));
+
     const testHtml = ctx ? `<div class="card-context">(${ctx})</div>` : "";
-    console.log("testHtml:", testHtml);
   }
   pane.innerHTML = filtered.map(item => {
     const metaParts = [item.company, item.customerType, item.type].filter(Boolean).join(" · ");
