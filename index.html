@@ -283,24 +283,18 @@
 
       useEffect(() => {
         async function load() {
-          if (sb) {
-            setSyncing(true);
-            try {
-              const { data, error } = await sb.from(TABLE).select("*").order("date", { ascending: false });
-              if (!error && data && data.length > 0) { setItems(data); setLoaded(true); setSyncing(false); return; }
-            } catch(e) {}
-            setSyncing(false);
-          }
+          setSyncing(true);
           try {
-            const stored = localStorage.getItem("work-tracker-items");
-            if (stored) { const p = JSON.parse(stored); if (p && p.length) { setItems(p); setLoaded(true); return; } }
+            const { data, error } = await sb.from(TABLE).select("*").order("followUpDate", { ascending: true, nullsFirst: false });
+            if (!error && data) { setItems(data); }
           } catch(e) {}
+          setSyncing(false);
           setLoaded(true);
         }
         load();
       }, []);
 
-      useEffect(() => { if (loaded) localStorage.setItem("work-tracker-items", JSON.stringify(items)); }, [items, loaded]);
+
 
       async function upsertItem(item) { if (sb) await sb.from(TABLE).upsert(item); }
       async function removeItem(id)   { if (sb) await sb.from(TABLE).delete().eq("id", id); }
