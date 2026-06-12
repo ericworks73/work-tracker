@@ -446,7 +446,7 @@
                       <Badge status={item.status} />
                     </div>
                     <div style={{ fontSize:"11px", color:"#999", marginBottom:"4px" }}>
-                      {CATEGORY_ICONS[item.category]} {item.category} &nbsp;·&nbsp; {item.company}
+                      {item.company}{item.coWorkers ? <span> &nbsp;·&nbsp; 👥 {item.coWorkers}</span> : ""}
                     </div>
                     {item.context && (
                       <div style={{ fontSize:"11px", color:"#666", fontStyle:"italic", marginBottom:"5px",
