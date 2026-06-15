@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v2.9 -->
+<!DOCTYPE html><!-- v3.1 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -207,7 +207,7 @@
   </div>
 </div>
 
-<div id="version">v2.9</div>
+<div id="version">v3.1</div>
 
 <script>
 const PASSWORD = "karvox-7Hunjit-plwesk";
@@ -296,7 +296,12 @@ async function remove(id) { await sb.from(TABLE).delete().eq("id", id); }
 
 // Render
 function getFiltered() {
-  let f = items.filter(i => filterStatus === "All" || i.status === filterStatus);
+  let f;
+  if (filterStatus === "Overdue") {
+    f = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) < 0);
+  } else {
+    f = items.filter(i => filterStatus === "All" || i.status === filterStatus);
+  }
   if (searchQuery.trim()) {
     const q = searchQuery.toLowerCase();
     f = f.filter(i =>
@@ -344,8 +349,14 @@ function renderOverdue() {
 
 function renderTabs() {
   const container = document.getElementById("status-tabs");
+  const overdueCount = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) < 0).length;
   const tabs = ["All", ...STATUSES];
-  container.innerHTML = tabs.map(s => `<button class="tab-btn${filterStatus === s ? " active" : ""}" data-status="${s}">${s}</button>`).join("");
+  let html = tabs.map(s => `<button class="tab-btn${filterStatus === s ? " active" : ""}" data-status="${s}">${s}</button>`).join("");
+  if (overdueCount > 0) {
+    const isActive = filterStatus === "Overdue";
+    html += `<button class="tab-btn" data-status="Overdue" style="color:#c03030;font-weight:${isActive ? "700" : "400"};border-bottom:${isActive ? "2px solid #c03030" : "2px solid transparent"};">Overdue (${overdueCount})</button>`;
+  }
+  container.innerHTML = html;
   container.querySelectorAll(".tab-btn").forEach(btn => {
     btn.onclick = () => { filterStatus = btn.dataset.status; render(); };
   });
@@ -623,7 +634,10 @@ document.getElementById("search-clear").onclick = () => {
 document.getElementById("add-btn").onclick = () => { isAdding = true; editingItem = null; selectedId = null; render(); };
 
 // Overdue bar
-document.getElementById("overdue-bar").onclick = () => { filterStatus = "All"; searchQuery = ""; document.getElementById("search-input").value = ""; render(); };
+document.getElementById("overdue-bar").onclick = () => {
+  filterStatus = "Overdue"; searchQuery = ""; document.getElementById("search-input").value = "";
+  render();
+};
 
 // Init
 if (sessionStorage.getItem(SESSION_KEY)) {
