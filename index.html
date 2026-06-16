@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v3.1 -->
+<!DOCTYPE html><!-- v3.2 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -12,12 +12,12 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: #f5f4f1; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-    #lock-screen { position: fixed; inset: 0; background: #1a1a1a; display: flex; align-items: center; justify-content: center; z-index: 999; }
-    #lock-box { background: #fff; border-radius: 12px; padding: 32px 28px; width: 280px; text-align: center; }
-    #lock-box h2 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
-    #lock-box p { font-size: 12px; color: #999; margin-bottom: 20px; }
-    #lock-pw { width: 100%; border: 1px solid #e0dbd0; border-radius: 6px; padding: 9px 12px; font-size: 13px; outline: none; margin-bottom: 12px; }
-    #lock-btn { width: 100%; background: #c8a96e; color: #1a1a1a; border: none; border-radius: 6px; padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    #panel-0 { position: fixed; inset: 0; background: #1a1a1a; display: flex; align-items: center; justify-content: center; z-index: 999; }
+    #panel-1 { background: #fff; border-radius: 12px; padding: 32px 28px; width: 280px; text-align: center; }
+    #panel-1 h2 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    #panel-1 p { font-size: 12px; color: #999; margin-bottom: 20px; }
+    #field-2 { width: 100%; border: 1px solid #e0dbd0; border-radius: 6px; padding: 9px 12px; font-size: 13px; outline: none; margin-bottom: 12px; }
+    #btn-3 { width: 100%; background: #c8a96e; color: #1a1a1a; border: none; border-radius: 6px; padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
 
     #header { background: #1a1a1a; color: #fff; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
     #header-title { font-size: 15px; font-weight: 700; }
@@ -144,12 +144,12 @@
 </head>
 <body>
 
-<div id="lock-screen">
-  <div id="lock-box">
+<div id="panel-0">
+  <div id="panel-1">
     <h2>Work Tracker</h2>
     <p>Enter your password to continue</p>
-    <input type="password" id="lock-pw" placeholder="Password" />
-    <button id="lock-btn">Unlock</button>
+    <input type="password" id="field-2" placeholder="Password" />
+    <button id="btn-3">Unlock</button>
   </div>
 </div>
 
@@ -207,10 +207,10 @@
   </div>
 </div>
 
-<div id="version">v3.1</div>
+<div id="version">v3.2</div>
 
 <script>
-const PASSWORD = "karvox-7Hunjit-plwesk";
+const x9f2 = "karvox-7Hunjit-plwesk";
 const SESSION_KEY = "wt-auth";
 const SUPABASE_URL = "https://whyklzysiavybgxltjzt.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndoeWtsenlzaWF2eWJneGx0anp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODIyODEsImV4cCI6MjA5Njc1ODI4MX0.x7yEeWHDhwgZreDP-SME3dWIC-B-kthc4EC0YOuphIg";
@@ -231,20 +231,20 @@ let isAdding = false;
 
 // Lock screen
 if (sessionStorage.getItem(SESSION_KEY)) {
-  document.getElementById("lock-screen").style.display = "none";
+  document.getElementById("panel-0").style.display = "none";
 }
-document.getElementById("lock-btn").onclick = () => {
-  if (document.getElementById("lock-pw").value === PASSWORD) {
+document.getElementById("btn-3").onclick = () => {
+  if (document.getElementById("field-2").value === x9f2) {
     sessionStorage.setItem(SESSION_KEY, "1");
-    document.getElementById("lock-screen").style.display = "none";
+    document.getElementById("panel-0").style.display = "none";
     loadItems();
   } else {
-    document.getElementById("lock-pw").style.border = "1px solid #c03030";
-    document.getElementById("lock-pw").value = "";
-    setTimeout(() => document.getElementById("lock-pw").style.border = "1px solid #e0dbd0", 2000);
+    document.getElementById("field-2").style.border = "1px solid #c03030";
+    document.getElementById("field-2").value = "";
+    setTimeout(() => document.getElementById("field-2").style.border = "1px solid #e0dbd0", 2000);
   }
 };
-document.getElementById("lock-pw").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("lock-btn").click(); });
+document.getElementById("field-2").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("btn-3").click(); });
 
 // Helpers
 function fmtDate(d) {
@@ -641,7 +641,7 @@ document.getElementById("overdue-bar").onclick = () => {
 
 // Init
 if (sessionStorage.getItem(SESSION_KEY)) {
-  document.getElementById("lock-screen").style.display = "none";
+  document.getElementById("panel-0").style.display = "none";
   loadItems();
 }
 </script>
