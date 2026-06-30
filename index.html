@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v3.2 -->
+<!DOCTYPE html><!-- v3.3 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -140,6 +140,17 @@
 
     #version { position: fixed; bottom: 6px; right: 10px; font-size: 9px; color: #ccc; pointer-events: none; z-index: 999; }
     .loading-msg { padding: 40px 20px; text-align: center; color: #bbb; font-size: 13px; }
+    .task-section { margin-bottom: 14px; }
+    .task-list { list-style: none; padding: 0; margin: 0 0 8px; }
+    .task-item { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; border-bottom: 1px solid #f0ede8; }
+    .task-item:last-child { border-bottom: none; }
+    .task-check { width: 15px; height: 15px; margin-top: 2px; cursor: pointer; accent-color: #c8a96e; flex-shrink: 0; }
+    .task-text { flex: 1; font-size: 13px; color: #1a1a1a; line-height: 1.4; }
+    .task-text.done { text-decoration: line-through; color: #aaa; }
+    .task-dates { font-size: 10px; color: #ccc; white-space: nowrap; margin-top: 1px; }
+    .task-add-row { display: flex; gap: 6px; margin-top: 4px; }
+    .task-add-input { flex: 1; border: 1px solid #e0dbd0; border-radius: 6px; padding: 6px 9px; font-size: 12px; outline: none; font-family: inherit; }
+    .task-add-btn { background: #1a1a1a; color: #fff; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -207,7 +218,7 @@
   </div>
 </div>
 
-<div id="version">v3.2</div>
+<div id="version">v3.3</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -484,6 +495,57 @@ function renderPanel() {
       <button class="btn btn-delete" id="btn-delete">Delete</button>
     </div>`;
 
+  // Render tasks
+  function renderTasks() {
+    const taskList = document.getElementById("task-list");
+    if (!taskList) return;
+    const tasks = item.tasks || [];
+    taskList.innerHTML = tasks.map((t, i) => `
+      <li class="task-item">
+        <input type="checkbox" class="task-check" data-idx="${i}" ${t.done ? "checked" : ""} />
+        <div style="flex:1">
+          <div class="task-text${t.done ? " done" : ""}">${t.text}</div>
+          <div class="task-dates">
+            Added ${t.created}${t.done && t.completed ? ` · Done ${t.completed}` : ""}
+          </div>
+        </div>
+      </li>`).join("");
+
+    taskList.querySelectorAll(".task-check").forEach(cb => {
+      cb.addEventListener("change", async () => {
+        const idx = parseInt(cb.dataset.idx);
+        const tasks = item.tasks || [];
+        tasks[idx].done = cb.checked;
+        tasks[idx].completed = cb.checked ? todayStr() : null;
+        item.tasks = tasks;
+        items = items.map(i => i.id === item.id ? item : i);
+        await upsert(item);
+        renderTasks();
+      });
+    });
+  }
+  renderTasks();
+
+  // Add task handler
+  function addTask() {
+    const input = document.getElementById("task-input");
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    const tasks = item.tasks || [];
+    tasks.push({ text, done: false, created: todayStr(), completed: null });
+    item.tasks = tasks;
+    items = items.map(i => i.id === item.id ? item : i);
+    input.value = "";
+    upsert(item);
+    renderTasks();
+  }
+
+  const addBtn = document.getElementById("task-add-btn");
+  const taskInput = document.getElementById("task-input");
+  if (addBtn) addBtn.onclick = addTask;
+  if (taskInput) taskInput.addEventListener("keydown", e => { if (e.key === "Enter") addTask(); });
+
   document.getElementById("btn-back").onclick = () => { selectedId = null; render(); };
   document.getElementById("btn-edit").onclick = () => { editingItem = item; render(); };
   document.getElementById("btn-delete").onclick = async () => {
@@ -550,7 +612,8 @@ function renderEditForm() {
       followUpDate: document.getElementById("f-followUpDate").value,
       date: document.getElementById("f-date").value,
       notes: document.getElementById("f-notes").innerHTML,
-      category: item.category || "Commitment"
+      category: item.category || "Commitment",
+      tasks: item.tasks || []
     };
     await upsert(updated);
     if (isNew) { items.push(updated); selectedId = updated.id; }
