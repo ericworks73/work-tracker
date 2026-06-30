@@ -488,6 +488,14 @@ function renderPanel() {
     ${item.lastAction ? `<div class="field-block"><div class="field-label">Last Action</div><div class="field-content">${item.lastAction}</div></div>` : ""}
     <div class="field-block"><div class="field-label">Last Touch</div><div class="field-content">${fmtDate(item.date)}</div></div>
     ${item.notes ? `<div class="field-block"><div class="field-label">Notes</div><div class="notes-box field-content">${item.notes}</div></div>` : ""}
+    <div class="task-section">
+      <div class="field-label" style="margin-bottom:8px;">Things To Be Done</div>
+      <ul class="task-list" id="task-list"></ul>
+      <div class="task-add-row">
+        <input class="task-add-input" id="task-input" placeholder="Add a task..." />
+        <button class="task-add-btn" id="task-add-btn">+ Add</button>
+      </div>
+    </div>
     <div class="detail-btns">
       <button class="btn btn-back" id="btn-back">← Back</button>
       <button class="btn btn-edit" id="btn-edit">Edit</button>
