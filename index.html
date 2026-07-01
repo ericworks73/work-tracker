@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v5.1 -->
+<!DOCTYPE html><!-- v5.2 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -118,9 +118,9 @@
     .field-content b, .field-content strong { font-weight: 700; }
     .field-content i, .field-content em { font-style: italic; }
     .field-content p { margin: 0 0 2px; }
-    .next-box { background: var(--accent-bg); border: 1px solid var(--accent-bd); border-radius: var(--radius-sm); padding: 9px 11px; }
-    .notes-box { background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 11px; }
-    .notes-box .field-content { color: var(--ink-2); }
+    .next-box { background: var(--accent-bg); border: 1px solid var(--accent-bd); border-radius: var(--radius-sm); padding: 10px 13px; }
+    .field-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 13px; }
+    .notes-inner { background: var(--surface-alt); color: var(--ink-2); }
 
     /* Detail footer buttons */
     .btn { border: none; border-radius: var(--radius-sm); padding: 9px 16px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
@@ -254,7 +254,7 @@
   </div>
 </div>
 
-<div id="version">v5.1</div>
+<div id="version">v5.2</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -519,18 +519,20 @@ function renderPanel() {
     </div>
     <div class="dp-body">
       ${item.nextAction ? `<div class="field-block"><div class="field-label">Next action</div><div class="next-box field-content">${item.nextAction}</div></div>` : ""}
-      ${item.context    ? `<div class="field-block"><div class="field-label">Context</div><div class="field-content">${item.context}</div></div>` : ""}
-      ${item.lastAction ? `<div class="field-block"><div class="field-label">Last action</div><div class="field-content">${item.lastAction}</div></div>` : ""}
-      <div class="field-block"><div class="field-label">Last touch</div><div class="field-content" style="color:var(--ink-3)">${fmtDate(item.date)}</div></div>
-      ${item.notes ? `<div class="field-block"><div class="field-label">Notes</div><div class="notes-box field-content">${item.notes}</div></div>` : ""}
-      <div class="task-section">
+      <div class="field-block">
         <div class="field-label">Things to be done</div>
-        <ul class="task-list" id="task-list"></ul>
-        <div class="task-add-row">
-          <input class="task-add-input" id="task-input" placeholder="Add a task..." />
-          <button class="task-add-btn" id="task-add-btn">+ Add</button>
+        <div class="field-box">
+          <ul class="task-list" id="task-list"></ul>
+          <div class="task-add-row">
+            <input class="task-add-input" id="task-input" placeholder="Add a task..." />
+            <button class="task-add-btn" id="task-add-btn">+ Add</button>
+          </div>
         </div>
       </div>
+      ${item.context    ? `<div class="field-block"><div class="field-label">Context</div><div class="field-box field-content">${item.context}</div></div>` : ""}
+      ${item.lastAction ? `<div class="field-block"><div class="field-label">Last action</div><div class="field-box field-content">${item.lastAction}</div></div>` : ""}
+      <div class="field-block"><div class="field-label">Last touch</div><div class="field-box field-content" style="color:var(--ink-3)">${fmtDate(item.date)}</div></div>
+      ${item.notes ? `<div class="field-block"><div class="field-label">Notes</div><div class="field-box notes-inner field-content">${item.notes}</div></div>` : ""}
     </div>
     <div class="dp-foot">
       <button class="btn btn-edit" id="btn-edit">Edit</button>
