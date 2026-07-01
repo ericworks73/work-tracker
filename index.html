@@ -582,12 +582,12 @@ function renderTabs() {
   const tomorrowCount = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) === 1).length;
   const tabs = ["All", ...STATUSES];
   let html = tabs.map(s => `<button class="tab-btn${filterStatus === s ? " active" : ""}" data-status="${s}">${s}</button>`).join("");
-  const aO = filterStatus === "Overdue";
-  html += `<button class="tab-btn" data-status="Overdue" style="color:var(--neon-red);font-weight:${aO?"700":"400"};border-bottom:${aO?"2px solid var(--neon-red)":"2px solid transparent"};opacity:${overdueCount===0?0.4:1};">Overdue (${overdueCount})</button>`;
-  const aT = filterStatus === "Today";
-  html += `<button class="tab-btn" data-status="Today" style="color:var(--neon-amber);font-weight:${aT?"700":"400"};border-bottom:${aT?"2px solid var(--neon-amber)":"2px solid transparent"};opacity:${todayCount===0?0.4:1};">Today (${todayCount})</button>`;
-  const aTom = filterStatus === "Tomorrow";
-  html += `<button class="tab-btn" data-status="Tomorrow" style="color:var(--neon-green);font-weight:${aTom?"700":"400"};border-bottom:${aTom?"2px solid var(--neon-green)":"2px solid transparent"};opacity:${tomorrowCount===0?0.4:1};">Tomorrow (${tomorrowCount})</button>`;
+  const a1 = filterStatus === "Overdue";
+  html += `<button class="tab-btn" data-status="Overdue" style="color:var(--neon-red);font-weight:${a1?"700":"400"};border-bottom:${a1?"2px solid var(--neon-red)":"2px solid transparent"};">Overdue (${overdueCount})</button>`;
+  const a2 = filterStatus === "Today";
+  html += `<button class="tab-btn" data-status="Today" style="color:var(--neon-amber);font-weight:${a2?"700":"400"};border-bottom:${a2?"2px solid var(--neon-amber)":"2px solid transparent"};">Today (${todayCount})</button>`;
+  const a3 = filterStatus === "Tomorrow";
+  html += `<button class="tab-btn" data-status="Tomorrow" style="color:var(--neon-green);font-weight:${a3?"700":"400"};border-bottom:${a3?"2px solid var(--neon-green)":"2px solid transparent"};">Tomorrow (${tomorrowCount})</button>`;
   container.innerHTML = html;
   container.querySelectorAll(".tab-btn").forEach(btn => {
     btn.onclick = () => { filterStatus = btn.dataset.status; render(); };
