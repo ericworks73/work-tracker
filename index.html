@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.0 -->
+<!DOCTYPE html><!-- v6.1 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -29,7 +29,7 @@
       --r-sm:       8px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: var(--bg0); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; color: var(--ink); font-size: 14px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: var(--bg0); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; color: var(--ink); font-size: 15px; }
 
     /* Lock */
     #panel-0 { position: fixed; inset: 0; background: var(--bg0); display: flex; align-items: center; justify-content: center; z-index: 999; }
@@ -43,9 +43,9 @@
 
     /* Header */
     #header { background: var(--bg1); border-bottom: 1px solid var(--glass-bd); padding: 0 18px; display: flex; align-items: center; justify-content: space-between; height: 54px; flex-shrink: 0; }
-    #header-title { font-size: 16px; font-weight: 700; color: var(--ink); letter-spacing: -.3px; }
+    #header-title { font-size: 18px; font-weight: 700; color: var(--ink); letter-spacing: -.3px; }
     #header-sub   { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
-    #add-btn { background: var(--neon-purple); color: #0d0d14; border: none; border-radius: var(--r-sm); padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity .2s; }
+    #add-btn { background: var(--neon-purple); color: #0d0d14; border: none; border-radius: var(--r-sm); padding: 9px 18px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity .2s; }
     #add-btn:hover { opacity: .85; }
 
     /* Overdue bar */
@@ -58,7 +58,7 @@
     #search-input::placeholder { color: var(--ink-3); }
     #search-clear { border: none; background: none; color: var(--ink-3); font-size: 14px; cursor: pointer; display: none; padding: 0; }
     #status-tabs { padding: 0 14px; display: flex; gap: 0; overflow-x: auto; }
-    .tab-btn { border: none; background: none; padding: 9px 12px; font-size: 12px; font-weight: 400; color: var(--ink-3); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; font-family: inherit; transition: color .15s; }
+    .tab-btn { border: none; background: none; padding: 10px 14px; font-size: 13px; font-weight: 400; color: var(--ink-3); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; font-family: inherit; transition: color .15s; }
     .tab-btn.active { font-weight: 700; color: var(--neon-purple); border-bottom-color: var(--neon-purple); }
 
     /* Main */
@@ -75,11 +75,11 @@
     .card.done { opacity: .35; }
     .card-body { padding: 12px 14px 8px; }
     .card-row1 { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 3px; }
-    .card-name { font-weight: 700; font-size: 14px; color: var(--ink); }
+    .card-name { font-weight: 700; font-size: 15px; color: var(--ink); }
     .card-row2 { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; flex-wrap: wrap; }
-    .card-meta { font-size: 11px; color: var(--ink-3); }
-    .card-context { font-size: 11px; color: var(--ink-2); font-style: italic; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.3; }
-    .card-next { font-size: 12px; color: var(--ink-2); margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .card-meta { font-size: 12px; color: var(--ink-3); }
+    .card-context { font-size: 12px; color: var(--ink-2); font-style: italic; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.3; }
+    .card-next { font-size: 13px; color: var(--ink-2); margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .card-next-label { color: var(--neon-green); font-weight: 600; }
     .card-footer { display: flex; align-items: center; gap: 8px; }
     .card-quick { padding: 0 14px 10px; }
@@ -87,39 +87,39 @@
     .quick-btn:hover { border-color: var(--neon-purple); color: var(--neon-purple); }
 
     /* Badges */
-    .pri-badge { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+    .pri-badge { padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
     .pri-High   { background: rgba(255,107,107,0.2); color: var(--neon-red); }
     .pri-Medium { background: rgba(255,209,102,0.2); color: var(--neon-amber); }
     .pri-Low    { background: rgba(255,255,255,0.08); color: var(--ink-3); }
 
-    .status-badge { padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .status-badge { padding: 3px 11px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
     .status-dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
     .s-act  { background: rgba(57,255,154,0.15);  color: var(--neon-green);  } .s-act .status-dot  { background: var(--neon-green); }
     .s-wait { background: rgba(255,209,102,0.15); color: var(--neon-amber);  } .s-wait .status-dot { background: var(--neon-amber); }
     .s-stuck{ background: rgba(255,107,107,0.15); color: var(--neon-red);    } .s-stuck .status-dot{ background: var(--neon-red); }
     .s-done { background: rgba(255,255,255,0.07); color: var(--ink-3);       } .s-done .status-dot { background: var(--ink-3); }
 
-    .follow-chip { font-size: 10px; font-weight: 700; border-radius: 10px; }
+    .follow-chip { font-size: 11px; font-weight: 700; border-radius: 10px; }
     .follow-overdue { color: var(--neon-red);   background: rgba(255,107,107,0.18); padding: 1px 7px; }
     .follow-today   { color: var(--neon-amber); background: rgba(255,209,102,0.18); padding: 1px 7px; }
     .follow-soon    { color: var(--neon-amber); }
     .follow-normal  { color: var(--ink-3); }
-    .follow-date    { font-size: 10px; color: var(--ink-3); }
+    .follow-date    { font-size: 11px; color: var(--ink-3); }
 
     /* Detail pane */
     #detail-pane { flex: 1; background: var(--bg1); border-left: 1px solid var(--glass-bd); overflow-y: auto; padding: 20px 18px; display: none; }
     #detail-pane.open { display: block; }
     .detail-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 3px; }
-    .detail-name { font-size: 20px; font-weight: 700; color: var(--ink); letter-spacing: -.4px; }
-    .detail-meta { font-size: 12px; color: var(--ink-3); margin-bottom: 5px; }
+    .detail-name { font-size: 22px; font-weight: 700; color: var(--ink); letter-spacing: -.4px; }
+    .detail-meta { font-size: 13px; color: var(--ink-3); margin-bottom: 5px; }
     .detail-coworkers { font-size: 12px; color: var(--ink-3); margin-bottom: 10px; }
     .detail-chips { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
     .follow-label { font-size: 11px; color: var(--ink-3); }
 
     /* Field blocks with colored glass sections */
     .field-block { margin-bottom: 14px; border-radius: var(--r); overflow: hidden; }
-    .field-label { font-size: 10px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
-    .field-content { font-size: 14px; color: var(--ink); line-height: 1.65; }
+    .field-label { font-size: 11px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
+    .field-content { font-size: 15px; color: var(--ink); line-height: 1.65; }
     .field-content ul, .field-content ol { padding-left: 18px; margin: 2px 0; }
     .field-content li { margin: 2px 0; }
     .field-content b, .field-content strong { font-weight: 700; color: var(--ink); }
@@ -149,7 +149,7 @@
 
     /* Buttons */
     .detail-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-    .btn { border: none; border-radius: var(--r-sm); padding: 10px 16px; font-size: 13px; cursor: pointer; font-family: inherit; flex: 1; min-width: 80px; font-weight: 600; transition: opacity .15s; }
+    .btn { border: none; border-radius: var(--r-sm); padding: 11px 18px; font-size: 14px; cursor: pointer; font-family: inherit; flex: 1; min-width: 80px; font-weight: 600; transition: opacity .15s; }
     .btn:hover { opacity: .85; }
     .btn-back   { background: var(--glass); color: var(--ink-2); border: 1px solid var(--glass-bd); }
     .btn-edit   { background: var(--neon-purple); color: #0d0d14; }
@@ -174,7 +174,7 @@
     .rte-btn { border: none; background: transparent; padding: 3px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; color: var(--ink-2); font-family: inherit; line-height: 1.4; }
     .rte-btn:hover { background: var(--glass-hover); color: var(--ink); }
     .rte-sep { width: 1px; background: var(--glass-bd); margin: 2px; }
-    .rte-body { padding: 9px 11px; font-size: 14px; min-height: 80px; outline: none; line-height: 1.6; background: var(--bg2); color: var(--ink); }
+    .rte-body { padding: 9px 11px; font-size: 15px; min-height: 80px; outline: none; line-height: 1.6; background: var(--bg2); color: var(--ink); }
     .rte-body ul, .rte-body ol { padding-left: 18px; margin: 2px 0; }
     .rte-body li { margin: 1px 0; }
 
@@ -183,7 +183,7 @@
     #quick-modal.open { display: flex; }
     #quick-box { background: var(--bg2); border: 1px solid var(--glass-bd); width: 100%; max-width: 520px; border-radius: 20px 20px 0 0; padding: 22px 20px 34px; box-shadow: 0 -8px 40px rgba(181,123,255,0.15); }
     #quick-handle { width: 36px; height: 4px; background: var(--glass-bd); border-radius: 2px; margin: 0 auto 18px; }
-    #quick-name    { font-weight: 700; font-size: 15px; color: var(--ink); margin-bottom: 3px; }
+    #quick-name    { font-weight: 700; font-size: 16px; color: var(--ink); margin-bottom: 3px; }
     #quick-company { font-size: 12px; color: var(--ink-3); margin-bottom: 18px; }
     .quick-field   { margin-bottom: 13px; }
     .quick-label   { font-size: 10px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 4px; display: block; }
@@ -204,7 +204,7 @@
     .task-item { display: flex; align-items: flex-start; gap: 9px; padding: 6px 0; border-bottom: 1px solid var(--glass-bd); }
     .task-item:last-child { border-bottom: none; }
     .task-check { width: 15px; height: 15px; margin-top: 2px; cursor: pointer; accent-color: var(--neon-blue); flex-shrink: 0; }
-    .task-text  { flex: 1; font-size: 13px; color: var(--ink); line-height: 1.4; }
+    .task-text  { flex: 1; font-size: 14px; color: var(--ink); line-height: 1.4; }
     .task-text.done { text-decoration: line-through; color: var(--ink-3); }
     .task-dates { font-size: 10px; color: var(--ink-3); white-space: nowrap; margin-top: 1px; }
     .task-add-row { display: flex; gap: 6px; margin-top: 6px; }
@@ -286,7 +286,7 @@
   </div>
 </div>
 
-<div id="version">v6.0</div>
+<div id="version">v6.1</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -470,7 +470,7 @@ function renderList() {
     return `<div class="card${selectedId === item.id ? " selected" : ""}${item.status === "Done" ? " done" : ""}" data-id="${item.id}">
       <div class="card-body">
         <div class="card-row1">
-          <div class="card-name"><button class="star-btn" data-id="${item.id}" style="border:none;background:none;font-size:14px;cursor:pointer;padding:0;margin-right:3px;color:${item.featured ? '#c8a96e' : '#ccc'};">★</button>${item.person}</div>
+          <div class="card-name"><button class="star-btn" data-id="${item.id}" style="border:none;background:none;font-size:14px;cursor:pointer;padding:0;margin-right:3px;color:${item.featured ? 'var(--neon-amber)' : 'rgba(255,255,255,0.2)'};">★</button>${item.person}</div>
           ${item.priority ? `<span class="pri-badge pri-${item.priority}">${item.priority}</span>` : ""}
         </div>
         <div class="card-row2">
@@ -487,8 +487,9 @@ function renderList() {
 
   pane.querySelectorAll(".card").forEach(card => {
     card.addEventListener("click", e => {
-      if (e.target.closest(".quick-btn")) return;
-      selectedId = parseInt(card.dataset.id);
+      if (e.target.closest(".quick-btn") || e.target.closest(".star-btn")) return;
+      const clickedId = parseInt(card.dataset.id);
+      selectedId = (selectedId === clickedId) ? null : clickedId;
       isAdding = false;
       editingItem = null;
       render();
