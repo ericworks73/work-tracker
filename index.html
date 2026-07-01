@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.13 -->
+<!DOCTYPE html><!-- v6.14 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -10,20 +10,20 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg0:        #080c18;
-      --bg1:        #0c1220;
-      --bg2:        #111828;
-      --glass:      rgba(255,255,255,0.04);
-      --glass-bd:   rgba(255,255,255,0.10);
-      --glass-hover:rgba(255,255,255,0.07);
-      --ink:        #f0f4ff;
-      --ink-2:      #a0aec8;
-      --ink-3:      #5a6888;
+      --bg0:        #05080f;
+      --bg1:        #080d18;
+      --bg2:        #0a1428;
+      --glass:      rgba(255,255,255,0.03);
+      --glass-bd:   #1a3a8a;
+      --glass-hover:rgba(26,58,138,0.15);
+      --ink:        #e8eeff;
+      --ink-2:      #7a90b8;
+      --ink-3:      #3a5a9a;
       --neon-purple:#cc2200;
       --neon-blue:  #4488ff;
       --neon-green: #39ff9a;
       --neon-amber: #ffd166;
-      --neon-red:   #ff4444;
+      --neon-red:   #ff6655;
       --neon-pink:  #ff6688;
       --accent-red: #cc2200;
       --accent-blue:#1a3a8a;
@@ -44,7 +44,7 @@
     #btn-3:hover { opacity: .85; }
 
     /* Header */
-    #header { background: var(--bg1); border-bottom: 1px solid rgba(68,136,255,0.2); padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 72px; flex-shrink: 0; gap: 16px; }
+    #header { background: var(--bg1); border-bottom: 2px solid var(--glass-bd); padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 72px; flex-shrink: 0; gap: 16px; }
     #header-title { font-size: 22px; font-weight: 700; color: var(--ink); letter-spacing: -.3px; }
     #header-sub   { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
     #weather-block { display: flex; align-items: center; gap: 16px; flex: 1; justify-content: center; }
@@ -86,7 +86,7 @@
     .card:hover { background: var(--glass-hover); border-color: rgba(181,123,255,0.3); transform: translateY(-1px); }
     .card.selected { border-color: var(--accent-red); background: rgba(204,34,0,0.08); }
     .card.done { opacity: .35; }
-    .card.starred { border-left: 3px solid var(--accent-red); }
+    .card.starred { border-left: 3px solid var(--accent-red); background: rgba(204,34,0,0.04); }
     .card-body { padding: 13px 15px 10px; }
     .card-row1 { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; }
     .card-name { font-weight: 700; font-size: 18px; color: var(--ink); letter-spacing: -.2px; }
@@ -100,7 +100,7 @@
     .quick-btn { border: 1px solid var(--glass-bd); background: var(--glass); color: var(--ink-2); border-radius: var(--r-sm); padding: 5px 13px; font-size: 12px; cursor: pointer; font-family: inherit; transition: all .15s; }
     .quick-btn:hover { border-color: var(--accent-red); color: var(--accent-red); }
     .card-band { background: rgba(255,255,255,0.04); border-top: 1px solid var(--glass-bd); padding: 8px 14px; display: flex; align-items: center; gap: 8px; }
-    .card-band-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: #cc4444; flex-shrink: 0; }
+    .card-band-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: #4488ff; flex-shrink: 0; }
     .card-band-text  { font-size: 12px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
     .card-footer-row { padding: 7px 14px 10px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; border-top: 1px solid var(--glass-bd); }
     .sep { color: var(--glass-bd); font-size: 12px; }
@@ -118,16 +118,16 @@
 
     .status-badge { padding: 3px 11px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
     .status-dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-    .s-act  { background: #fff3e0; color: #e65100; } .s-act .status-dot  { background: #e65100; }
-    .s-wait { background: #e8eaf6; color: #283593; } .s-wait .status-dot { background: #283593; }
-    .s-stuck{ background: #ffcdd2; color: #b71c1c; } .s-stuck .status-dot{ background: #b71c1c; }
-    .s-done { background: rgba(255,255,255,0.07); color: var(--ink-3); } .s-done .status-dot { background: var(--ink-3); }
+    .s-act  { background: #4a1500; color: #ff8866; border: 1px solid #8a2a00; } .s-act .status-dot  { background: #ff8866; }
+    .s-wait { background: #1a2a6a; color: #7aadff; border: 1px solid #2a4aaa; } .s-wait .status-dot { background: #7aadff; }
+    .s-stuck{ background: #5a0a00; color: #ff6655; border: 1px solid #991500; } .s-stuck .status-dot{ background: #ff6655; }
+    .s-done { background: rgba(255,255,255,0.05); color: var(--ink-3); border: 1px solid var(--glass-bd); } .s-done .status-dot { background: var(--ink-3); }
 
     .follow-chip { font-size: 11px; font-weight: 600; border-radius: 6px; padding: 3px 9px; }
-    .follow-overdue  { background: #ffcdd2; color: #b71c1c; font-weight: 700; }
-    .follow-tomorrow { background: #ffe0b2; color: #e65100; }
-    .follow-today    { background: #fff9c4; color: #f57f17; }
-    .follow-future   { background: #e8f5e9; color: #2e7d32; }
+    .follow-overdue  { background: #5a0a00; color: #ff6655; border: 1px solid #991500; font-weight: 700; }
+    .follow-tomorrow { background: #2a2000; color: #ccaa44; border: 1px solid #4a3800; }
+    .follow-today    { background: #3a2800; color: #ffd166; border: 1px solid #6a4a00; font-weight: 700; }
+    .follow-future   { background: #0a2a18; color: #44cc88; border: 1px solid #0e4428; }
     .follow-date     { font-size: 11px; color: var(--ink-3); }
 
     /* Detail pane */
@@ -367,7 +367,7 @@
   </div>
 </div>
 
-<div id="version">v6.13</div>
+<div id="version">v6.14</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -635,7 +635,7 @@ function renderList() {
     return `<div class="card${selectedId === item.id ? " selected" : ""}${item.status === "Done" ? " done" : ""}${item.featured ? " starred" : ""}" data-id="${item.id}">
       <div class="card-body">
         <div class="card-row1">
-          <div class="card-name"><button class="star-btn" data-id="${item.id}" style="border:none;background:none;font-size:15px;cursor:pointer;padding:0;margin-right:5px;color:${item.featured ? '#cc2200' : 'rgba(255,255,255,0.2)'};">★</button>${item.person}</div>
+          <div class="card-name" style="display:flex;align-items:center;gap:10px;">${item.featured ? `<svg width="28" height="18" viewBox="0 0 28 18" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;margin-top:1px;border-radius:2px;cursor:pointer;" class="flag-btn" data-id="${item.id}"><rect width="28" height="18" fill="#b22234"/><rect y="1.38" width="28" height="1.38" fill="#fff"/><rect y="2.77" width="28" height="1.38" fill="#b22234"/><rect y="4.15" width="28" height="1.38" fill="#fff"/><rect y="5.54" width="28" height="1.38" fill="#b22234"/><rect y="6.92" width="28" height="1.38" fill="#fff"/><rect y="8.31" width="28" height="1.38" fill="#b22234"/><rect y="9.69" width="28" height="1.38" fill="#fff"/><rect y="11.08" width="28" height="1.38" fill="#b22234"/><rect y="12.46" width="28" height="1.38" fill="#fff"/><rect y="13.85" width="28" height="1.38" fill="#b22234"/><rect y="15.23" width="28" height="1.38" fill="#fff"/><rect y="16.62" width="28" height="1.38" fill="#b22234"/><rect width="11" height="9.69" fill="#3c3b6e"/><text font-size="1.6" fill="white" text-anchor="middle"><tspan x="1.4" y="2.2">&#x2605;</tspan><tspan x="3.6" y="2.2">&#x2605;</tspan><tspan x="5.8" y="2.2">&#x2605;</tspan><tspan x="8" y="2.2">&#x2605;</tspan><tspan x="10.2" y="2.2">&#x2605;</tspan><tspan x="2.5" y="3.8">&#x2605;</tspan><tspan x="4.7" y="3.8">&#x2605;</tspan><tspan x="6.9" y="3.8">&#x2605;</tspan><tspan x="9.1" y="3.8">&#x2605;</tspan><tspan x="1.4" y="5.4">&#x2605;</tspan><tspan x="3.6" y="5.4">&#x2605;</tspan><tspan x="5.8" y="5.4">&#x2605;</tspan><tspan x="8" y="5.4">&#x2605;</tspan><tspan x="10.2" y="5.4">&#x2605;</tspan><tspan x="2.5" y="7">&#x2605;</tspan><tspan x="4.7" y="7">&#x2605;</tspan><tspan x="6.9" y="7">&#x2605;</tspan><tspan x="9.1" y="7">&#x2605;</tspan><tspan x="1.4" y="8.6">&#x2605;</tspan><tspan x="3.6" y="8.6">&#x2605;</tspan><tspan x="5.8" y="8.6">&#x2605;</tspan><tspan x="8" y="8.6">&#x2605;</tspan><tspan x="10.2" y="8.6">&#x2605;</tspan></text></svg>` : `<svg width="28" height="18" viewBox="0 0 28 18" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;margin-top:1px;border-radius:2px;cursor:pointer;opacity:0.15;" class="flag-btn" data-id="${item.id}"><rect width="28" height="18" fill="#b22234"/><rect y="1.38" width="28" height="1.38" fill="#fff"/><rect y="2.77" width="28" height="1.38" fill="#b22234"/><rect y="4.15" width="28" height="1.38" fill="#fff"/><rect y="5.54" width="28" height="1.38" fill="#b22234"/><rect y="6.92" width="28" height="1.38" fill="#fff"/><rect y="8.31" width="28" height="1.38" fill="#b22234"/><rect y="9.69" width="28" height="1.38" fill="#fff"/><rect y="11.08" width="28" height="1.38" fill="#b22234"/><rect y="12.46" width="28" height="1.38" fill="#fff"/><rect y="13.85" width="28" height="1.38" fill="#b22234"/><rect y="15.23" width="28" height="1.38" fill="#fff"/><rect y="16.62" width="28" height="1.38" fill="#b22234"/><rect width="11" height="9.69" fill="#3c3b6e"/></svg>`}<span>${item.person}</span></div>
         </div>
         <div class="card-row2">
           <span class="card-meta">${metaParts}</span>
@@ -653,7 +653,7 @@ function renderList() {
 
   pane.querySelectorAll(".card").forEach(card => {
     card.addEventListener("click", e => {
-      if (e.target.closest(".quick-btn") || e.target.closest(".star-btn")) return;
+      if (e.target.closest(".quick-btn") || e.target.closest(".flag-btn")) return;
       const clickedId = parseInt(card.dataset.id);
       selectedId = (selectedId === clickedId) ? null : clickedId;
       isAdding = false;
@@ -669,7 +669,7 @@ function renderList() {
     });
   });
 
-  pane.querySelectorAll(".star-btn").forEach(btn => {
+  pane.querySelectorAll(".flag-btn").forEach(btn => {
     btn.addEventListener("click", async e => {
       e.stopPropagation();
       const id = parseInt(btn.dataset.id);
