@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.1 -->
+<!DOCTYPE html><!-- v6.2 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -163,6 +163,8 @@
     .form-field { margin-bottom: 12px; }
     .form-label { font-size: 10px; font-weight: 700; color: var(--ink-3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .6px; display: block; }
     .form-input { width: 100%; background: var(--glass); border: 1px solid var(--glass-bd); border-radius: var(--r-sm); padding: 9px 11px; font-size: 13px; outline: none; font-family: inherit; color: var(--ink); transition: border-color .2s; }
+    input[type="date"] { color-scheme: dark; }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.6); cursor: pointer; }
     .form-input:focus { border-color: var(--neon-purple); }
     .form-row { display: flex; gap: 8px; margin-bottom: 12px; }
     .form-row .form-field { flex: 1; margin-bottom: 0; }
@@ -188,6 +190,7 @@
     .quick-field   { margin-bottom: 13px; }
     .quick-label   { font-size: 10px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 4px; display: block; }
     .quick-input   { width: 100%; background: var(--glass); border: 1px solid var(--glass-bd); border-radius: var(--r-sm); padding: 9px 11px; font-size: 13px; outline: none; font-family: inherit; color: var(--ink); transition: border-color .2s; }
+    .quick-input[type="date"] { color-scheme: dark; }
     .quick-input:focus { border-color: var(--neon-purple); }
     #quick-row     { display: flex; gap: 8px; margin-bottom: 18px; }
     #quick-row .quick-field { flex: 1; margin-bottom: 0; }
@@ -286,7 +289,7 @@
   </div>
 </div>
 
-<div id="version">v6.1</div>
+<div id="version">v6.2</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -378,6 +381,10 @@ function getFiltered() {
   let f;
   if (filterStatus === "Overdue") {
     f = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) < 0);
+  } else if (filterStatus === "Today") {
+    f = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) === 0);
+  } else if (filterStatus === "Tomorrow") {
+    f = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) === 1);
   } else {
     f = items.filter(i => filterStatus === "All" || i.status === filterStatus);
   }
@@ -428,12 +435,22 @@ function renderOverdue() {
 
 function renderTabs() {
   const container = document.getElementById("status-tabs");
-  const overdueCount = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) < 0).length;
+  const overdueCount  = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) < 0).length;
+  const todayCount    = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) === 0).length;
+  const tomorrowCount = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) === 1).length;
   const tabs = ["All", ...STATUSES];
   let html = tabs.map(s => `<button class="tab-btn${filterStatus === s ? " active" : ""}" data-status="${s}">${s}</button>`).join("");
   if (overdueCount > 0) {
-    const isActive = filterStatus === "Overdue";
-    html += `<button class="tab-btn" data-status="Overdue" style="color:#c03030;font-weight:${isActive ? "700" : "400"};border-bottom:${isActive ? "2px solid #c03030" : "2px solid transparent"};">Overdue (${overdueCount})</button>`;
+    const a = filterStatus === "Overdue";
+    html += `<button class="tab-btn" data-status="Overdue" style="color:var(--neon-red);font-weight:${a?"700":"400"};border-bottom:${a?"2px solid var(--neon-red)":"2px solid transparent"};">Overdue (${overdueCount})</button>`;
+  }
+  if (todayCount > 0) {
+    const a = filterStatus === "Today";
+    html += `<button class="tab-btn" data-status="Today" style="color:var(--neon-amber);font-weight:${a?"700":"400"};border-bottom:${a?"2px solid var(--neon-amber)":"2px solid transparent"};">Today (${todayCount})</button>`;
+  }
+  if (tomorrowCount > 0) {
+    const a = filterStatus === "Tomorrow";
+    html += `<button class="tab-btn" data-status="Tomorrow" style="color:var(--neon-amber);font-weight:${a?"700":"400"};border-bottom:${a?"2px solid var(--neon-amber)":"2px solid transparent"};opacity:${a?1:0.7};">Tomorrow (${tomorrowCount})</button>`;
   }
   container.innerHTML = html;
   container.querySelectorAll(".tab-btn").forEach(btn => {
