@@ -561,7 +561,7 @@ function render() {
 function renderHeader() {
   const open = items.filter(i => i.status !== "Done").length;
   const closed = items.filter(i => i.status === "Done").length;
-  document.getElementById("header-sub").textContent = `${open} open · ${closed} closed`;
+  document.getElementById("header-sub").textContent = `${open} open`;
 }
 
 function renderOverdue() {
