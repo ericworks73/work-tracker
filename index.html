@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.14 -->
+<!DOCTYPE html><!-- v6.15 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -96,7 +96,6 @@
     .card-next { font-size: 13px; color: var(--ink-2); margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .card-next-label { color: var(--neon-green); font-weight: 600; }
     .card-footer { display: flex; align-items: center; gap: 8px; }
-    .card-quick { padding: 0 15px 11px; }
     .quick-btn { border: 1px solid var(--glass-bd); background: var(--glass); color: var(--ink-2); border-radius: var(--r-sm); padding: 5px 13px; font-size: 12px; cursor: pointer; font-family: inherit; transition: all .15s; }
     .quick-btn:hover { border-color: var(--accent-red); color: var(--accent-red); }
     .card-band { background: rgba(255,255,255,0.04); border-top: 1px solid var(--glass-bd); padding: 8px 14px; display: flex; align-items: center; gap: 8px; }
@@ -367,7 +366,7 @@
   </div>
 </div>
 
-<div id="version">v6.14</div>
+<div id="version">v6.15</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -642,12 +641,19 @@ function renderList() {
         </div>
       </div>
       ${nxt ? `<div class="card-band"><span class="card-band-label">Next</span><span class="card-band-text">${nxt}</span></div>` : ""}
+      ${item.status !== "Done" ? `
+      <div class="card-footer-row">
+        <button class="quick-btn" data-id="${item.id}">⚡ Quick Update</button>
+        <span class="sep" style="margin-left:8px;">·</span>
+        <span class="status-badge ${statusClass(item.status)}"><span class="status-dot"></span>Status: ${item.status}</span>
+        ${item.followUpDate ? `<span class="sep">·</span>${followChipHtml(item.followUpDate)}` : ""}
+        <span style="margin-left:auto;display:flex;align-items:center;gap:4px;">${touchHtml}</span>
+      </div>` : `
       <div class="card-footer-row">
         <span class="status-badge ${statusClass(item.status)}"><span class="status-dot"></span>Status: ${item.status}</span>
         ${item.followUpDate ? `<span class="sep">·</span>${followChipHtml(item.followUpDate)}` : ""}
         <span style="margin-left:auto;display:flex;align-items:center;gap:4px;">${touchHtml}</span>
-      </div>
-      ${item.status !== "Done" ? `<div class="card-quick"><button class="quick-btn" data-id="${item.id}">⚡ Quick Update</button></div>` : ""}
+      </div>`}
     </div>`;
   }).join("");
 
