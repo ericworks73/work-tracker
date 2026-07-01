@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.3 -->
+<!DOCTYPE html><!-- v6.4 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -69,22 +69,28 @@
     #list-pane.narrow { width: 42%; min-width: 160px; }
 
     /* Cards */
-    .card { background: var(--glass); border: 1px solid var(--glass-bd); border-radius: var(--r); cursor: pointer; transition: background .15s, border-color .15s, transform .15s; }
+    .card { background: var(--glass); border: 1px solid var(--glass-bd); border-radius: var(--r); cursor: pointer; transition: background .15s, border-color .15s, transform .15s; border-left: 3px solid transparent; }
     .card:hover { background: var(--glass-hover); border-color: rgba(181,123,255,0.3); transform: translateY(-1px); }
     .card.selected { border-color: var(--neon-purple); background: rgba(181,123,255,0.08); }
     .card.done { opacity: .35; }
-    .card-body { padding: 12px 14px 8px; }
-    .card-row1 { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-bottom: 3px; }
-    .card-name { font-weight: 700; font-size: 15px; color: var(--ink); }
-    .card-row2 { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; flex-wrap: wrap; }
+    .card.starred { border-left: 3px solid var(--neon-purple); }
+    .card-body { padding: 13px 15px 10px; }
+    .card-row1 { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .card-name { font-weight: 700; font-size: 18px; color: var(--ink); letter-spacing: -.2px; }
+    .card-row2 { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
     .card-meta { font-size: 12px; color: var(--ink-3); }
-    .card-context { font-size: 12px; color: var(--ink-2); font-style: italic; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.3; }
+    .card-context { display: none; }
     .card-next { font-size: 13px; color: var(--ink-2); margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .card-next-label { color: var(--neon-green); font-weight: 600; }
     .card-footer { display: flex; align-items: center; gap: 8px; }
-    .card-quick { padding: 0 14px 10px; }
-    .quick-btn { border: 1px solid var(--glass-bd); background: var(--glass); color: var(--ink-2); border-radius: var(--r-sm); padding: 4px 12px; font-size: 11px; cursor: pointer; font-family: inherit; transition: all .15s; }
+    .card-quick { padding: 0 15px 11px; }
+    .quick-btn { border: 1px solid var(--glass-bd); background: var(--glass); color: var(--ink-2); border-radius: var(--r-sm); padding: 5px 13px; font-size: 12px; cursor: pointer; font-family: inherit; transition: all .15s; }
     .quick-btn:hover { border-color: var(--neon-purple); color: var(--neon-purple); }
+    .touch-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+    .touch-today    { background: var(--neon-green); box-shadow: 0 0 6px var(--neon-green); }
+    .touch-yesterday{ background: var(--neon-amber); box-shadow: 0 0 6px var(--neon-amber); }
+    .touch-old      { background: var(--neon-red);   box-shadow: 0 0 6px var(--neon-red); }
+    .touch-label    { font-size: 11px; color: var(--ink-3); }
 
     /* Badges */
     .pri-badge { padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
@@ -164,7 +170,7 @@
     .form-label { font-size: 10px; font-weight: 700; color: var(--ink-3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .6px; display: block; }
     .form-input { width: 100%; background: var(--glass); border: 1px solid var(--glass-bd); border-radius: var(--r-sm); padding: 9px 11px; font-size: 13px; outline: none; font-family: inherit; color: var(--ink); transition: border-color .2s; }
     input[type="date"] { color-scheme: dark; }
-    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.6); cursor: pointer; }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.7) sepia(1) saturate(5) hue-rotate(220deg) brightness(1.4); cursor: pointer; width: 18px; height: 18px; opacity: 0.9; }
     .form-input:focus { border-color: var(--neon-purple); }
     .form-row { display: flex; gap: 8px; margin-bottom: 12px; }
     .form-row .form-field { flex: 1; margin-bottom: 0; }
@@ -289,7 +295,7 @@
   </div>
 </div>
 
-<div id="version">v6.3</div>
+<div id="version">v6.4</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -478,25 +484,32 @@ function renderList() {
   }
   pane.innerHTML = filtered.map(item => {
     const metaParts = [item.company, item.customerType, item.type].filter(Boolean).join(" · ");
-        const starHtml = item.featured ? '<span style="color:#c8a96e;font-size:14px;margin-right:3px;">★</span>' : '';
-    const coworkers = item.coWorkers ? ` · 👥 ${item.coWorkers}` : "";
-    const ctx = item.context ? stripHtml(item.context) : "";
     const nxt = item.nextAction ? stripHtml(item.nextAction) : "";
     const followUp = item.followUpDate ? `${followChipHtml(item.followUpDate)} <span class="follow-date">Follow up ${fmtDate(item.followUpDate)}</span>` : "";
+    const touchDays = item.date ? Math.floor((new Date() - new Date(item.date)) / 86400000) : 99;
+    const touchDotCls = touchDays === 0 ? "touch-dot touch-today" : touchDays === 1 ? "touch-dot touch-yesterday" : touchDays >= 7 ? "touch-dot touch-old" : "";
+    const touchLbl = touchDays === 0 ? "today" : touchDays === 1 ? "yesterday" : `${touchDays}d ago`;
+    const touchHtml = touchDotCls
+      ? `<span class="${touchDotCls}"></span><span class="touch-label">${touchLbl}</span>`
+      : `<span class="touch-label">${touchLbl}</span>`;
 
-    return `<div class="card${selectedId === item.id ? " selected" : ""}${item.status === "Done" ? " done" : ""}" data-id="${item.id}">
+    return `<div class="card${selectedId === item.id ? " selected" : ""}${item.status === "Done" ? " done" : ""}${item.featured ? " starred" : ""}" data-id="${item.id}">
       <div class="card-body">
         <div class="card-row1">
-          <div class="card-name"><button class="star-btn" data-id="${item.id}" style="border:none;background:none;font-size:14px;cursor:pointer;padding:0;margin-right:3px;color:${item.featured ? 'var(--neon-amber)' : 'rgba(255,255,255,0.2)'};">★</button>${item.person}</div>
-          ${item.priority ? `<span class="pri-badge pri-${item.priority}">${item.priority}</span>` : ""}
+          <div class="card-name"><button class="star-btn" data-id="${item.id}" style="border:none;background:none;font-size:15px;cursor:pointer;padding:0;margin-right:5px;color:${item.featured ? 'var(--neon-amber)' : 'rgba(255,255,255,0.2)'};">★</button>${item.person}</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            ${item.priority ? `<span class="pri-badge pri-${item.priority}">${item.priority}</span>` : ""}
+            <span class="status-badge ${statusClass(item.status)}"><span class="status-dot"></span>${item.status}</span>
+          </div>
         </div>
         <div class="card-row2">
-          <span class="card-meta">${metaParts}${coworkers}</span>
-          <span class="status-badge ${statusClass(item.status)}"><span class="status-dot"></span>${item.status}</span>
+          <span class="card-meta">${metaParts}</span>
         </div>
-        ${ctx ? `<div class="card-context">(${ctx})</div>` : ""}
         ${nxt ? `<div class="card-next"><span class="card-next-label">Next: </span>${nxt}</div>` : ""}
-        <div class="card-footer">${followUp}</div>
+        <div class="card-footer">
+          ${followUp}
+          <span style="margin-left:auto;display:flex;align-items:center;gap:4px;">${touchHtml}</span>
+        </div>
       </div>
       ${item.status !== "Done" ? `<div class="card-quick"><button class="quick-btn" data-id="${item.id}">⚡ Quick Update</button></div>` : ""}
     </div>`;
