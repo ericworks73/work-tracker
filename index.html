@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.2 -->
+<!DOCTYPE html><!-- v6.3 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -289,7 +289,7 @@
   </div>
 </div>
 
-<div id="version">v6.2</div>
+<div id="version">v6.3</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -450,7 +450,7 @@ function renderTabs() {
   }
   if (tomorrowCount > 0) {
     const a = filterStatus === "Tomorrow";
-    html += `<button class="tab-btn" data-status="Tomorrow" style="color:var(--neon-amber);font-weight:${a?"700":"400"};border-bottom:${a?"2px solid var(--neon-amber)":"2px solid transparent"};opacity:${a?1:0.7};">Tomorrow (${tomorrowCount})</button>`;
+    html += `<button class="tab-btn" data-status="Tomorrow" style="color:var(--neon-green);font-weight:${a?"700":"400"};border-bottom:${a?"2px solid var(--neon-green)":"2px solid transparent"};opacity:${a?1:0.7};">Tomorrow (${tomorrowCount})</button>`;
   }
   container.innerHTML = html;
   container.querySelectorAll(".tab-btn").forEach(btn => {
