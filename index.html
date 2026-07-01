@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.5 -->
+<!DOCTYPE html><!-- v6.6 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -300,7 +300,7 @@
   </div>
 </div>
 
-<div id="version">v6.5</div>
+<div id="version">v6.6</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -579,15 +579,6 @@ function renderPanel() {
         const starHtml = item.featured ? '<span style="color:#c8a96e;font-size:14px;margin-right:3px;">★</span>' : '';
 
   detail.innerHTML = `
-    <div class="detail-header">
-      <div class="detail-name">${item.person}</div>
-      <span class="status-badge ${statusClass(item.status)}"><span class="status-dot"></span>${item.status}</span>
-    </div>
-    <div class="detail-meta">${metaParts}${item.coWorkers ? " · " + item.coWorkers : ""}</div>
-    <div class="detail-chips">
-      ${item.priority ? `<span class="pri-badge pri-${item.priority}">${item.priority}</span>` : ""}
-      ${item.followUpDate ? `<span class="follow-label">Follow up: <strong style="color:var(--ink)">${fmtDate(item.followUpDate)}</strong></span> ${followChipHtml(item.followUpDate)}` : ""}
-    </div>
     ${item.nextAction ? `<div class="section-box box-next"><div class="field-label">Next Action</div><div class="field-content">${item.nextAction}</div></div>` : ""}
     <div class="section-box box-tasks">
       <div class="field-label">Things To Be Done</div>
