@@ -1,12 +1,12 @@
-<!DOCTYPE html><!-- v6.6 -->
+<!DOCTYPE html><!-- v6.10 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Work Tracker" />
-  <title>Work Tracker</title>
+  <meta name="apple-mobile-web-app-title" content="GSD" />
+  <title>GSD</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
@@ -42,9 +42,20 @@
     #btn-3:hover { opacity: .85; }
 
     /* Header */
-    #header { background: var(--bg1); border-bottom: 1px solid var(--glass-bd); padding: 0 18px; display: flex; align-items: center; justify-content: space-between; height: 54px; flex-shrink: 0; }
-    #header-title { font-size: 18px; font-weight: 700; color: var(--ink); letter-spacing: -.3px; }
-    #header-sub   { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+    #header { background: var(--bg1); border-bottom: 1px solid var(--glass-bd); padding: 0 20px; display: flex; align-items: center; justify-content: space-between; height: 72px; flex-shrink: 0; gap: 16px; }
+    #header-title { font-size: 22px; font-weight: 700; color: var(--ink); letter-spacing: -.3px; }
+    #header-sub   { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+    #weather-block { display: flex; align-items: center; gap: 16px; flex: 1; justify-content: center; }
+    #weather-now { display: flex; align-items: center; gap: 8px; }
+    #weather-temp { font-size: 28px; font-weight: 700; color: var(--ink); letter-spacing: -.5px; line-height: 1; }
+    #weather-desc { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+    #weather-icon { font-size: 28px; line-height: 1; }
+    #weather-forecast { display: flex; gap: 10px; border-left: 1px solid var(--glass-bd); padding-left: 16px; }
+    .fc-slot { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .fc-time { font-size: 10px; color: var(--ink-3); }
+    .fc-icon { font-size: 14px; }
+    .fc-temp { font-size: 12px; font-weight: 600; color: var(--ink); }
+    #weather-loading { font-size: 11px; color: var(--ink-3); }
     #add-btn { background: var(--neon-purple); color: #0d0d14; border: none; border-radius: var(--r-sm); padding: 9px 18px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity .2s; }
     #add-btn:hover { opacity: .85; }
 
@@ -239,19 +250,38 @@
 
 <div id="panel-0">
   <div id="panel-1">
-    <h2>Work Tracker</h2>
-    <p>Enter your password to continue</p>
+    <h2>GSD</h2>
+    <p>Enter your password to get stuff done</p>
     <input type="password" id="field-2" placeholder="Password" />
     <button id="btn-3">Unlock</button>
   </div>
 </div>
 
 <div id="header">
-  <div>
-    <div id="header-title">Work Tracker</div>
+  <div style="flex-shrink:0;">
+    <div id="header-title">GSD</div>
     <div id="header-sub">— open · — closed</div>
   </div>
-  <button id="add-btn">+ Add</button>
+  <div id="weather-block">
+    <div id="weather-now">
+      <div id="weather-icon">—</div>
+      <div>
+        <div id="weather-temp">—°</div>
+        <div id="weather-desc">Winter Garden, FL</div>
+      </div>
+    </div>
+    <div id="weather-forecast">
+      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
+      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
+      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
+      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
+      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
+      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+    <button id="add-btn">+ Add</button>
+  </div>
 </div>
 
 <div id="overdue-bar">
@@ -300,7 +330,7 @@
   </div>
 </div>
 
-<div id="version">v6.6</div>
+<div id="version">v6.10</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -326,6 +356,42 @@ let isAdding = false;
 if (sessionStorage.getItem(SESSION_KEY)) {
   document.getElementById("panel-0").style.display = "none";
 }
+// Weather — Open-Meteo (free, no key needed)
+async function loadWeather() {
+  try {
+    const lat = 28.5653, lon = -81.5862;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&hourly=temperature_2m,weathercode&temperature_unit=fahrenheit&forecast_days=1&timezone=America%2FNew_York`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const wmoIcon = c => c===0?"☀️":c<=3?"⛅":c<=49?"🌫️":c<=67?"🌧️":c<=77?"❄️":c<=82?"🌦️":"⛈️";
+    const wmoDesc = c => c===0?"Clear":c<=3?"Partly cloudy":c<=49?"Foggy":c<=67?"Rainy":c<=77?"Snow":c<=82?"Showers":"Thunderstorms";
+    const cur = data.current;
+    document.getElementById("weather-temp").textContent = Math.round(cur.temperature_2m) + "°F";
+    document.getElementById("weather-icon").textContent = wmoIcon(cur.weathercode);
+    document.getElementById("weather-desc").textContent = wmoDesc(cur.weathercode) + " · Winter Garden FL";
+    const now = new Date();
+    const hours = data.hourly.time;
+    const temps = data.hourly.temperature_2m;
+    const codes = data.hourly.weathercode;
+    const slots = document.querySelectorAll(".fc-slot");
+    let count = 0;
+    for (let i = 0; i < hours.length && count < 6; i++) {
+      const t = new Date(hours[i]);
+      if (t > now) {
+        const h = t.getHours();
+        slots[count].querySelector(".fc-time").textContent = (h%12||12) + (h>=12?"PM":"AM");
+        slots[count].querySelector(".fc-icon").textContent = wmoIcon(codes[i]);
+        slots[count].querySelector(".fc-temp").textContent = Math.round(temps[i]) + "°";
+        count++;
+      }
+    }
+  } catch(e) {
+    document.getElementById("weather-desc").textContent = "Weather unavailable";
+  }
+}
+loadWeather();
+setInterval(loadWeather, 10 * 60 * 1000);
+
 document.getElementById("btn-3").onclick = () => {
   if (document.getElementById("field-2").value === x9f2) {
     sessionStorage.setItem(SESSION_KEY, "1");
