@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.23 -->
+<!DOCTYPE html><!-- v6.24 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -364,7 +364,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(58,90,154,0.4);pointer-events:none;z-index:999;">v6.23</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(58,90,154,0.4);pointer-events:none;z-index:999;">v6.24</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -582,18 +582,12 @@ function renderTabs() {
   const tomorrowCount = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) === 1).length;
   const tabs = ["All", ...STATUSES];
   let html = tabs.map(s => `<button class="tab-btn${filterStatus === s ? " active" : ""}" data-status="${s}">${s}</button>`).join("");
-  if (overdueCount > 0) {
-    const a = filterStatus === "Overdue";
-    html += `<button class="tab-btn" data-status="Overdue" style="color:var(--neon-red);font-weight:${a?"700":"400"};border-bottom:${a?"2px solid var(--neon-red)":"2px solid transparent"};">Overdue (${overdueCount})</button>`;
-  }
-  if (todayCount > 0) {
-    const a = filterStatus === "Today";
-    html += `<button class="tab-btn" data-status="Today" style="color:var(--neon-amber);font-weight:${a?"700":"400"};border-bottom:${a?"2px solid var(--neon-amber)":"2px solid transparent"};">Today (${todayCount})</button>`;
-  }
-  if (tomorrowCount > 0) {
-    const a = filterStatus === "Tomorrow";
-    html += `<button class="tab-btn" data-status="Tomorrow" style="color:var(--neon-green);font-weight:${a?"700":"400"};border-bottom:${a?"2px solid var(--neon-green)":"2px solid transparent"};opacity:${a?1:0.7};">Tomorrow (${tomorrowCount})</button>`;
-  }
+  const aO = filterStatus === "Overdue";
+  html += `<button class="tab-btn" data-status="Overdue" style="color:var(--neon-red);font-weight:${aO?"700":"400"};border-bottom:${aO?"2px solid var(--neon-red)":"2px solid transparent"};opacity:${overdueCount===0?0.4:1};">Overdue (${overdueCount})</button>`;
+  const aT = filterStatus === "Today";
+  html += `<button class="tab-btn" data-status="Today" style="color:var(--neon-amber);font-weight:${aT?"700":"400"};border-bottom:${aT?"2px solid var(--neon-amber)":"2px solid transparent"};opacity:${todayCount===0?0.4:1};">Today (${todayCount})</button>`;
+  const aTom = filterStatus === "Tomorrow";
+  html += `<button class="tab-btn" data-status="Tomorrow" style="color:var(--neon-green);font-weight:${aTom?"700":"400"};border-bottom:${aTom?"2px solid var(--neon-green)":"2px solid transparent"};opacity:${tomorrowCount===0?0.4:1};">Tomorrow (${tomorrowCount})</button>`;
   container.innerHTML = html;
   container.querySelectorAll(".tab-btn").forEach(btn => {
     btn.onclick = () => { filterStatus = btn.dataset.status; render(); };
