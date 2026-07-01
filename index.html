@@ -562,14 +562,7 @@ function renderHeader() {
 }
 
 function renderOverdue() {
-  const count = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) < 0).length;
-  const bar = document.getElementById("overdue-bar");
-  if (count > 0) {
-    bar.style.display = "flex";
-    document.getElementById("overdue-text").textContent = `⚠ ${count} item${count > 1 ? "s" : ""} past follow-up date`;
-  } else {
-    bar.style.display = "none";
-  }
+  // overdue bar removed — tabs now always show overdue count
 }
 
 function renderTabs() {
