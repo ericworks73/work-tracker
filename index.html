@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.31 -->
+<!DOCTYPE html><!-- v6.32 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -7,6 +7,23 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="GSD" />
   <title>GSD</title>
+  <script>
+    // Cache buster: check the live file for a newer version and force one reload if stale.
+    (function () {
+      const CURRENT_VERSION = "v6.32";
+      const RELOAD_FLAG = "gsd_reloaded_for_" + CURRENT_VERSION;
+      fetch(window.location.href, { cache: "no-store" })
+        .then(r => r.text())
+        .then(html => {
+          const match = html.match(/<!--\s*(v[\d.]+)\s*-->/);
+          if (match && match[1] !== CURRENT_VERSION && !sessionStorage.getItem(RELOAD_FLAG)) {
+            sessionStorage.setItem(RELOAD_FLAG, "1");
+            window.location.reload(true);
+          }
+        })
+        .catch(() => {}); // fail silently, never block the app from loading
+    })();
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
@@ -379,7 +396,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.31</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.32</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
