@@ -405,7 +405,6 @@ const SUPABASE_URL = "https://whyklzysiavybgxltjzt.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndoeWtsenlzaWF2eWJneGx0anp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExODIyODEsImV4cCI6MjA5Njc1ODI4MX0.x7yEeWHDhwgZreDP-SME3dWIC-B-kthc4EC0YOuphIg";
 const TABLE = "work_tracker_items";
 const STATUSES = ["I Need To Act","Waiting On Them","Stuck","Done"];
-const PRIORITIES = ["High","Medium","Low"];
 const TYPES = ["Sales Opportunity","Renewal","Escalation","Internal"];
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -838,17 +837,18 @@ function renderEditForm() {
     <div class="form-field"><label class="form-label">Context (why it's on your list)</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-context")}</div><div class="rte-body" id="f-context" contenteditable="true">${item.context||""}</div></div></div>
     <div class="form-field"><label class="form-label">Last Action</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-lastAction")}</div><div class="rte-body" id="f-lastAction" contenteditable="true">${item.lastAction||""}</div></div></div>
     <div class="form-field"><label class="form-label">Next Action</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-nextAction")}</div><div class="rte-body" id="f-nextAction" contenteditable="true">${item.nextAction||""}</div></div></div>
-    <div class="form-field"><label class="form-label">Status</label><select class="form-input" id="f-status">${STATUSES.map(s => `<option${(item.status||"I Need To Act")===s?" selected":""}>${s}</option>`).join("")}</select></div>
     <div class="form-row">
-      <div class="form-field"><label class="form-label">Co-Workers Involved</label><input class="form-input" id="f-coWorkers" value="${item.coWorkers||""}" placeholder="Names" /></div>
+      <div class="form-field"><label class="form-label">Status</label><select class="form-input" id="f-status">${STATUSES.map(s => `<option${(item.status||"I Need To Act")===s?" selected":""}>${s}</option>`).join("")}</select></div>
       <div class="form-field"><label class="form-label">Customer Type</label><select class="form-input" id="f-customerType"><option value="">Not set</option><option${item.customerType==="Prospect"?" selected":""}>Prospect</option><option${item.customerType==="Current Customer"?" selected":""}>Current Customer</option></select></div>
     </div>
-    <div class="form-field"><label class="form-label">Type</label><select class="form-input" id="f-type"><option value="">Not set</option>${TYPES.map(t => `<option${item.type===t?" selected":""}>${t}</option>`).join("")}</select></div>
     <div class="form-row">
-      <div class="form-field"><label class="form-label">Priority</label><select class="form-input" id="f-priority">${PRIORITIES.map(p => `<option${(item.priority||"Medium")===p?" selected":""}>${p}</option>`).join("")}</select></div>
-      <div class="form-field"><label class="form-label">Follow-up Date</label><input type="date" class="form-input" id="f-followUpDate" value="${item.followUpDate||""}" /></div>
+      <div class="form-field"><label class="form-label">Type</label><select class="form-input" id="f-type"><option value="">Not set</option>${TYPES.map(t => `<option${item.type===t?" selected":""}>${t}</option>`).join("")}</select></div>
+      <div class="form-field"><label class="form-label">Co-Workers Involved</label><input class="form-input" id="f-coWorkers" value="${item.coWorkers||""}" placeholder="Names" /></div>
     </div>
-    <div class="form-field"><label class="form-label">Last Touch Date</label><input type="date" class="form-input" id="f-date" value="${item.date||todayStr()}" /></div>
+    <div class="form-row">
+      <div class="form-field"><label class="form-label">Follow-up Date</label><input type="date" class="form-input" id="f-followUpDate" value="${item.followUpDate||""}" /></div>
+      <div class="form-field"><label class="form-label">Last Touch Date</label><input type="date" class="form-input" id="f-date" value="${item.date||todayStr()}" /></div>
+    </div>
     <div class="form-field"><label class="form-label">Notes</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-notes")}</div><div class="rte-body" id="f-notes" contenteditable="true" style="min-height:100px">${item.notes||""}</div></div></div>
     <div class="form-btns">
       <button class="btn btn-edit" id="f-save">Save</button>
@@ -873,7 +873,6 @@ function renderEditForm() {
       coWorkers: document.getElementById("f-coWorkers").value,
       customerType: document.getElementById("f-customerType").value,
       type: document.getElementById("f-type").value,
-      priority: document.getElementById("f-priority").value,
       followUpDate: document.getElementById("f-followUpDate").value || null,
       date: document.getElementById("f-date").value,
       notes: document.getElementById("f-notes").innerHTML,
