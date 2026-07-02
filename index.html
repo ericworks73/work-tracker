@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.32 -->
+<!DOCTYPE html><!-- v6.33 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -10,7 +10,7 @@
   <script>
     // Cache buster: check the live file for a newer version and force one reload if stale.
     (function () {
-      const CURRENT_VERSION = "v6.32";
+      const CURRENT_VERSION = "v6.33";
       const RELOAD_FLAG = "gsd_reloaded_for_" + CURRENT_VERSION;
       fetch(window.location.href, { cache: "no-store" })
         .then(r => r.text())
@@ -396,7 +396,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.32</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.33</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -874,7 +874,7 @@ function renderEditForm() {
       customerType: document.getElementById("f-customerType").value,
       type: document.getElementById("f-type").value,
       priority: document.getElementById("f-priority").value,
-      followUpDate: document.getElementById("f-followUpDate").value,
+      followUpDate: document.getElementById("f-followUpDate").value || null,
       date: document.getElementById("f-date").value,
       notes: document.getElementById("f-notes").innerHTML,
       category: item.category || "Commitment",
@@ -897,9 +897,9 @@ function renderEditForm() {
 
       document.getElementById("scm-save").onclick = async () => {
         if (newStatus === "Done" && document.getElementById("scm-cleardate").checked) {
-          updated.followUpDate = "";
+          updated.followUpDate = null;
         } else {
-          updated.followUpDate = document.getElementById("scm-next").value;
+          updated.followUpDate = document.getElementById("scm-next").value || null;
         }
         await upsert(updated);
         items = items.map(i => i.id === updated.id ? updated : i);
