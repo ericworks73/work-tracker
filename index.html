@@ -832,23 +832,25 @@ function renderEditForm() {
 
   pane.innerHTML = `
     <div class="form-title">${isNew ? "New Item" : "Edit Item"}</div>
-    <div class="form-field"><label class="form-label">Person</label><input class="form-input" id="f-person" value="${item.person||""}" placeholder="Name" /></div>
-    <div class="form-field"><label class="form-label">Company</label><input class="form-input" id="f-company" value="${item.company||""}" placeholder="Company or team" /></div>
-    <div class="form-field"><label class="form-label">Context (why it's on your list)</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-context")}</div><div class="rte-body" id="f-context" contenteditable="true">${item.context||""}</div></div></div>
-    <div class="form-field"><label class="form-label">Last Action</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-lastAction")}</div><div class="rte-body" id="f-lastAction" contenteditable="true">${item.lastAction||""}</div></div></div>
-    <div class="form-field"><label class="form-label">Next Action</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-nextAction")}</div><div class="rte-body" id="f-nextAction" contenteditable="true">${item.nextAction||""}</div></div></div>
     <div class="form-row">
-      <div class="form-field"><label class="form-label">Status</label><select class="form-input" id="f-status">${STATUSES.map(s => `<option${(item.status||"I Need To Act")===s?" selected":""}>${s}</option>`).join("")}</select></div>
-      <div class="form-field"><label class="form-label">Customer Type</label><select class="form-input" id="f-customerType"><option value="">Not set</option><option${item.customerType==="Prospect"?" selected":""}>Prospect</option><option${item.customerType==="Current Customer"?" selected":""}>Current Customer</option></select></div>
+      <div class="form-field"><label class="form-label">Person</label><input class="form-input" id="f-person" value="${item.person||""}" placeholder="Name" /></div>
+      <div class="form-field"><label class="form-label">Company</label><input class="form-input" id="f-company" value="${item.company||""}" placeholder="Company or team" /></div>
     </div>
     <div class="form-row">
+      <div class="form-field"><label class="form-label">Status</label><select class="form-input" id="f-status">${STATUSES.map(s => `<option${(item.status||"I Need To Act")===s?" selected":""}>${s}</option>`).join("")}</select></div>
       <div class="form-field"><label class="form-label">Type</label><select class="form-input" id="f-type"><option value="">Not set</option>${TYPES.map(t => `<option${item.type===t?" selected":""}>${t}</option>`).join("")}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-field"><label class="form-label">Customer Type</label><select class="form-input" id="f-customerType"><option value="">Not set</option><option${item.customerType==="Prospect"?" selected":""}>Prospect</option><option${item.customerType==="Current Customer"?" selected":""}>Current Customer</option></select></div>
       <div class="form-field"><label class="form-label">Co-Workers Involved</label><input class="form-input" id="f-coWorkers" value="${item.coWorkers||""}" placeholder="Names" /></div>
     </div>
     <div class="form-row">
       <div class="form-field"><label class="form-label">Follow-up Date</label><input type="date" class="form-input" id="f-followUpDate" value="${item.followUpDate||""}" /></div>
       <div class="form-field"><label class="form-label">Last Touch Date</label><input type="date" class="form-input" id="f-date" value="${item.date||todayStr()}" /></div>
     </div>
+    <div class="form-field"><label class="form-label">Context (why it's on your list)</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-context")}</div><div class="rte-body" id="f-context" contenteditable="true">${item.context||""}</div></div></div>
+    <div class="form-field"><label class="form-label">Last Action</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-lastAction")}</div><div class="rte-body" id="f-lastAction" contenteditable="true">${item.lastAction||""}</div></div></div>
+    <div class="form-field"><label class="form-label">Next Action</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-nextAction")}</div><div class="rte-body" id="f-nextAction" contenteditable="true">${item.nextAction||""}</div></div></div>
     <div class="form-field"><label class="form-label">Notes</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-notes")}</div><div class="rte-body" id="f-notes" contenteditable="true" style="min-height:100px">${item.notes||""}</div></div></div>
     <div class="form-btns">
       <button class="btn btn-edit" id="f-save">Save</button>
