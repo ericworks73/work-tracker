@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.30 -->
+<!DOCTYPE html><!-- v6.31 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -335,6 +335,45 @@
   <div id="edit-pane"></div>
 </div>
 
+<div id="status-change-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+  <div style="background:var(--bg2);border:1px solid rgba(26,58,138,0.4);border-radius:16px;padding:24px 22px;width:340px;box-shadow:0 -8px 40px rgba(204,34,0,0.15);">
+    <div id="scm-title" style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px;"></div>
+    <div id="scm-sub" style="font-size:12px;color:var(--ink-3);margin-bottom:16px;"></div>
+    <label style="font-size:10px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:4px;">Update Follow-Up Date</label>
+    <input type="date" id="scm-next" class="form-input" style="margin-bottom:12px;color-scheme:dark;" />
+    <div id="scm-cleardate-wrap" style="display:none;margin-bottom:14px;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);cursor:pointer;">
+        <input type="checkbox" id="scm-cleardate" style="accent-color:var(--accent-red);" /> Clear follow-up date since this is Done
+      </label>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button id="scm-save" style="flex:1;background:var(--accent-red);color:#fff;border:none;border-radius:var(--r-sm);padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Update</button>
+      <button id="scm-skip" style="flex:1;background:rgba(255,255,255,0.05);color:var(--ink-2);border:1px solid rgba(26,58,138,0.4);border-radius:var(--r-sm);padding:10px;font-size:13px;cursor:pointer;font-family:inherit;">Skip</button>
+    </div>
+  </div>
+</div>
+
+<div id="status-change-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);">
+  <div style="background:var(--bg2);border:1px solid rgba(26,58,138,0.4);border-radius:14px;padding:24px 22px;width:90%;max-width:480px;box-shadow:0 8px 40px rgba(0,0,0,0.4);">
+    <div id="scm-title" style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:4px;"></div>
+    <div id="scm-sub" style="font-size:12px;color:var(--ink-3);margin-bottom:18px;"></div>
+    <div class="quick-field">
+      <label class="quick-label">Update Next Action</label>
+      <textarea class="quick-input" id="scm-next" rows="3" style="resize:vertical;"></textarea>
+    </div>
+    <div id="scm-cleardate-wrap" style="display:none;margin-bottom:14px;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);cursor:pointer;">
+        <input type="checkbox" id="scm-cleardate" checked style="accent-color:var(--accent-red);width:15px;height:15px;" />
+        Clear follow-up date
+      </label>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button id="scm-save" style="flex:1;background:var(--accent-red);color:#fff;border:none;border-radius:var(--r-sm);padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Save</button>
+      <button id="scm-skip" style="flex:1;background:rgba(255,255,255,0.04);color:var(--ink-2);border:1px solid rgba(26,58,138,0.4);border-radius:var(--r-sm);padding:11px;font-size:13px;cursor:pointer;font-family:inherit;">Skip</button>
+    </div>
+  </div>
+</div>
+
 <div id="quick-modal">
   <div id="quick-box">
     <div id="quick-handle"></div>
@@ -361,7 +400,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.30</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.31</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -631,7 +670,6 @@ function renderList() {
       </div>` : `
       <div class="card-footer-row">
         <span class="status-badge ${statusClass(item.status)}"><span class="status-dot"></span>Status: ${item.status}</span>
-        ${item.followUpDate ? `<span class="sep">·</span>${followChipHtml(item.followUpDate)}` : ""}
         <span style="margin-left:auto;display:flex;align-items:center;gap:4px;">${touchHtml}</span>
       </div>`}
     </div>`;
@@ -818,6 +856,10 @@ function renderEditForm() {
   setupRteToolbars();
 
   document.getElementById("f-save").onclick = async () => {
+    const newStatus = document.getElementById("f-status").value;
+    const oldStatus = item.status || "";
+    const statusChanged = !isNew && newStatus !== oldStatus;
+
     const updated = {
       id: isNew ? Date.now() : item.id,
       person: document.getElementById("f-person").value,
@@ -825,7 +867,7 @@ function renderEditForm() {
       context: document.getElementById("f-context").innerHTML,
       lastAction: document.getElementById("f-lastAction").innerHTML,
       nextAction: document.getElementById("f-nextAction").innerHTML,
-      status: document.getElementById("f-status").value,
+      status: newStatus,
       coWorkers: document.getElementById("f-coWorkers").value,
       customerType: document.getElementById("f-customerType").value,
       type: document.getElementById("f-type").value,
@@ -840,7 +882,35 @@ function renderEditForm() {
     if (isNew) { items.push(updated); selectedId = updated.id; }
     else { items = items.map(i => i.id === updated.id ? updated : i); selectedId = updated.id; }
     isAdding = false; editingItem = null;
-    render();
+
+    if (statusChanged) {
+      // Show status change prompt
+      const modal = document.getElementById("status-change-modal");
+      document.getElementById("scm-title").textContent = `Status changed to "${newStatus}"`;
+      document.getElementById("scm-sub").textContent = "Do you want to update the follow-up date?";
+      document.getElementById("scm-next").value = updated.followUpDate || "";
+      const clearWrap = document.getElementById("scm-cleardate-wrap");
+      clearWrap.style.display = newStatus === "Done" ? "block" : "none";
+      modal.style.display = "flex";
+
+      document.getElementById("scm-save").onclick = async () => {
+        if (newStatus === "Done" && document.getElementById("scm-cleardate").checked) {
+          updated.followUpDate = "";
+        } else {
+          updated.followUpDate = document.getElementById("scm-next").value;
+        }
+        await upsert(updated);
+        items = items.map(i => i.id === updated.id ? updated : i);
+        modal.style.display = "none";
+        render();
+      };
+      document.getElementById("scm-skip").onclick = () => {
+        modal.style.display = "none";
+        render();
+      };
+    } else {
+      render();
+    }
   };
 
   document.getElementById("f-cancel").onclick = () => {
