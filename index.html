@@ -95,6 +95,11 @@
     #search-input::placeholder { color: var(--ink-3); }
     #search-clear { border: none; background: none; color: var(--ink-3); font-size: 14px; cursor: pointer; display: none; padding: 0; }
     #status-tabs { padding: 0 14px; display: flex; gap: 0; overflow-x: auto; }
+    #type-tabs { padding: 6px 14px; display: flex; gap: 8px; overflow-x: auto; background: var(--bg1); border-bottom: 1px solid rgba(26,58,138,0.4); }
+    .type-pill { display: flex; align-items: center; gap: 6px; border: 1px solid var(--glass-bd); background: var(--glass); border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--ink-2); cursor: pointer; white-space: nowrap; font-family: inherit; transition: all .15s; }
+    .type-pill:hover { background: var(--glass-hover); }
+    .type-pill.active { color: #fff; background: rgba(255,255,255,0.06); }
+    .type-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .tab-btn { border: none; background: none; padding: 10px 14px; font-size: 13px; font-weight: 400; color: var(--ink-3); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; font-family: inherit; transition: color .15s; }
     .tab-btn.active { font-weight: 700; color: #fff; border-bottom-color: var(--accent-red); }
 
@@ -273,7 +278,38 @@
 
 <div id="panel-0">
   <div id="panel-1">
-    <h2>GSD</h2>
+    <div style="width:128px;height:67px;border-radius:5px;overflow:hidden;position:relative;box-shadow:0 0 16px rgba(0,0,0,0.5);margin:0 auto 14px;">
+      <!-- stripes -->
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="flex:1;background:#b22234;"></div><div style="flex:1;background:#e8e8e8;"></div>
+        <div style="flex:1;background:#b22234;"></div><div style="flex:1;background:#e8e8e8;"></div>
+        <div style="flex:1;background:#b22234;"></div><div style="flex:1;background:#e8e8e8;"></div>
+        <div style="flex:1;background:#b22234;"></div><div style="flex:1;background:#e8e8e8;"></div>
+        <div style="flex:1;background:#b22234;"></div><div style="flex:1;background:#e8e8e8;"></div>
+        <div style="flex:1;background:#b22234;"></div><div style="flex:1;background:#e8e8e8;"></div>
+        <div style="flex:1;background:#b22234;"></div>
+      </div>
+      <!-- canton -->
+      <div style="position:absolute;top:0;left:0;width:51px;height:35px;background:#002147;"></div>
+      <!-- stars SVG -->
+      <svg style="position:absolute;top:0;left:0;width:51px;height:35px;opacity:0.25;" viewBox="0 0 95 67" xmlns="http://www.w3.org/2000/svg">
+        <text font-size="5" fill="white" text-anchor="middle">
+          <tspan x="7" y="7">★</tspan><tspan x="22" y="7">★</tspan><tspan x="37" y="7">★</tspan><tspan x="52" y="7">★</tspan><tspan x="67" y="7">★</tspan><tspan x="82" y="7">★</tspan>
+          <tspan x="14" y="14">★</tspan><tspan x="29" y="14">★</tspan><tspan x="44" y="14">★</tspan><tspan x="59" y="14">★</tspan><tspan x="74" y="14">★</tspan>
+          <tspan x="7" y="21">★</tspan><tspan x="22" y="21">★</tspan><tspan x="37" y="21">★</tspan><tspan x="52" y="21">★</tspan><tspan x="67" y="21">★</tspan><tspan x="82" y="21">★</tspan>
+          <tspan x="14" y="28">★</tspan><tspan x="29" y="28">★</tspan><tspan x="44" y="28">★</tspan><tspan x="59" y="28">★</tspan><tspan x="74" y="28">★</tspan>
+          <tspan x="7" y="35">★</tspan><tspan x="22" y="35">★</tspan><tspan x="37" y="35">★</tspan><tspan x="52" y="35">★</tspan><tspan x="67" y="35">★</tspan><tspan x="82" y="35">★</tspan>
+          <tspan x="14" y="42">★</tspan><tspan x="29" y="42">★</tspan><tspan x="44" y="42">★</tspan><tspan x="59" y="42">★</tspan><tspan x="74" y="42">★</tspan>
+          <tspan x="7" y="49">★</tspan><tspan x="22" y="49">★</tspan><tspan x="37" y="49">★</tspan><tspan x="52" y="49">★</tspan><tspan x="67" y="49">★</tspan><tspan x="82" y="49">★</tspan>
+          <tspan x="14" y="56">★</tspan><tspan x="29" y="56">★</tspan><tspan x="44" y="56">★</tspan><tspan x="59" y="56">★</tspan><tspan x="74" y="56">★</tspan>
+          <tspan x="7" y="63">★</tspan><tspan x="22" y="63">★</tspan><tspan x="37" y="63">★</tspan><tspan x="52" y="63">★</tspan><tspan x="67" y="63">★</tspan><tspan x="82" y="63">★</tspan>
+        </text>
+      </svg>
+      <!-- GSD neon over canton -->
+      <div style="position:absolute;top:0;left:0;width:51px;height:35px;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-style:italic;font-size:14px;font-weight:700;letter-spacing:1px;z-index:10;">
+        <span style="color:#ff6666;text-shadow:0 0 3px #ff6666,0 0 8px #cc0000;">G</span><span style="color:#fff;text-shadow:0 0 3px #fff,0 0 6px rgba(255,255,255,0.8);">S</span><span style="color:#7799ff;text-shadow:0 0 3px #7799ff,0 0 8px #3355cc;">D</span>
+      </div>
+    </div>
     <p>Enter your password to get stuff done</p>
     <input type="password" id="field-2" placeholder="Password" />
     <button id="btn-3">Unlock</button>
@@ -366,6 +402,7 @@
 <div id="filter-bar">
   <div id="status-tabs"></div>
 </div>
+<div id="type-tabs"></div>
 
 <div id="main">
   <div id="list-pane"><div class="loading-msg">Loading...</div></div>
@@ -433,6 +470,8 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 let items = [];
 let selectedId = null;
 let filterStatus = "All";
+let filterType = "All";
+const TYPE_COLORS = { "Sales Opportunity": "var(--neon-green)", "Renewal": "var(--neon-blue)", "Escalation": "var(--neon-red)", "Internal": "var(--ink-2)" };
 let searchQuery = "";
 let quickItem = null;
 let editingItem = null;
@@ -602,6 +641,9 @@ function getFiltered() {
   } else {
     f = items.filter(i => filterStatus === "All" || i.status === filterStatus);
   }
+  if (filterType !== "All") {
+    f = f.filter(i => i.type === filterType);
+  }
   if (searchQuery.trim()) {
     const q = searchQuery.toLowerCase();
     f = f.filter(i =>
@@ -626,6 +668,7 @@ function render() {
   renderHeader();
   renderOverdue();
   renderTabs();
+  renderTypeTabs();
   renderList();
   renderPanel();
 }
@@ -657,6 +700,24 @@ function renderTabs() {
   container.innerHTML = html;
   container.querySelectorAll(".tab-btn").forEach(btn => {
     btn.onclick = () => { filterStatus = btn.dataset.status; render(); };
+  });
+}
+
+function renderTypeTabs() {
+  const container = document.getElementById("type-tabs");
+  if (!container) return;
+  const counts = {};
+  TYPES.forEach(t => { counts[t] = items.filter(i => i.status !== "Done" && i.type === t).length; });
+  let html = `<button class="type-pill${filterType === "All" ? " active" : ""}" data-type="All"><span class="type-dot" style="background:var(--ink-3)"></span>All types</button>`;
+  html += TYPES.map(t => {
+    const active = filterType === t;
+    const color = TYPE_COLORS[t];
+    const style = active ? `color:${color};border-color:${color};` : "";
+    return `<button class="type-pill${active ? " active" : ""}" data-type="${t}" style="${style}"><span class="type-dot" style="background:${color}"></span>${t} (${counts[t]})</button>`;
+  }).join("");
+  container.innerHTML = html;
+  container.querySelectorAll(".type-pill").forEach(btn => {
+    btn.onclick = () => { filterType = btn.dataset.type; render(); };
   });
 }
 
