@@ -606,7 +606,7 @@ function renderList() {
     const metaParts = [item.company, item.customerType, item.type].filter(Boolean).join(" · ");
     const nxt = item.nextAction ? stripHtml(item.nextAction) : "";
 
-    const touchDays = item.date ? Math.floor((new Date() - new Date(item.date)) / 86400000) : 99;
+    const touchDays = item.date ? Math.floor((new Date() - new Date(item.date + "T12:00:00")) / 86400000) : 99;
     const touchLbl = touchDays === 0 ? "Last Updated: Today" : touchDays === 1 ? "Last Updated: Yesterday" : `Last Updated: ${touchDays}d ago`;
     const touchCls = touchDays >= 7 ? "touch-label stale" : "touch-label";
     const touchHtml = `<span class="${touchCls}">${touchLbl}</span>`;
