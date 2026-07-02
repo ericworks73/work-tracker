@@ -353,27 +353,6 @@
   </div>
 </div>
 
-<div id="status-change-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);">
-  <div style="background:var(--bg2);border:1px solid rgba(26,58,138,0.4);border-radius:14px;padding:24px 22px;width:90%;max-width:480px;box-shadow:0 8px 40px rgba(0,0,0,0.4);">
-    <div id="scm-title" style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:4px;"></div>
-    <div id="scm-sub" style="font-size:12px;color:var(--ink-3);margin-bottom:18px;"></div>
-    <div class="quick-field">
-      <label class="quick-label">Update Next Action</label>
-      <textarea class="quick-input" id="scm-next" rows="3" style="resize:vertical;"></textarea>
-    </div>
-    <div id="scm-cleardate-wrap" style="display:none;margin-bottom:14px;">
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);cursor:pointer;">
-        <input type="checkbox" id="scm-cleardate" checked style="accent-color:var(--accent-red);width:15px;height:15px;" />
-        Clear follow-up date
-      </label>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button id="scm-save" style="flex:1;background:var(--accent-red);color:#fff;border:none;border-radius:var(--r-sm);padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Save</button>
-      <button id="scm-skip" style="flex:1;background:rgba(255,255,255,0.04);color:var(--ink-2);border:1px solid rgba(26,58,138,0.4);border-radius:var(--r-sm);padding:11px;font-size:13px;cursor:pointer;font-family:inherit;">Skip</button>
-    </div>
-  </div>
-</div>
-
 <div id="quick-modal">
   <div id="quick-box">
     <div id="quick-handle"></div>
@@ -551,7 +530,13 @@ async function loadItems() {
 }
 
 // Save
-async function upsert(item) { await sb.from(TABLE).upsert(item); }
+async function upsert(item) {
+  const { error } = await sb.from(TABLE).upsert(item);
+  if (error) {
+    alert("Save failed: " + error.message);
+    console.error("Save failed:", error);
+  }
+}
 async function remove(id) { await sb.from(TABLE).delete().eq("id", id); }
 
 // Render
