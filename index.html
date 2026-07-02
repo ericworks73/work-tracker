@@ -485,19 +485,20 @@ if (sessionStorage.getItem(SESSION_KEY)) {
 async function loadWeather() {
   try {
     const lat = 28.5653, lon = -81.5862;
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&hourly=temperature_2m,weathercode&temperature_unit=fahrenheit&forecast_days=2&timezone=America%2FNew_York`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,is_day&hourly=temperature_2m,weathercode,is_day&temperature_unit=fahrenheit&forecast_days=2&timezone=America%2FNew_York`;
     const res = await fetch(url);
     const data = await res.json();
-    const wmoIcon = c => c===0?"☀️":c<=3?"⛅":c<=49?"🌫️":c<=67?"🌧️":c<=77?"❄️":c<=82?"🌦️":"⛈️";
+    const wmoIcon = (c, isDay) => c===0?(isDay?"☀️":"🌙"):c<=3?(isDay?"⛅":"☁️"):c<=49?"🌫️":c<=67?"🌧️":c<=77?"❄️":c<=82?"🌦️":"⛈️";
     const wmoDesc = c => c===0?"Clear":c<=3?"Partly cloudy":c<=49?"Foggy":c<=67?"Rainy":c<=77?"Snow":c<=82?"Showers":"Thunderstorms";
     const cur = data.current;
     document.getElementById("weather-temp").textContent = Math.round(cur.temperature_2m) + "°F";
-    document.getElementById("weather-icon").textContent = wmoIcon(cur.weathercode);
+    document.getElementById("weather-icon").textContent = wmoIcon(cur.weathercode, cur.is_day === 1);
     document.getElementById("weather-desc").textContent = wmoDesc(cur.weathercode) + " · Winter Garden FL";
     const now = new Date();
     const hours = data.hourly.time;
     const temps = data.hourly.temperature_2m;
     const codes = data.hourly.weathercode;
+    const isDayHourly = data.hourly.is_day;
     const slots = document.querySelectorAll(".fc-slot");
     let count = 0;
     for (let i = 0; i < hours.length && count < 12; i++) {
@@ -505,7 +506,7 @@ async function loadWeather() {
       if (t > now) {
         const h = t.getHours();
         slots[count].querySelector(".fc-time").textContent = (h%12||12) + (h>=12?"PM":"AM");
-        slots[count].querySelector(".fc-icon").textContent = wmoIcon(codes[i]);
+        slots[count].querySelector(".fc-icon").textContent = wmoIcon(codes[i], isDayHourly[i] === 1);
         slots[count].querySelector(".fc-temp").textContent = Math.round(temps[i]) + "°";
         count++;
       }
