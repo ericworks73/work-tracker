@@ -533,8 +533,40 @@ async function loadWeather() {
     const summaryEl = document.getElementById("weather-summary");
     const pct6 = Math.round(Math.max(maxPrecip6, 0));
     const pct12 = Math.round(Math.max(maxPrecip12, 0));
-    summaryEl.textContent = `${pct6}% chance of rain in the next 6 hours, ${pct12}% in the next 12`;
-    summaryEl.style.color = pct12 >= 20 ? "var(--neon-amber)" : "var(--ink-2)";
+
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+    let line, color;
+    if (pct6 < 15 && pct12 < 15) {
+      line = pick([
+        `Dry as a bone out there. Rain chances sit at just ${pct12}% through the next 12 hours.`,
+        `Nothing on the radar worth worrying about. Only a ${pct12}% shot at rain all the way out to 12 hours.`,
+        `Go ahead and leave the umbrella at home. Rain chances stay under ${pct12}% for the next 12 hours.`
+      ]);
+      color = "var(--neon-green)";
+    } else if (pct6 < 15) {
+      line = pick([
+        `Clear for now, but keep an eye on the sky later. Rain chances climb to ${pct12}% by the 12 hour mark.`,
+        `Dry the next few hours, though it's not staying that way. ${pct12}% chance of rain creeps in by hour 12.`,
+        `No rain yet, don't put the umbrella away though. Chances build to ${pct12}% later tonight.`
+      ]);
+      color = "var(--neon-amber)";
+    } else if (pct6 >= 40 && pct12 >= 40) {
+      line = pick([
+        `Soggy stretch ahead. Rain chances stay high, ${pct6}% the next 6 hours and ${pct12}% out to 12.`,
+        `Keep the umbrella handy all day, this one's a soaker. ${pct6}% now, ${pct12}% by hour 12.`,
+        `Wet one today. Rain sticks around at ${pct6}% for 6 hours and ${pct12}% for 12.`
+      ]);
+      color = "var(--neon-red)";
+    } else {
+      line = pick([
+        `Grab the umbrella if you're headed out soon. ${pct6}% chance of rain the next 6 hours.`,
+        `Umbrella weather. Rain chances hit ${pct6}% in the next 6 hours, ${pct12}% out to 12.`,
+        `Wouldn't leave the house without an umbrella. ${pct6}% chance of rain coming up soon.`
+      ]);
+      color = "var(--neon-amber)";
+    }
+    summaryEl.textContent = line;
+    summaryEl.style.color = color;
   } catch(e) {
     document.getElementById("weather-summary").textContent = "Weather unavailable";
   }
