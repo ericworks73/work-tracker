@@ -499,65 +499,36 @@ let isAdding = false;
 if (sessionStorage.getItem(SESSION_KEY)) {
   document.getElementById("panel-0").style.display = "none";
 }
-// Weather — National Weather Service (api.weather.gov), routed through a CORS proxy
-const NWS_CACHE_KEY = "nws_grid_urls";
-const NWS_CACHE_MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days
-
+// Weather — Open-Meteo GFS & HRRR endpoint (NOAA models, no key, no proxy needed)
 async function loadWeather() {
   try {
     const lat = 28.5653, lon = -81.5862;
-    const proxy = (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`;
+    const url = `https://api.open-meteo.com/v1/gfs?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,is_day&hourly=temperature_2m,weathercode,is_day,precipitation_probability&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&forecast_days=2&timezone=America%2FNew_York`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const wmoIcon = (c, isDay) => c===0?(isDay?"☀️":"🌙"):c<=3?(isDay?"⛅":"☁️"):c<=49?"🌫️":c<=67?"🌧️":c<=77?"❄️":c<=82?"🌦️":"⛈️";
+    const cur = data.current;
+    document.getElementById("weather-temp").textContent = Math.round(cur.temperature_2m) + "°F";
+    document.getElementById("weather-icon").textContent = wmoIcon(cur.weathercode, cur.is_day === 1);
 
-    let forecastUrl, forecastHourlyUrl;
-    let cached = null;
-    try { cached = JSON.parse(localStorage.getItem(NWS_CACHE_KEY)); } catch(e) {}
+    const todayHigh = Math.round(data.daily.temperature_2m_max[0]);
+    const todayLow = Math.round(data.daily.temperature_2m_min[0]);
+    document.getElementById("weather-hilo").textContent = `H: ${todayHigh}° L: ${todayLow}°`;
 
-    if (cached && cached.forecast && cached.forecastHourly && (Date.now() - cached.cachedAt) < NWS_CACHE_MAX_AGE) {
-      forecastUrl = cached.forecast;
-      forecastHourlyUrl = cached.forecastHourly;
-    } else {
-      const pointsRes = await fetch(proxy(`https://api.weather.gov/points/${lat},${lon}`));
-      const points = await pointsRes.json();
-      forecastUrl = points.properties.forecast;
-      forecastHourlyUrl = points.properties.forecastHourly;
-      localStorage.setItem(NWS_CACHE_KEY, JSON.stringify({ forecast: forecastUrl, forecastHourly: forecastHourlyUrl, cachedAt: Date.now() }));
-    }
-
-    const [forecastRes, hourlyRes] = await Promise.all([
-      fetch(proxy(forecastUrl)),
-      fetch(proxy(forecastHourlyUrl))
-    ]);
-    const forecastData = await forecastRes.json();
-    const hourlyData = await hourlyRes.json();
-
-    const dayNightPeriods = forecastData.properties.periods;
-    const hourlyPeriods = hourlyData.properties.periods;
-
-    const iconFor = (text, isDay) => {
-      const t = text.toLowerCase();
-      if (t.includes("thunder") || t.includes("storm")) return "⛈️";
-      if (t.includes("snow")) return "❄️";
-      if (t.includes("rain") || t.includes("shower")) return "🌧️";
-      if (t.includes("fog")) return "🌫️";
-      if (t.includes("cloudy") || t.includes("overcast")) return isDay ? "⛅" : "☁️";
-      if (t.includes("clear") || t.includes("sunny")) return isDay ? "☀️" : "🌙";
-      return isDay ? "⛅" : "☁️";
-    };
-
-    const now0 = hourlyPeriods[0];
-    document.getElementById("weather-temp").textContent = Math.round(now0.temperature) + "°F";
-    document.getElementById("weather-icon").textContent = iconFor(now0.shortForecast, now0.isDaytime);
-
-    const dayPeriod = dayNightPeriods.find(p => p.isDaytime) || dayNightPeriods[0];
-    const nightPeriod = dayNightPeriods.find(p => !p.isDaytime) || dayNightPeriods[1];
-    document.getElementById("weather-hilo").textContent = `H: ${Math.round(dayPeriod.temperature)}° L: ${Math.round(nightPeriod.temperature)}°`;
-
+    const now = new Date();
+    const hours = data.hourly.time;
+    const precipProbs = data.hourly.precipitation_probability;
+    let count = 0;
     let maxPrecip6 = -1;
     let maxPrecip12 = -1;
-    for (let i = 0; i < Math.min(12, hourlyPeriods.length); i++) {
-      const p = hourlyPeriods[i].probabilityOfPrecipitation?.value ?? 0;
-      if (i < 6 && p > maxPrecip6) maxPrecip6 = p;
-      if (p > maxPrecip12) maxPrecip12 = p;
+    for (let i = 0; i < hours.length && count < 12; i++) {
+      const t = new Date(hours[i]);
+      if (t > now) {
+        const precip = precipProbs[i] ?? 0;
+        if (count < 6 && precip > maxPrecip6) maxPrecip6 = precip;
+        if (precip > maxPrecip12) maxPrecip12 = precip;
+        count++;
+      }
     }
     const summaryEl = document.getElementById("weather-summary");
     const pct6 = Math.round(Math.max(maxPrecip6, 0));
