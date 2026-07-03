@@ -500,15 +500,28 @@ if (sessionStorage.getItem(SESSION_KEY)) {
   document.getElementById("panel-0").style.display = "none";
 }
 // Weather — National Weather Service (api.weather.gov), routed through a CORS proxy
+const NWS_CACHE_KEY = "nws_grid_urls";
+const NWS_CACHE_MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days
+
 async function loadWeather() {
   try {
     const lat = 28.5653, lon = -81.5862;
     const proxy = (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`;
 
-    const pointsRes = await fetch(proxy(`https://api.weather.gov/points/${lat},${lon}`));
-    const points = await pointsRes.json();
-    const forecastUrl = points.properties.forecast;
-    const forecastHourlyUrl = points.properties.forecastHourly;
+    let forecastUrl, forecastHourlyUrl;
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem(NWS_CACHE_KEY)); } catch(e) {}
+
+    if (cached && cached.forecast && cached.forecastHourly && (Date.now() - cached.cachedAt) < NWS_CACHE_MAX_AGE) {
+      forecastUrl = cached.forecast;
+      forecastHourlyUrl = cached.forecastHourly;
+    } else {
+      const pointsRes = await fetch(proxy(`https://api.weather.gov/points/${lat},${lon}`));
+      const points = await pointsRes.json();
+      forecastUrl = points.properties.forecast;
+      forecastHourlyUrl = points.properties.forecastHourly;
+      localStorage.setItem(NWS_CACHE_KEY, JSON.stringify({ forecast: forecastUrl, forecastHourly: forecastHourlyUrl, cachedAt: Date.now() }));
+    }
 
     const [forecastRes, hourlyRes] = await Promise.all([
       fetch(proxy(forecastUrl)),
