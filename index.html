@@ -81,6 +81,13 @@
     #weather-desc { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
     #weather-icon { font-size: 28px; line-height: 1; }
     #weather-forecast { display: flex; gap: 10px; border-left: 1px solid var(--glass-bd); padding-left: 16px; }
+    #stock-ticker { display: flex; align-items: baseline; justify-content: flex-end; gap: 6px; white-space: nowrap; opacity: 1; transition: opacity .4s ease; margin-top: 4px; }
+    #stock-ticker.fade { opacity: 0; }
+    #stock-ticker-symbol { font-size: 11px; font-weight: 700; color: var(--ink-2); }
+    #stock-ticker-price { font-size: 11px; font-weight: 700; color: #fff; }
+    #stock-ticker-change { font-size: 11px; font-weight: 600; }
+    .tick-up { color: var(--neon-green); }
+    .tick-down { color: var(--neon-red); }
     .fc-slot { display: flex; flex-direction: column; align-items: center; gap: 2px; }
     .fc-time { font-size: 10px; color: var(--ink-3); }
     .fc-icon { font-size: 14px; }
@@ -287,6 +294,7 @@
       #dt-time { font-size: 20px; }
       #dt-sub { font-size: 11px; }
       #weather-forecast { display: none; }
+      #stock-ticker { display: none; }
       #weather-desc { display: none; }
       #holiday-date { display: none; }
       #holiday-block { text-align: right; }
@@ -408,6 +416,11 @@
   <div id="holiday-block" style="flex-shrink:0;text-align:right;">
     <div id="holiday-name" style="font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;"></div>
     <div id="holiday-date" style="font-size:11px;color:var(--ink-3);margin-top:2px;white-space:nowrap;"></div>
+    <div id="stock-ticker">
+      <span id="stock-ticker-symbol">—</span>
+      <span id="stock-ticker-price">—</span>
+      <span id="stock-ticker-change"></span>
+    </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
     <button id="add-btn">+ Add</button>
@@ -539,6 +552,34 @@ async function loadWeather() {
 }
 loadWeather();
 setInterval(loadWeather, 10 * 60 * 1000);
+
+const STOCK_SYMBOL = "VOO";
+
+async function loadStock() {
+  try {
+    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${STOCK_SYMBOL}?interval=1d&range=1d`;
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
+    const res = await fetch(proxyUrl);
+    const data = await res.json();
+    const meta = data.chart.result[0].meta;
+    const price = meta.regularMarketPrice;
+    const prevClose = meta.chartPreviousClose ?? meta.previousClose;
+    const changePct = ((price - prevClose) / prevClose) * 100;
+    const dir = changePct >= 0 ? "tick-up" : "tick-down";
+    const priceEl = document.getElementById("stock-ticker-price");
+    const changeEl = document.getElementById("stock-ticker-change");
+    priceEl.textContent = price.toFixed(2);
+    priceEl.className = dir;
+    const sign = changePct >= 0 ? "+" : "";
+    changeEl.textContent = `${sign}${changePct.toFixed(2)}%`;
+    changeEl.className = dir;
+  } catch(e) {
+    // silently skip this refresh, the ticker keeps showing the last good values
+  }
+}
+document.getElementById("stock-ticker-symbol").textContent = STOCK_SYMBOL;
+loadStock();
+setInterval(loadStock, 5 * 60 * 1000);
 
 function loadHoliday() {
   const holidays = [
