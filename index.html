@@ -78,9 +78,9 @@
     #weather-block { display: flex; align-items: center; gap: 16px; flex: 0 0 auto; justify-content: center; }
     #weather-now { display: flex; align-items: center; gap: 8px; }
     #weather-temp { font-size: 28px; font-weight: 700; color: var(--ink); letter-spacing: -.5px; line-height: 1; }
-    #weather-desc { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+    #weather-hilo { font-size: 12px; color: var(--ink-3); font-weight: 600; }
+    #weather-summary { font-size: 12px; font-weight: 600; margin-top: 2px; }
     #weather-icon { font-size: 28px; line-height: 1; }
-    #weather-forecast { display: flex; gap: 10px; border-left: 1px solid var(--glass-bd); padding-left: 16px; }
     #stock-ticker { display: flex; align-items: baseline; justify-content: flex-end; gap: 6px; white-space: nowrap; opacity: 1; transition: opacity .4s ease; margin-top: 4px; }
     #stock-ticker.fade { opacity: 0; }
     #stock-ticker-symbol { font-size: 11px; font-weight: 700; color: var(--ink-2); }
@@ -88,10 +88,6 @@
     #stock-ticker-change { font-size: 11px; font-weight: 600; }
     .tick-up { color: var(--neon-green); }
     .tick-down { color: var(--neon-red); }
-    .fc-slot { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-    .fc-time { font-size: 10px; color: var(--ink-3); }
-    .fc-icon { font-size: 14px; }
-    .fc-temp { font-size: 12px; font-weight: 600; color: var(--ink); }
     #weather-loading { font-size: 11px; color: var(--ink-3); }
     #add-btn { background: var(--accent-red); color: #fff; border: none; border-radius: var(--r-sm); padding: 9px 18px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity .2s; }
     #add-btn:hover { opacity: .85; }
@@ -293,9 +289,7 @@
       #gsd-flag { transform: scale(0.547); transform-origin: top left; }
       #dt-time { font-size: 20px; }
       #dt-sub { font-size: 11px; }
-      #weather-forecast { display: none; }
       #stock-ticker { display: none; }
-      #weather-desc { display: none; }
       #holiday-date { display: none; }
       #holiday-block { text-align: right; }
       #add-btn { padding: 8px 14px; font-size: 13px; }
@@ -392,23 +386,12 @@
     <div id="weather-now">
       <div id="weather-icon">—</div>
       <div>
-        <div id="weather-temp">—°</div>
-        <div id="weather-desc">Winter Garden, FL</div>
+        <div style="display:flex;align-items:baseline;gap:8px;">
+          <div id="weather-temp">—°</div>
+          <div id="weather-hilo">H: —° L: —°</div>
+        </div>
+        <div id="weather-summary">—</div>
       </div>
-    </div>
-    <div id="weather-forecast">
-      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
-      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
-      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
-      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
-      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
-      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
-      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
-      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
-      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
-      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
-      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
-      <div class="fc-slot"><div class="fc-time">—</div><div class="fc-icon">—</div><div class="fc-temp">—°</div></div>
     </div>
   </div>
   </div>
@@ -516,38 +499,60 @@ let isAdding = false;
 if (sessionStorage.getItem(SESSION_KEY)) {
   document.getElementById("panel-0").style.display = "none";
 }
-// Weather — Open-Meteo (free, no key needed)
+// Weather — National Weather Service (api.weather.gov), routed through a CORS proxy
 async function loadWeather() {
   try {
     const lat = 28.5653, lon = -81.5862;
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,is_day&hourly=temperature_2m,weathercode,is_day&temperature_unit=fahrenheit&forecast_days=2&timezone=America%2FNew_York`;
-    const res = await fetch(url);
-    const data = await res.json();
-    const wmoIcon = (c, isDay) => c===0?(isDay?"☀️":"🌙"):c<=3?(isDay?"⛅":"☁️"):c<=49?"🌫️":c<=67?"🌧️":c<=77?"❄️":c<=82?"🌦️":"⛈️";
-    const wmoDesc = c => c===0?"Clear":c<=3?"Partly cloudy":c<=49?"Foggy":c<=67?"Rainy":c<=77?"Snow":c<=82?"Showers":"Thunderstorms";
-    const cur = data.current;
-    document.getElementById("weather-temp").textContent = Math.round(cur.temperature_2m) + "°F";
-    document.getElementById("weather-icon").textContent = wmoIcon(cur.weathercode, cur.is_day === 1);
-    document.getElementById("weather-desc").textContent = wmoDesc(cur.weathercode) + " · Winter Garden FL";
-    const now = new Date();
-    const hours = data.hourly.time;
-    const temps = data.hourly.temperature_2m;
-    const codes = data.hourly.weathercode;
-    const isDayHourly = data.hourly.is_day;
-    const slots = document.querySelectorAll(".fc-slot");
-    let count = 0;
-    for (let i = 0; i < hours.length && count < 12; i++) {
-      const t = new Date(hours[i]);
-      if (t > now) {
-        const h = t.getHours();
-        slots[count].querySelector(".fc-time").textContent = (h%12||12) + (h>=12?"PM":"AM");
-        slots[count].querySelector(".fc-icon").textContent = wmoIcon(codes[i], isDayHourly[i] === 1);
-        slots[count].querySelector(".fc-temp").textContent = Math.round(temps[i]) + "°";
-        count++;
-      }
+    const proxy = (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`;
+
+    const pointsRes = await fetch(proxy(`https://api.weather.gov/points/${lat},${lon}`));
+    const points = await pointsRes.json();
+    const forecastUrl = points.properties.forecast;
+    const forecastHourlyUrl = points.properties.forecastHourly;
+
+    const [forecastRes, hourlyRes] = await Promise.all([
+      fetch(proxy(forecastUrl)),
+      fetch(proxy(forecastHourlyUrl))
+    ]);
+    const forecastData = await forecastRes.json();
+    const hourlyData = await hourlyRes.json();
+
+    const dayNightPeriods = forecastData.properties.periods;
+    const hourlyPeriods = hourlyData.properties.periods;
+
+    const iconFor = (text, isDay) => {
+      const t = text.toLowerCase();
+      if (t.includes("thunder") || t.includes("storm")) return "⛈️";
+      if (t.includes("snow")) return "❄️";
+      if (t.includes("rain") || t.includes("shower")) return "🌧️";
+      if (t.includes("fog")) return "🌫️";
+      if (t.includes("cloudy") || t.includes("overcast")) return isDay ? "⛅" : "☁️";
+      if (t.includes("clear") || t.includes("sunny")) return isDay ? "☀️" : "🌙";
+      return isDay ? "⛅" : "☁️";
+    };
+
+    const now0 = hourlyPeriods[0];
+    document.getElementById("weather-temp").textContent = Math.round(now0.temperature) + "°F";
+    document.getElementById("weather-icon").textContent = iconFor(now0.shortForecast, now0.isDaytime);
+
+    const dayPeriod = dayNightPeriods.find(p => p.isDaytime) || dayNightPeriods[0];
+    const nightPeriod = dayNightPeriods.find(p => !p.isDaytime) || dayNightPeriods[1];
+    document.getElementById("weather-hilo").textContent = `H: ${Math.round(dayPeriod.temperature)}° L: ${Math.round(nightPeriod.temperature)}°`;
+
+    let maxPrecip6 = -1;
+    let maxPrecip12 = -1;
+    for (let i = 0; i < Math.min(12, hourlyPeriods.length); i++) {
+      const p = hourlyPeriods[i].probabilityOfPrecipitation?.value ?? 0;
+      if (i < 6 && p > maxPrecip6) maxPrecip6 = p;
+      if (p > maxPrecip12) maxPrecip12 = p;
     }
+    const summaryEl = document.getElementById("weather-summary");
+    const pct6 = Math.round(Math.max(maxPrecip6, 0));
+    const pct12 = Math.round(Math.max(maxPrecip12, 0));
+    summaryEl.textContent = `${pct6}% chance of rain in the next 6 hours, ${pct12}% in the next 12`;
+    summaryEl.style.color = pct12 >= 20 ? "var(--neon-amber)" : "var(--ink-2)";
   } catch(e) {
-    document.getElementById("weather-desc").textContent = "Weather unavailable";
+    document.getElementById("weather-summary").textContent = "Weather unavailable";
   }
 }
 loadWeather();
