@@ -81,11 +81,6 @@
     #weather-hilo { font-size: 12px; color: var(--ink-3); font-weight: 600; }
     #weather-summary { font-size: 12px; font-weight: 600; margin-top: 2px; }
     #weather-icon { font-size: 28px; line-height: 1; }
-    #stock-ticker { display: flex; align-items: baseline; justify-content: flex-end; gap: 6px; white-space: nowrap; opacity: 1; transition: opacity .4s ease; margin-top: 4px; }
-    #stock-ticker.fade { opacity: 0; }
-    #stock-ticker-symbol { font-size: 11px; font-weight: 700; color: var(--ink-2); }
-    #stock-ticker-price { font-size: 11px; font-weight: 700; color: #fff; }
-    #stock-ticker-change { font-size: 11px; font-weight: 600; }
     .tick-up { color: var(--neon-green); }
     .tick-down { color: var(--neon-red); }
     #weather-loading { font-size: 11px; color: var(--ink-3); }
@@ -289,7 +284,6 @@
       #gsd-flag { transform: scale(0.547); transform-origin: top left; }
       #dt-time { font-size: 20px; }
       #dt-sub { font-size: 11px; }
-      #stock-ticker { display: none; }
       #holiday-date { display: none; }
       #holiday-block { text-align: right; }
       #add-btn { padding: 8px 14px; font-size: 13px; }
@@ -399,11 +393,6 @@
   <div id="holiday-block" style="flex-shrink:0;text-align:right;">
     <div id="holiday-name" style="font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;"></div>
     <div id="holiday-date" style="font-size:11px;color:var(--ink-3);margin-top:2px;white-space:nowrap;"></div>
-    <div id="stock-ticker">
-      <span id="stock-ticker-symbol">—</span>
-      <span id="stock-ticker-price">—</span>
-      <span id="stock-ticker-change"></span>
-    </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
     <button id="add-btn">+ Add</button>
@@ -574,34 +563,6 @@ async function loadWeather() {
 loadWeather();
 setInterval(loadWeather, 10 * 60 * 1000);
 
-const STOCK_SYMBOL = "VOO";
-
-async function loadStock() {
-  try {
-    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${STOCK_SYMBOL}?interval=1d&range=1d`;
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
-    const res = await fetch(proxyUrl);
-    const data = await res.json();
-    const meta = data.chart.result[0].meta;
-    const price = meta.regularMarketPrice;
-    const prevClose = meta.chartPreviousClose ?? meta.previousClose;
-    const changePct = ((price - prevClose) / prevClose) * 100;
-    const dir = changePct >= 0 ? "tick-up" : "tick-down";
-    const priceEl = document.getElementById("stock-ticker-price");
-    const changeEl = document.getElementById("stock-ticker-change");
-    priceEl.textContent = price.toFixed(2);
-    priceEl.className = dir;
-    const sign = changePct >= 0 ? "+" : "";
-    changeEl.textContent = `${sign}${changePct.toFixed(2)}%`;
-    changeEl.className = dir;
-  } catch(e) {
-    // silently skip this refresh, the ticker keeps showing the last good values
-  }
-}
-document.getElementById("stock-ticker-symbol").textContent = STOCK_SYMBOL;
-loadStock();
-setInterval(loadStock, 5 * 60 * 1000);
-
 function loadHoliday() {
   const holidays = [
     { name: "New Year's Day",    date: "2026-01-01" },
@@ -671,6 +632,10 @@ function daysUntil(d) {
   const target = new Date(d + "T00:00:00");
   return Math.round((target - local) / 86400000);
 }
+function daysUntilFriday() {
+  const dow = new Date().getDay(); // 0=Sun ... 5=Fri, 6=Sat
+  return (5 - dow + 7) % 7;
+}
 function stripHtml(html) {
   if (!html) return "";
   return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
@@ -723,6 +688,13 @@ function getFiltered() {
     f = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) === 0);
   } else if (filterStatus === "Tomorrow") {
     f = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) === 1);
+  } else if (filterStatus === "This Week") {
+    const dtf = daysUntilFriday();
+    f = items.filter(i => {
+      if (i.status === "Done" || !i.followUpDate) return false;
+      const du = daysUntil(i.followUpDate);
+      return du >= 0 && du <= dtf;
+    });
   } else {
     f = items.filter(i => filterStatus === "All" || i.status === filterStatus);
   }
@@ -774,6 +746,12 @@ function renderTabs() {
   const overdueCount  = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) < 0).length;
   const todayCount    = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) === 0).length;
   const tomorrowCount = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) === 1).length;
+  const dtf = daysUntilFriday();
+  const weekCount = items.filter(i => {
+    if (i.status === "Done" || !i.followUpDate) return false;
+    const du = daysUntil(i.followUpDate);
+    return du >= 0 && du <= dtf;
+  }).length;
   const tabs = ["All", ...STATUSES];
   let html = tabs.map(s => `<button class="tab-btn${filterStatus === s ? " active" : ""}" data-status="${s}">${s}</button>`).join("");
   const a1 = filterStatus === "Overdue";
@@ -782,6 +760,8 @@ function renderTabs() {
   html += `<button class="tab-btn" data-status="Today" style="color:var(--neon-amber);font-weight:${a2?"700":"400"};border-bottom:${a2?"2px solid var(--neon-amber)":"2px solid transparent"};">Today (${todayCount})</button>`;
   const a3 = filterStatus === "Tomorrow";
   html += `<button class="tab-btn" data-status="Tomorrow" style="color:var(--neon-green);font-weight:${a3?"700":"400"};border-bottom:${a3?"2px solid var(--neon-green)":"2px solid transparent"};">Tomorrow (${tomorrowCount})</button>`;
+  const a4 = filterStatus === "This Week";
+  html += `<button class="tab-btn" data-status="This Week" style="color:var(--neon-blue);font-weight:${a4?"700":"400"};border-bottom:${a4?"2px solid var(--neon-blue)":"2px solid transparent"};">This Week (${weekCount})</button>`;
   container.innerHTML = html;
   container.querySelectorAll(".tab-btn").forEach(btn => {
     btn.onclick = () => { filterStatus = btn.dataset.status; render(); };
