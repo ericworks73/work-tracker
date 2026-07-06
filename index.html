@@ -70,8 +70,8 @@
     #header-left { display: flex; align-items: center; gap: 16px; min-width: 0; }
     #datetime-block { display: flex; flex-direction: column; justify-content: center; }
     #dt-time { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -.2px; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
-    #dt-sub { font-size: 11px; font-weight: 700; color: var(--ink-2); letter-spacing: -.1px; line-height: 1.2; white-space: nowrap; margin-bottom: 6px; }
-    #stats-row { display: flex; align-items: center; }
+    #dt-sub { font-size: 11px; font-weight: 700; color: var(--ink-2); letter-spacing: -.1px; line-height: 1.2; white-space: nowrap; }
+    #stats-row { display: flex; align-items: center; margin-top: 6px; }
     .stat-cell { text-align: center; padding: 0 14px; }
     .stat-cell:first-child { padding-left: 0; }
     .stat-cell:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.08); }
@@ -282,8 +282,6 @@
     @media (max-width: 700px) {
       #header { padding: 10px 14px; gap: 10px; }
       #header-left { gap: 10px; }
-      #gsd-flag-wrap { width: 40px; height: 40px; }
-      #gsd-flag { width: 24px; height: 13px; }
       #dt-time { font-size: 17px; }
       .stat-cell { padding: 0 8px; }
       .stat-cell:first-child { padding-left: 0; }
@@ -336,35 +334,18 @@
 
 <div id="header">
   <div id="header-left">
-  <div id="gsd-flag-wrap" style="width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#12234a,#080d18);border:1px solid rgba(68,136,255,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-    <div id="gsd-flag" style="width:30px;height:16px;border-radius:2px;overflow:hidden;position:relative;">
-      <!-- stripes -->
-      <div style="position:absolute;inset:0;display:flex;flex-direction:column;">
-        <div style="flex:1;background:#b22234;"></div><div style="flex:1;background:#e8e8e8;"></div>
-        <div style="flex:1;background:#b22234;"></div><div style="flex:1;background:#e8e8e8;"></div>
-        <div style="flex:1;background:#b22234;"></div><div style="flex:1;background:#e8e8e8;"></div>
-        <div style="flex:1;background:#b22234;"></div><div style="flex:1;background:#e8e8e8;"></div>
-        <div style="flex:1;background:#b22234;"></div><div style="flex:1;background:#e8e8e8;"></div>
-        <div style="flex:1;background:#b22234;"></div><div style="flex:1;background:#e8e8e8;"></div>
-        <div style="flex:1;background:#b22234;"></div>
-      </div>
-      <!-- canton -->
-      <div style="position:absolute;top:0;left:0;width:13px;height:9px;background:#002147;"></div>
-      <!-- GSD neon over canton -->
-      <div style="position:absolute;top:0;left:0;width:13px;height:9px;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-style:italic;font-weight:700;letter-spacing:0;z-index:10;transform:scale(0.34);transform-origin:left center;">
-        <span style="color:#ff6666;text-shadow:0 0 3px #ff6666,0 0 8px #cc0000;font-size:14px;">G</span><span style="color:#fff;text-shadow:0 0 3px #fff,0 0 6px rgba(255,255,255,0.8);font-size:14px;">S</span><span style="color:#7799ff;text-shadow:0 0 3px #7799ff,0 0 8px #3355cc;font-size:14px;">D</span>
-      </div>
-    </div>
-  </div>
   <div>
-    <div id="datetime-block">
+    <div id="datetime-block" style="display:flex;align-items:baseline;gap:8px;">
       <div id="dt-time">—</div>
       <div id="dt-sub">—</div>
     </div>
     <div id="stats-row">
-      <div class="stat-cell">
-        <div id="weather-temp" class="stat-val">—°</div>
-        <div id="weather-hilo" class="stat-label">H: —° L: —°</div>
+      <div class="stat-cell" style="display:flex;align-items:center;gap:6px;">
+        <span id="weather-icon" style="font-size:22px;line-height:1;">—</span>
+        <div>
+          <div id="weather-temp" class="stat-val">—°</div>
+          <div id="weather-hilo" class="stat-label">H: —° L: —°</div>
+        </div>
       </div>
       <div class="stat-cell">
         <div id="weather-rain" class="stat-val">—%</div>
@@ -479,6 +460,8 @@ async function loadWeather() {
     const res = await fetch(url);
     const data = await res.json();
     const cur = data.current;
+    const wmoIcon = (c, isDay) => c===0?(isDay?"☀️":"🌙"):c<=3?(isDay?"⛅":"☁️"):c<=49?"🌫️":c<=67?"🌧️":c<=77?"❄️":c<=82?"🌦️":"⛈️";
+    document.getElementById("weather-icon").textContent = wmoIcon(cur.weathercode, cur.is_day === 1);
     document.getElementById("weather-temp").textContent = Math.round(cur.temperature_2m) + "°F";
 
     const todayHigh = Math.round(data.daily.temperature_2m_max[0]);
