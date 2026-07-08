@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.35 -->
+<!DOCTYPE html><!-- v6.36 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
   <script>
     // Cache buster: check the live file for a newer version and force one reload if stale.
     (function () {
-      const CURRENT_VERSION = "v6.35";
+      const CURRENT_VERSION = "v6.36";
       const RELOAD_FLAG = "gsd_reloaded_for_" + CURRENT_VERSION;
       fetch(window.location.href, { cache: "no-store" })
         .then(r => r.text())
@@ -141,6 +141,9 @@
     .card-band { background: rgba(26,58,138,0.15); padding: 8px 14px; display: flex; align-items: center; gap: 8px; }
     .card-band-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: #4488ff; flex-shrink: 0; }
     .card-band-text  { font-size: 12px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+    .card-ctx-band { background: rgba(255,255,255,0.03); padding: 7px 14px; display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .card-ctx-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--ink-3); flex-shrink: 0; }
+    .card-ctx-text  { font-size: 12px; color: var(--ink-2); font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
     .card-footer-row { padding: 8px 14px 12px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .sep { color: var(--glass-bd); font-size: 12px; }
     .touch-dot { display: none; }
@@ -438,7 +441,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.35</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.36</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -835,6 +838,7 @@ function renderList() {
   pane.innerHTML = filtered.map(item => {
     const metaParts = [item.company, item.customerType, item.type].filter(Boolean).join(" · ");
     const nxt = item.nextAction ? stripHtml(item.nextAction) : "";
+    const ctx = item.context ? stripHtml(item.context) : "";
 
     const touchDays = item.date ? Math.floor((new Date() - new Date(item.date + "T12:00:00")) / 86400000) : 99;
     const touchLbl = touchDays === 0 ? "Last Updated: Today" : touchDays === 1 ? "Last Updated: Yesterday" : `Last Updated: ${touchDays}d ago`;
@@ -851,6 +855,7 @@ function renderList() {
         </div>
       </div>
       ${nxt ? `<div class="card-band"><span class="card-band-label">Next</span><span class="card-band-text">${nxt}</span></div>` : ""}
+      ${ctx ? `<div class="card-ctx-band"><span class="card-ctx-label">Context</span><span class="card-ctx-text">${ctx}</span></div>` : ""}
       ${item.status !== "Done" ? `
       <div class="card-footer-row">
         <button class="quick-btn" data-id="${item.id}">⚡ Quick Update</button>
