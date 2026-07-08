@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.34 -->
+<!DOCTYPE html><!-- v6.35 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
   <script>
     // Cache buster: check the live file for a newer version and force one reload if stale.
     (function () {
-      const CURRENT_VERSION = "v6.34";
+      const CURRENT_VERSION = "v6.35";
       const RELOAD_FLAG = "gsd_reloaded_for_" + CURRENT_VERSION;
       fetch(window.location.href, { cache: "no-store" })
         .then(r => r.text())
@@ -438,7 +438,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.34</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.35</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -628,6 +628,9 @@ function statusClass(s) {
   if (s === "Waiting On Them") return "s-wait";
   if (s === "Stuck") return "s-stuck";
   return "s-done";
+}
+function hasOpenTasks(item) {
+  return !!(item && item.tasks && item.tasks.some(t => !t.done));
 }
 function followChipHtml(date) {
   if (!date) return "";
@@ -1005,6 +1008,7 @@ function renderPanel() {
   });
   detail.querySelectorAll('[data-action="close"]').forEach(b => {
     b.onclick = async () => {
+      if (hasOpenTasks(item) && !confirm("You still have open tasks, are you sure you want to mark as done?")) return;
       item.status = "Done";
       await upsert(item);
       selectedId = null;
@@ -1049,6 +1053,8 @@ function renderEditForm() {
     const newStatus = document.getElementById("f-status").value;
     const oldStatus = item.status || "";
     const statusChanged = !isNew && newStatus !== oldStatus;
+
+    if (newStatus === "Done" && hasOpenTasks(item) && !confirm("You still have open tasks, are you sure you want to mark as done?")) return;
 
     const updated = {
       id: isNew ? Date.now() : item.id,
@@ -1143,6 +1149,8 @@ function openQuick(id) {
 }
 
 document.getElementById("quick-save").onclick = async () => {
+  const newStatus = document.getElementById("quick-status").value;
+  if (newStatus === "Done" && hasOpenTasks(quickItem) && !confirm("You still have open tasks, are you sure you want to mark as done?")) return;
   const note = document.getElementById("quick-note").value.trim();
   const today = todayStr();
   let lastAction = quickItem.lastAction || "";
@@ -1150,7 +1158,7 @@ document.getElementById("quick-save").onclick = async () => {
     const noteHtml = `<p><em><strong>${fmtDate(today)}:</strong> ${note}</em></p>`;
     lastAction = noteHtml + lastAction;
   }
-  const updated = { ...quickItem, lastAction, status: document.getElementById("quick-status").value, followUpDate: document.getElementById("quick-date").value, date: today };
+  const updated = { ...quickItem, lastAction, status: newStatus, followUpDate: document.getElementById("quick-date").value, date: today };
   await upsert(updated);
   items = items.map(i => i.id === updated.id ? updated : i);
   document.getElementById("quick-modal").className = "";
