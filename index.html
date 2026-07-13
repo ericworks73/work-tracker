@@ -672,7 +672,7 @@ function getFiltered() {
   } else if (filterStatus === "Today") {
     f = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) === 0);
   } else {
-    f = items.filter(i => filterStatus === "All" || i.status === filterStatus);
+    f = items.filter(i => (filterStatus === "All" ? i.status !== "Done" : i.status === filterStatus));
   }
   if (filterType !== "All") {
     f = f.filter(i => i.type === filterType);
@@ -726,10 +726,10 @@ function renderTabs() {
   const isRegularActive = regularOptions.includes(filterStatus);
   if (isRegularActive) lastRegularStatus = filterStatus;
   const dropLabel = lastRegularStatus;
-  const dropCount = dropLabel === "All" ? items.length : items.filter(i => i.status === dropLabel).length;
+  const dropCount = dropLabel === "All" ? items.filter(i => i.status !== "Done").length : items.filter(i => i.status === dropLabel).length;
 
   const menuItems = regularOptions.map(s => {
-    const count = s === "All" ? items.length : items.filter(i => i.status === s).length;
+    const count = s === "All" ? items.filter(i => i.status !== "Done").length : items.filter(i => i.status === s).length;
     const active = s === dropLabel;
     return `<div class="status-drop-item${active ? " active" : ""}" data-status="${s}">${s} <span class="count">${count}</span></div>`;
   }).join("");
