@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.37 -->
+<!DOCTYPE html><!-- v6.38 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
   <script>
     // Cache buster: check the live file for a newer version and force one reload if stale.
     (function () {
-      const CURRENT_VERSION = "v6.37";
+      const CURRENT_VERSION = "v6.38";
       const RELOAD_FLAG = "gsd_reloaded_for_" + CURRENT_VERSION;
       fetch(window.location.href, { cache: "no-store" })
         .then(r => r.text())
@@ -131,6 +131,7 @@
     .crow-header .ch-company { width: 140px; flex-shrink: 0; }
     .crow-header .ch-person { width: 140px; flex-shrink: 0; }
     .crow-header .ch-type { flex: 1; }
+    .crow-header .ch-tasks { width: 60px; flex-shrink: 0; text-align: left; }
     .crow-header .ch-status { width: 130px; flex-shrink: 0; text-align: left; }
     .crow-header .ch-date { width: 64px; flex-shrink: 0; text-align: right; }
     .crow-header .ch-touch { width: 90px; flex-shrink: 0; text-align: right; }
@@ -140,6 +141,7 @@
     .crow-company { font-weight: 700; font-size: 13px; color: var(--ink); width: 140px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .crow-person { font-weight: 700; font-size: 13px; color: var(--ink-2); width: 140px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .crow-type { font-weight: 700; font-size: 12px; color: var(--ink-3); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .crow-tasks { width: 60px; flex-shrink: 0; }
     .crow-date { font-weight: 700; font-size: 12px; width: 64px; flex-shrink: 0; text-align: right; color: var(--ink-3); }
     .crow-touch { font-weight: 700; font-size: 12px; width: 90px; flex-shrink: 0; text-align: right; color: var(--ink-3); }
     .crow-touch.stale { color: var(--neon-red); }
@@ -471,7 +473,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.37</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.38</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -906,6 +908,7 @@ function renderList() {
       <span class="ch-company">Company</span>
       <span class="ch-person">Person</span>
       <span class="ch-type">Type</span>
+      <span class="ch-tasks">Tasks</span>
       <span class="ch-status">Status</span>
       <span class="ch-date">Follow up</span>
       <span class="ch-touch">Updated</span>
@@ -922,6 +925,7 @@ function renderList() {
         <span class="crow-company">${item.company || ""}</span>
         <span class="crow-person">${item.person || ""}</span>
         <span class="crow-type">${item.type || ""}</span>
+        <span class="crow-tasks">${openTaskCount(item) > 0 ? `<span class="task-count-badge">${openTaskCount(item)} open</span>` : ""}</span>
         <span class="status-badge ${statusClass(item.status)}"><span class="status-dot"></span>${item.status}</span>
         <span class="crow-date ${dateCls}">${dateLbl}</span>
         <span class="${touchCls}">${touchLbl}</span>
@@ -1215,6 +1219,16 @@ function renderEditForm() {
     <div class="form-field"><label class="form-label">Context (why it's on your list)</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-context")}</div><div class="rte-body" id="f-context" contenteditable="true">${item.context||""}</div></div></div>
     <div class="form-field"><label class="form-label">Last Action</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-lastAction")}</div><div class="rte-body" id="f-lastAction" contenteditable="true">${item.lastAction||""}</div></div></div>
     <div class="form-field"><label class="form-label">Next Action</label><div class="rte-wrap"><div class="rte-toolbar">${rteToolbar("f-nextAction")}</div><div class="rte-body" id="f-nextAction" contenteditable="true">${item.nextAction||""}</div></div></div>
+    <div class="form-field">
+      <label class="form-label" id="f-task-header-label">Things To Be Done</label>
+      <div class="task-section">
+        <ul class="task-list" id="f-task-list"></ul>
+        <div class="task-add-row">
+          <input class="task-add-input" id="f-task-input" placeholder="Add a task..." />
+          <button class="task-add-btn" id="f-task-add-btn" type="button">+ Add</button>
+        </div>
+      </div>
+    </div>
     <div class="form-row">
       <div class="form-field"><label class="form-label">Status</label><select class="form-input" id="f-status">${STATUSES.map(s => `<option${(item.status||"I Need To Act")===s?" selected":""}>${s}</option>`).join("")}</select></div>
       <div class="form-field"><label class="form-label">Customer Type</label><select class="form-input" id="f-customerType"><option value="">Not set</option><option${item.customerType==="Prospect"?" selected":""}>Prospect</option><option${item.customerType==="Current Customer"?" selected":""}>Current Customer</option></select></div>
@@ -1234,6 +1248,104 @@ function renderEditForm() {
     </div>`;
 
   setupRteToolbars();
+
+  function renderFormTasks() {
+    const taskList = document.getElementById("f-task-list");
+    if (!taskList) return;
+    const tasks = item.tasks || [];
+    const headerLabel = document.getElementById("f-task-header-label");
+    if (headerLabel) {
+      const openCount = tasks.filter(t => !t.done).length;
+      headerLabel.textContent = `Things To Be Done${openCount > 0 ? ` (${openCount} open)` : ""}`;
+    }
+    taskList.innerHTML = tasks.map((t, i) => `
+      <li class="task-item" data-idx="${i}">
+        <input type="checkbox" class="task-check" data-idx="${i}" ${t.done ? "checked" : ""} />
+        <div style="flex:1">
+          <div class="task-text${t.done ? " done" : ""}" data-idx="${i}">${t.text}</div>
+          <div class="task-dates">
+            Added ${t.created}${t.done && t.completed ? ` · Done ${t.completed}` : ""}
+          </div>
+        </div>
+        <span class="task-edit-icon" data-idx="${i}" title="Edit">✎</span>
+        <span class="task-delete-icon" data-idx="${i}" title="Delete">✕</span>
+      </li>`).join("");
+
+    taskList.querySelectorAll(".task-check").forEach(cb => {
+      cb.addEventListener("change", () => {
+        const idx = parseInt(cb.dataset.idx);
+        const tasks = item.tasks || [];
+        tasks[idx].done = cb.checked;
+        tasks[idx].completed = cb.checked ? todayStr() : null;
+        item.tasks = tasks;
+        renderFormTasks();
+      });
+    });
+    taskList.querySelectorAll(".task-delete-icon").forEach(el => {
+      el.addEventListener("click", () => {
+        const idx = parseInt(el.dataset.idx);
+        const tasks = item.tasks || [];
+        tasks.splice(idx, 1);
+        item.tasks = tasks;
+        renderFormTasks();
+      });
+    });
+    taskList.querySelectorAll(".task-edit-icon").forEach(el => {
+      el.addEventListener("click", () => startEditFormTask(parseInt(el.dataset.idx)));
+    });
+    taskList.querySelectorAll(".task-text").forEach(el => {
+      el.addEventListener("click", () => startEditFormTask(parseInt(el.dataset.idx)));
+    });
+  }
+
+  function startEditFormTask(idx) {
+    const taskList = document.getElementById("f-task-list");
+    if (!taskList) return;
+    const li = taskList.querySelector(`.task-item[data-idx="${idx}"]`);
+    if (!li) return;
+    const tasks = item.tasks || [];
+    const textDiv = li.querySelector(".task-text");
+    if (!textDiv) return;
+    const current = tasks[idx].text;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "task-edit-input";
+    input.value = current;
+    textDiv.replaceWith(input);
+    input.focus();
+    input.select();
+
+    const commit = () => {
+      const val = input.value.trim();
+      if (val && val !== current) {
+        tasks[idx].text = val;
+        item.tasks = tasks;
+      }
+      renderFormTasks();
+    };
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") { e.preventDefault(); commit(); }
+      if (e.key === "Escape") { renderFormTasks(); }
+    });
+    input.addEventListener("blur", commit);
+  }
+
+  function addFormTask() {
+    const input = document.getElementById("f-task-input");
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    const tasks = item.tasks || [];
+    tasks.push({ text, done: false, created: todayStr(), completed: null });
+    item.tasks = tasks;
+    input.value = "";
+    renderFormTasks();
+  }
+  renderFormTasks();
+  const fAddBtn = document.getElementById("f-task-add-btn");
+  const fTaskInput = document.getElementById("f-task-input");
+  if (fAddBtn) fAddBtn.onclick = addFormTask;
+  if (fTaskInput) fTaskInput.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addFormTask(); } });
 
   document.getElementById("f-save").onclick = async () => {
     const newStatus = document.getElementById("f-status").value;
