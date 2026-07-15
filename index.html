@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.36 -->
+<!DOCTYPE html><!-- v6.37 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
   <script>
     // Cache buster: check the live file for a newer version and force one reload if stale.
     (function () {
-      const CURRENT_VERSION = "v6.36";
+      const CURRENT_VERSION = "v6.37";
       const RELOAD_FLAG = "gsd_reloaded_for_" + CURRENT_VERSION;
       fetch(window.location.href, { cache: "no-store" })
         .then(r => r.text())
@@ -315,6 +315,10 @@
     .task-add-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-bd); border-radius: var(--r-sm); padding: 7px 10px; font-size: 12px; outline: none; font-family: inherit; color: var(--ink); transition: border-color .2s; }
     .task-add-input:focus { border-color: var(--accent-red); }
     .task-add-btn { background: var(--accent-blue); color: #fff; border: none; border-radius: var(--r-sm); padding: 7px 13px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .task-count-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(26,58,138,0.35); color: #7fb2ff; font-size: 11px; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+    .task-edit-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-bd); border-radius: var(--r-sm); padding: 4px 8px; font-size: 14px; outline: none; font-family: inherit; color: var(--ink); }
+    .task-edit-icon, .task-delete-icon { cursor: pointer; color: var(--ink-3); font-size: 14px; padding: 2px; flex-shrink: 0; }
+    .task-edit-icon:hover, .task-delete-icon:hover { color: var(--ink); }
 
     /* Select options dark */
     option { background: #1a1a2e; color: #f0eeff; }
@@ -467,7 +471,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.36</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.37</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -669,6 +673,9 @@ function flagIcon(item, w, h) {
 }
 function hasOpenTasks(item) {
   return !!(item && item.tasks && item.tasks.some(t => !t.done));
+}
+function openTaskCount(item) {
+  return (item && item.tasks) ? item.tasks.filter(t => !t.done).length : 0;
 }
 function followChipHtml(date) {
   if (!date) return "";
@@ -958,7 +965,7 @@ function renderList() {
     return `<div class="card${selectedId === item.id ? " selected" : ""}${item.status === "Done" ? " done" : ""}${item.featured ? " starred" : ""}" data-id="${item.id}">
       <div class="card-body">
         <div class="card-row1">
-          <div class="card-name" style="display:flex;align-items:center;gap:10px;">${flagIcon(item, 28, 18)}<span>${item.company}</span></div>
+          <div class="card-name" style="display:flex;align-items:center;gap:10px;">${flagIcon(item, 28, 18)}<span>${item.company}</span>${openTaskCount(item) > 0 ? `<span class="task-count-badge">${openTaskCount(item)} open</span>` : ""}</div>
         </div>
         <div class="card-row2">
           <span class="card-meta">${metaParts}</span>
@@ -1041,7 +1048,7 @@ function renderPanel() {
     <div class="icon-dock-row top"><div class="icon-dock">${iconDockHtml(item)}</div></div>
     ${item.nextAction ? `<div class="section-box box-next"><div class="field-label">Next Action</div><div class="field-content">${item.nextAction}</div></div>` : ""}
     <div class="section-box box-tasks">
-      <div class="field-label">Things To Be Done</div>
+      <div class="field-label" id="task-header-label">Things To Be Done</div>
       <div class="task-section">
         <ul class="task-list" id="task-list"></ul>
         <div class="task-add-row">
@@ -1061,15 +1068,22 @@ function renderPanel() {
     const taskList = document.getElementById("task-list");
     if (!taskList) return;
     const tasks = item.tasks || [];
+    const headerLabel = document.getElementById("task-header-label");
+    if (headerLabel) {
+      const openCount = tasks.filter(t => !t.done).length;
+      headerLabel.textContent = `Things To Be Done${openCount > 0 ? ` (${openCount} open)` : ""}`;
+    }
     taskList.innerHTML = tasks.map((t, i) => `
-      <li class="task-item">
+      <li class="task-item" data-idx="${i}">
         <input type="checkbox" class="task-check" data-idx="${i}" ${t.done ? "checked" : ""} />
         <div style="flex:1">
-          <div class="task-text${t.done ? " done" : ""}">${t.text}</div>
+          <div class="task-text${t.done ? " done" : ""}" data-idx="${i}">${t.text}</div>
           <div class="task-dates">
             Added ${t.created}${t.done && t.completed ? ` · Done ${t.completed}` : ""}
           </div>
         </div>
+        <span class="task-edit-icon" data-idx="${i}" title="Edit">✎</span>
+        <span class="task-delete-icon" data-idx="${i}" title="Delete">✕</span>
       </li>`).join("");
 
     taskList.querySelectorAll(".task-check").forEach(cb => {
@@ -1084,6 +1098,63 @@ function renderPanel() {
         renderTasks();
       });
     });
+
+    taskList.querySelectorAll(".task-delete-icon").forEach(el => {
+      el.addEventListener("click", async () => {
+        const idx = parseInt(el.dataset.idx);
+        const tasks = item.tasks || [];
+        tasks.splice(idx, 1);
+        item.tasks = tasks;
+        items = items.map(i => i.id === item.id ? item : i);
+        await upsert(item);
+        renderTasks();
+      });
+    });
+
+    taskList.querySelectorAll(".task-edit-icon").forEach(el => {
+      el.addEventListener("click", () => startEditTask(parseInt(el.dataset.idx)));
+    });
+    taskList.querySelectorAll(".task-text").forEach(el => {
+      el.addEventListener("click", () => startEditTask(parseInt(el.dataset.idx)));
+    });
+  }
+
+  function startEditTask(idx) {
+    const li = taskList_li(idx);
+    if (!li) return;
+    const tasks = item.tasks || [];
+    const textDiv = li.querySelector(".task-text");
+    if (!textDiv) return;
+    const current = tasks[idx].text;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "task-edit-input";
+    input.value = current;
+    textDiv.replaceWith(input);
+    input.focus();
+    input.select();
+
+    const commit = async () => {
+      const val = input.value.trim();
+      if (val && val !== current) {
+        tasks[idx].text = val;
+        item.tasks = tasks;
+        items = items.map(i => i.id === item.id ? item : i);
+        await upsert(item);
+      }
+      renderTasks();
+    };
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") { e.preventDefault(); commit(); }
+      if (e.key === "Escape") { renderTasks(); }
+    });
+    input.addEventListener("blur", commit);
+  }
+
+  function taskList_li(idx) {
+    const taskList = document.getElementById("task-list");
+    if (!taskList) return null;
+    return taskList.querySelector(`.task-item[data-idx="${idx}"]`);
   }
   renderTasks();
 
