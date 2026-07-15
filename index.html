@@ -128,11 +128,12 @@
     .crow { background: #101d38; border: 1px solid rgba(122,144,184,0.18); border-radius: var(--r-sm); cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 8px 12px; transition: background .15s; }
     .crow.selected { background: rgba(26,58,138,0.25); }
     .crow-company { font-weight: 700; font-size: 13px; color: var(--ink); width: 140px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .crow-person { font-size: 13px; color: var(--ink-2); width: 140px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .crow-type { font-size: 12px; color: var(--ink-3); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .crow-date { font-size: 12px; width: 56px; flex-shrink: 0; text-align: right; color: var(--ink-3); }
+    .crow-person { font-weight: 700; font-size: 13px; color: var(--ink-2); width: 140px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .crow-type { font-weight: 700; font-size: 12px; color: var(--ink-3); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .crow-date { font-weight: 700; font-size: 12px; width: 56px; flex-shrink: 0; text-align: right; color: var(--ink-3); }
     .crow-date.overdue { color: var(--neon-red); }
     .crow-date.today { color: var(--neon-amber); }
+    .crow .status-badge { font-weight: 700; }
     .card { background: var(--bg2); border: none; border-radius: var(--r); cursor: pointer; transition: background .15s, transform .15s; }
     .card:hover { background: rgba(26,58,138,0.12); transform: translateY(-1px); }
     .card.selected { border-left: 3px solid var(--accent-red); background: rgba(204,34,0,0.08); }
