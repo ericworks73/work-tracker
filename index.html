@@ -122,6 +122,17 @@
     #list-pane.narrow { width: 42%; min-width: 160px; }
 
     /* Cards */
+    #view-toggle { display: flex; align-items: center; gap: 2px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-bd); border-radius: 8px; padding: 3px; flex-shrink: 0; }
+    #view-toggle button { border: none; background: transparent; color: var(--ink-3); border-radius: 6px; padding: 5px 9px; cursor: pointer; display: flex; align-items: center; font-family: inherit; }
+    #view-toggle button.active { background: rgba(26,58,138,0.35); color: var(--ink); }
+    .crow { background: var(--bg2); border: none; border-radius: var(--r-sm); cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 8px 12px; transition: background .15s; }
+    .crow.selected { background: rgba(26,58,138,0.25); }
+    .crow-company { font-weight: 700; font-size: 13px; color: var(--ink); width: 140px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .crow-person { font-size: 13px; color: var(--ink-2); width: 140px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .crow-type { font-size: 12px; color: var(--ink-3); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .crow-date { font-size: 12px; width: 56px; flex-shrink: 0; text-align: right; color: var(--ink-3); }
+    .crow-date.overdue { color: var(--neon-red); }
+    .crow-date.today { color: var(--neon-amber); }
     .card { background: var(--bg2); border: none; border-radius: var(--r); cursor: pointer; transition: background .15s, transform .15s; }
     .card:hover { background: rgba(26,58,138,0.12); transform: translateY(-1px); }
     .card.selected { border-left: 3px solid var(--accent-red); background: rgba(204,34,0,0.08); }
@@ -389,6 +400,8 @@
 <div id="filter-bar">
   <div id="type-tabs"></div>
   <div id="status-tabs"></div>
+  <div style="flex:1;"></div>
+  <div id="view-toggle"></div>
 </div>
 
 <div id="main">
@@ -469,6 +482,7 @@ function iconDockHtml(item) {
 let items = [];
 let selectedId = null;
 let filterStatus = "All";
+let viewMode = localStorage.getItem("gsd-view-mode") || "full";
 let lastRegularStatus = "All";
 let statusDropdownOpen = false;
 let filterType = "All";
@@ -632,6 +646,14 @@ function statusClass(s) {
   if (s === "Stuck") return "s-stuck";
   return "s-done";
 }
+function flagIcon(item, w, h) {
+  const stars = `<text font-size="1.6" fill="white" text-anchor="middle"><tspan x="1.4" y="2.2">&#x2605;</tspan><tspan x="3.6" y="2.2">&#x2605;</tspan><tspan x="5.8" y="2.2">&#x2605;</tspan><tspan x="8" y="2.2">&#x2605;</tspan><tspan x="10.2" y="2.2">&#x2605;</tspan><tspan x="2.5" y="3.8">&#x2605;</tspan><tspan x="4.7" y="3.8">&#x2605;</tspan><tspan x="6.9" y="3.8">&#x2605;</tspan><tspan x="9.1" y="3.8">&#x2605;</tspan><tspan x="1.4" y="5.4">&#x2605;</tspan><tspan x="3.6" y="5.4">&#x2605;</tspan><tspan x="5.8" y="5.4">&#x2605;</tspan><tspan x="8" y="5.4">&#x2605;</tspan><tspan x="10.2" y="5.4">&#x2605;</tspan><tspan x="2.5" y="7">&#x2605;</tspan><tspan x="4.7" y="7">&#x2605;</tspan><tspan x="6.9" y="7">&#x2605;</tspan><tspan x="9.1" y="7">&#x2605;</tspan><tspan x="1.4" y="8.6">&#x2605;</tspan><tspan x="3.6" y="8.6">&#x2605;</tspan><tspan x="5.8" y="8.6">&#x2605;</tspan><tspan x="8" y="8.6">&#x2605;</tspan><tspan x="10.2" y="8.6">&#x2605;</tspan></text>`;
+  const stripes = `<rect width="28" height="18" fill="#b22234"/><rect y="1.38" width="28" height="1.38" fill="#fff"/><rect y="2.77" width="28" height="1.38" fill="#b22234"/><rect y="4.15" width="28" height="1.38" fill="#fff"/><rect y="5.54" width="28" height="1.38" fill="#b22234"/><rect y="6.92" width="28" height="1.38" fill="#fff"/><rect y="8.31" width="28" height="1.38" fill="#b22234"/><rect y="9.69" width="28" height="1.38" fill="#fff"/><rect y="11.08" width="28" height="1.38" fill="#b22234"/><rect y="12.46" width="28" height="1.38" fill="#fff"/><rect y="13.85" width="28" height="1.38" fill="#b22234"/><rect y="15.23" width="28" height="1.38" fill="#fff"/><rect y="16.62" width="28" height="1.38" fill="#b22234"/>`;
+  if (item.featured) {
+    return `<svg width="${w}" height="${h}" viewBox="0 0 28 18" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;border-radius:2px;cursor:pointer;" class="flag-btn" data-id="${item.id}">${stripes}<rect width="11" height="9.69" fill="#3c3b6e"/>${stars}</svg>`;
+  }
+  return `<svg width="${w}" height="${h}" viewBox="0 0 28 18" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;border-radius:2px;cursor:pointer;opacity:0.15;" class="flag-btn" data-id="${item.id}">${stripes}<rect width="11" height="9.69" fill="#3c3b6e"/></svg>`;
+}
 function hasOpenTasks(item) {
   return !!(item && item.tasks && item.tasks.some(t => !t.done));
 }
@@ -671,6 +693,8 @@ function getFiltered() {
     f = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) < 0);
   } else if (filterStatus === "Today") {
     f = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) === 0);
+  } else if (filterStatus === "Stale") {
+    f = items.filter(i => i.status !== "Done" && i.date && Math.floor((new Date() - new Date(i.date + "T12:00:00")) / 86400000) >= 15);
   } else {
     f = items.filter(i => (filterStatus === "All" ? i.status !== "Done" : i.status === filterStatus));
   }
@@ -702,8 +726,24 @@ function render() {
   renderOverdue();
   renderTabs();
   renderTypeTabs();
+  renderViewToggle();
   renderList();
   renderPanel();
+}
+
+function renderViewToggle() {
+  const el = document.getElementById("view-toggle");
+  if (!el) return;
+  el.innerHTML = `
+    <button id="view-full" class="${viewMode === "full" ? "active" : ""}" title="Full cards">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="14" height="5" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="9" width="14" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
+    </button>
+    <button id="view-compact" class="${viewMode === "compact" ? "active" : ""}" title="Compact list">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1.5" width="14" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="6.75" width="14" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="12" width="14" height="2.5" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+    </button>
+  `;
+  document.getElementById("view-full").onclick = () => { viewMode = "full"; localStorage.setItem("gsd-view-mode", "full"); render(); };
+  document.getElementById("view-compact").onclick = () => { viewMode = "compact"; localStorage.setItem("gsd-view-mode", "compact"); render(); };
 }
 
 function renderHeader() {
@@ -721,6 +761,7 @@ function renderTabs() {
   const container = document.getElementById("status-tabs");
   const overdueCount  = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) < 0).length;
   const todayCount    = items.filter(i => i.status !== "Done" && i.followUpDate && daysUntil(i.followUpDate) === 0).length;
+  const staleCount    = items.filter(i => i.status !== "Done" && i.date && Math.floor((new Date() - new Date(i.date + "T12:00:00")) / 86400000) >= 15).length;
 
   const regularOptions = ["All", ...STATUSES];
   const isRegularActive = regularOptions.includes(filterStatus);
@@ -745,6 +786,8 @@ function renderTabs() {
   html += `<button class="date-chip" data-status="Overdue" style="color:var(--neon-red);background:rgba(255,107,107,${a1?"0.25":"0.12"});">Overdue (${overdueCount})</button>`;
   const a2 = filterStatus === "Today";
   html += `<button class="date-chip" data-status="Today" style="color:var(--neon-amber);background:rgba(255,209,102,${a2?"0.25":"0.12"});">Today (${todayCount})</button>`;
+  const a3 = filterStatus === "Stale";
+  html += `<button class="date-chip" data-status="Stale" style="color:#a78bfa;background:rgba(167,139,250,${a3?"0.25":"0.12"});">Stale (${staleCount})</button>`;
 
   container.innerHTML = html;
 
@@ -835,8 +878,48 @@ function renderList() {
 
     const testHtml = ctx ? `<div class="card-context">(${ctx})</div>` : "";
   }
+
+  if (viewMode === "compact") {
+    pane.innerHTML = `<div style="display:flex;flex-direction:column;gap:6px;">${filtered.map(item => {
+      const days = item.followUpDate ? daysUntil(item.followUpDate) : null;
+      const dateCls = days === null ? "" : days < 0 ? "overdue" : days === 0 ? "today" : "";
+      const dateLbl = days === null ? "" : days < 0 ? fmtDate(item.followUpDate) : days === 0 ? "Today" : fmtDate(item.followUpDate);
+      return `<div class="crow${selectedId === item.id ? " selected" : ""}" data-id="${item.id}">
+        ${flagIcon(item, 22, 14)}
+        <span class="crow-company">${item.company || ""}</span>
+        <span class="crow-person">${item.person || ""}</span>
+        <span class="crow-type">${item.type || ""}</span>
+        <span class="status-badge ${statusClass(item.status)}"><span class="status-dot"></span>${item.status}</span>
+        <span class="crow-date ${dateCls}">${dateLbl}</span>
+      </div>`;
+    }).join("")}</div>`;
+
+    pane.querySelectorAll(".crow").forEach(row => {
+      row.addEventListener("click", e => {
+        if (e.target.closest(".flag-btn")) return;
+        const clickedId = parseInt(row.dataset.id);
+        selectedId = (selectedId === clickedId) ? null : clickedId;
+        isAdding = false;
+        editingItem = null;
+        render();
+      });
+    });
+    pane.querySelectorAll(".flag-btn").forEach(btn => {
+      btn.addEventListener("click", async e => {
+        e.stopPropagation();
+        const id = parseInt(btn.dataset.id);
+        const item = items.find(i => i.id === id);
+        if (!item) return;
+        item.featured = !item.featured;
+        await upsert(item);
+        renderList();
+      });
+    });
+    return;
+  }
+
   pane.innerHTML = filtered.map(item => {
-    const metaParts = [item.company, item.customerType, item.type].filter(Boolean).join(" · ");
+    const metaParts = [item.person, item.customerType, item.type].filter(Boolean).join(" · ");
     const nxt = item.nextAction ? stripHtml(item.nextAction) : "";
     const ctx = item.context ? stripHtml(item.context) : "";
 
@@ -848,7 +931,7 @@ function renderList() {
     return `<div class="card${selectedId === item.id ? " selected" : ""}${item.status === "Done" ? " done" : ""}${item.featured ? " starred" : ""}" data-id="${item.id}">
       <div class="card-body">
         <div class="card-row1">
-          <div class="card-name" style="display:flex;align-items:center;gap:10px;">${item.featured ? `<svg width="28" height="18" viewBox="0 0 28 18" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;margin-top:1px;border-radius:2px;cursor:pointer;" class="flag-btn" data-id="${item.id}"><rect width="28" height="18" fill="#b22234"/><rect y="1.38" width="28" height="1.38" fill="#fff"/><rect y="2.77" width="28" height="1.38" fill="#b22234"/><rect y="4.15" width="28" height="1.38" fill="#fff"/><rect y="5.54" width="28" height="1.38" fill="#b22234"/><rect y="6.92" width="28" height="1.38" fill="#fff"/><rect y="8.31" width="28" height="1.38" fill="#b22234"/><rect y="9.69" width="28" height="1.38" fill="#fff"/><rect y="11.08" width="28" height="1.38" fill="#b22234"/><rect y="12.46" width="28" height="1.38" fill="#fff"/><rect y="13.85" width="28" height="1.38" fill="#b22234"/><rect y="15.23" width="28" height="1.38" fill="#fff"/><rect y="16.62" width="28" height="1.38" fill="#b22234"/><rect width="11" height="9.69" fill="#3c3b6e"/><text font-size="1.6" fill="white" text-anchor="middle"><tspan x="1.4" y="2.2">&#x2605;</tspan><tspan x="3.6" y="2.2">&#x2605;</tspan><tspan x="5.8" y="2.2">&#x2605;</tspan><tspan x="8" y="2.2">&#x2605;</tspan><tspan x="10.2" y="2.2">&#x2605;</tspan><tspan x="2.5" y="3.8">&#x2605;</tspan><tspan x="4.7" y="3.8">&#x2605;</tspan><tspan x="6.9" y="3.8">&#x2605;</tspan><tspan x="9.1" y="3.8">&#x2605;</tspan><tspan x="1.4" y="5.4">&#x2605;</tspan><tspan x="3.6" y="5.4">&#x2605;</tspan><tspan x="5.8" y="5.4">&#x2605;</tspan><tspan x="8" y="5.4">&#x2605;</tspan><tspan x="10.2" y="5.4">&#x2605;</tspan><tspan x="2.5" y="7">&#x2605;</tspan><tspan x="4.7" y="7">&#x2605;</tspan><tspan x="6.9" y="7">&#x2605;</tspan><tspan x="9.1" y="7">&#x2605;</tspan><tspan x="1.4" y="8.6">&#x2605;</tspan><tspan x="3.6" y="8.6">&#x2605;</tspan><tspan x="5.8" y="8.6">&#x2605;</tspan><tspan x="8" y="8.6">&#x2605;</tspan><tspan x="10.2" y="8.6">&#x2605;</tspan></text></svg>` : `<svg width="28" height="18" viewBox="0 0 28 18" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;margin-top:1px;border-radius:2px;cursor:pointer;opacity:0.15;" class="flag-btn" data-id="${item.id}"><rect width="28" height="18" fill="#b22234"/><rect y="1.38" width="28" height="1.38" fill="#fff"/><rect y="2.77" width="28" height="1.38" fill="#b22234"/><rect y="4.15" width="28" height="1.38" fill="#fff"/><rect y="5.54" width="28" height="1.38" fill="#b22234"/><rect y="6.92" width="28" height="1.38" fill="#fff"/><rect y="8.31" width="28" height="1.38" fill="#b22234"/><rect y="9.69" width="28" height="1.38" fill="#fff"/><rect y="11.08" width="28" height="1.38" fill="#b22234"/><rect y="12.46" width="28" height="1.38" fill="#fff"/><rect y="13.85" width="28" height="1.38" fill="#b22234"/><rect y="15.23" width="28" height="1.38" fill="#fff"/><rect y="16.62" width="28" height="1.38" fill="#b22234"/><rect width="11" height="9.69" fill="#3c3b6e"/></svg>`}<span>${item.person}</span></div>
+          <div class="card-name" style="display:flex;align-items:center;gap:10px;">${flagIcon(item, 28, 18)}<span>${item.company}</span></div>
         </div>
         <div class="card-row2">
           <span class="card-meta">${metaParts}</span>
