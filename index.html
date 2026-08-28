@@ -130,7 +130,8 @@
     .crow-header .ch-icon { width: 22px; flex-shrink: 0; }
     .crow-header .ch-company { width: 140px; flex-shrink: 0; }
     .crow-header .ch-person { width: 140px; flex-shrink: 0; }
-    .crow-header .ch-type { flex: 1; }
+    .crow-header .ch-type { width: 130px; flex-shrink: 0; }
+    .crow-header .ch-customertype { flex: 1; }
     .crow-header .ch-tasks { width: 60px; flex-shrink: 0; text-align: left; }
     .crow-header .ch-status { width: 130px; flex-shrink: 0; text-align: left; }
     .crow-header .ch-date { width: 64px; flex-shrink: 0; text-align: right; }
@@ -140,7 +141,8 @@
     .crow.selected { background: rgba(26,58,138,0.25); }
     .crow-company { font-weight: 700; font-size: 13px; color: var(--ink); width: 140px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .crow-person { font-weight: 700; font-size: 13px; color: var(--ink-2); width: 140px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .crow-type { font-weight: 700; font-size: 12px; color: var(--ink-3); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .crow-type { font-weight: 700; font-size: 12px; color: var(--ink-3); width: 130px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .crow-customertype { font-weight: 700; font-size: 12px; color: var(--ink-3); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .crow-tasks { width: 60px; flex-shrink: 0; }
     .crow-date { font-weight: 700; font-size: 12px; width: 64px; flex-shrink: 0; text-align: right; color: var(--ink-3); }
     .crow-touch { font-weight: 700; font-size: 12px; width: 90px; flex-shrink: 0; text-align: right; color: var(--ink-3); }
@@ -908,6 +910,7 @@ function renderList() {
       <span class="ch-company">Company</span>
       <span class="ch-person">Person</span>
       <span class="ch-type">Type</span>
+      <span class="ch-customertype">Customer Type</span>
       <span class="ch-tasks">Tasks</span>
       <span class="ch-status">Status</span>
       <span class="ch-date">Follow up</span>
@@ -925,6 +928,7 @@ function renderList() {
         <span class="crow-company">${item.company || ""}</span>
         <span class="crow-person">${item.person || ""}</span>
         <span class="crow-type">${item.type || ""}</span>
+        <span class="crow-customertype">${item.customerType || ""}</span>
         <span class="crow-tasks">${openTaskCount(item) > 0 ? `<span class="task-count-badge">${openTaskCount(item)} open</span>` : ""}</span>
         <span class="status-badge ${statusClass(item.status)}"><span class="status-dot"></span>${item.status}</span>
         <span class="crow-date ${dateCls}">${dateLbl}</span>
