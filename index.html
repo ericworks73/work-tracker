@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.38 -->
+<!DOCTYPE html><!-- v6.40 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
   <script>
     // Cache buster: check the live file for a newer version and force one reload if stale.
     (function () {
-      const CURRENT_VERSION = "v6.38";
+      const CURRENT_VERSION = "v6.40";
       const RELOAD_FLAG = "gsd_reloaded_for_" + CURRENT_VERSION;
       fetch(window.location.href, { cache: "no-store" })
         .then(r => r.text())
@@ -51,6 +51,25 @@
       --accent-blue:#1a3a8a;
       --r:          12px;
       --r-sm:       8px;
+    }
+    html[data-theme="signals"] {
+      --bg0:        #F7F4EC;
+      --bg1:        #FFFFFF;
+      --bg2:        #FFFFFF;
+      --glass:      rgba(0,0,0,0.03);
+      --glass-bd:   #EFEBE1;
+      --glass-hover:rgba(192,57,43,0.06);
+      --ink:        #1C1B18;
+      --ink-2:      #6E6A5D;
+      --ink-3:      #948F80;
+      --neon-purple:#6E4A9E;
+      --neon-blue:  #3B6EA5;
+      --neon-green: #3B7A5E;
+      --neon-amber: #9A5B0E;
+      --neon-red:   #C0392B;
+      --neon-pink:  #9C4B6E;
+      --accent-red: #C0392B;
+      --accent-blue:#3B6EA5;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: var(--bg0); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; color: var(--ink); font-size: 15px; }
@@ -125,6 +144,8 @@
     #view-toggle { display: flex; align-items: center; gap: 2px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-bd); border-radius: 8px; padding: 3px; flex-shrink: 0; }
     #view-toggle button { border: none; background: transparent; color: var(--ink-3); border-radius: 6px; padding: 5px 9px; cursor: pointer; display: flex; align-items: center; font-family: inherit; }
     #view-toggle button.active { background: rgba(26,58,138,0.35); color: var(--ink); }
+    #theme-toggle { border: 1px solid var(--glass-bd); background: rgba(255,255,255,0.03); color: var(--ink-2); border-radius: 8px; padding: 6px 12px; font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; margin-right: 6px; }
+    #theme-toggle:hover { color: var(--ink); }
     .crow-header { position: sticky; top: -16px; z-index: 2; display: flex; align-items: center; gap: 10px; padding: 0 12px 6px; background: var(--bg0); }
     .crow-header span { font-size: 10px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; }
     .crow-header .ch-icon { width: 22px; flex-shrink: 0; }
@@ -339,6 +360,88 @@
       #header-actions { width: 110px; }
       #add-btn { padding: 8px 0; font-size: 13px; }
     }
+
+    /* 37signals theme overrides */
+    #app-shell { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+    html[data-theme="signals"] body { background: #F7F4EC; padding: 18px; }
+    html[data-theme="signals"] #app-shell { background: #fff; border-radius: 20px; box-shadow: 0 2px 20px rgba(30,27,20,0.08); }
+    html[data-theme="signals"] #header { border-radius: 20px 20px 0 0; }
+    html[data-theme="signals"] #theme-toggle { background: #fff; border-color: var(--glass-bd); color: var(--ink-2); }
+    html[data-theme="signals"] #panel-1 { box-shadow: 0 4px 24px rgba(30,27,20,0.12); }
+    html[data-theme="signals"] #dt-time { color: var(--ink); }
+    html[data-theme="signals"] #overdue-bar { background: #F9E4E1; border-bottom-color: #F0997B; }
+    html[data-theme="signals"] #filter-bar { border-bottom-color: var(--glass-bd); }
+    html[data-theme="signals"] #search-bar { background: #fff; }
+    html[data-theme="signals"] .chip-divider { background: var(--glass-bd); }
+    html[data-theme="signals"] #status-drop-btn { background: #fff; }
+    html[data-theme="signals"] #status-drop-btn.active { background: #F9E4E1; color: var(--ink); }
+    html[data-theme="signals"] #status-drop-menu { box-shadow: 0 8px 20px rgba(30,27,20,0.12); }
+    html[data-theme="signals"] .status-drop-item:hover { background: #F7F4EC; }
+    html[data-theme="signals"] .status-drop-item.active { background: #F9E4E1; color: var(--ink); }
+    html[data-theme="signals"] #type-drop-btn { background: #fff; }
+    html[data-theme="signals"] #type-drop-btn.active { color: var(--ink); background: #F7F4EC; }
+    html[data-theme="signals"] #type-drop-menu { box-shadow: 0 8px 20px rgba(30,27,20,0.12); }
+    html[data-theme="signals"] .type-drop-item:hover { background: #F7F4EC; }
+    html[data-theme="signals"] .type-drop-item.active { background: #F7F4EC; color: var(--ink); }
+    html[data-theme="signals"] #view-toggle { background: #fff; }
+    html[data-theme="signals"] #view-toggle button.active { background: #F9E4E1; color: var(--ink); }
+
+    /* Avatar chips replace the flag icon */
+    .avatar-chip { display: none; width: 34px; height: 34px; border-radius: 50%; color: #fff; font-size: 12px; font-weight: 700; align-items: center; justify-content: center; flex-shrink: 0; }
+    .avatar-chip.sm { width: 24px; height: 24px; font-size: 10px; }
+    html[data-theme="signals"] .avatar-chip { display: flex; }
+    html[data-theme="signals"] .flag-btn { display: none; }
+
+    /* Flatten cards/rows into dividered list style */
+    html[data-theme="signals"] #list-pane { background: #fff; gap: 0; padding: 8px 32px 24px; }
+    html[data-theme="signals"] .card { background: transparent; border-radius: 0; border: none; border-bottom: 1px solid #F3F0E8; }
+    html[data-theme="signals"] .card:last-child { border-bottom: none; }
+    html[data-theme="signals"] .card:hover { background: #FAF8F2; transform: none; }
+    html[data-theme="signals"] .card.selected { background: #F9E4E1; border-left: none; box-shadow: none; }
+    html[data-theme="signals"] .card-body { padding: 14px 0 8px; }
+    html[data-theme="signals"] .card-name { font-size: 15px; }
+    html[data-theme="signals"] .card-band, html[data-theme="signals"] .card-ctx-band { background: transparent; border-top: none; padding: 0 0 8px; }
+    html[data-theme="signals"] .card-band-label, html[data-theme="signals"] .card-ctx-label { color: var(--ink-3); font-size: 10px; }
+    html[data-theme="signals"] .card-footer-row { padding: 0 0 14px; }
+    html[data-theme="signals"] .quick-btn { border-color: var(--glass-bd); background: #F7F4EC; }
+    html[data-theme="signals"] .quick-btn:hover { border-color: var(--accent-red); color: var(--accent-red); }
+    html[data-theme="signals"] .crow { background: transparent; border: none; border-bottom: 1px solid #F3F0E8; border-radius: 0; padding: 10px 12px; }
+    html[data-theme="signals"] .crow.selected { background: #F9E4E1; }
+    html[data-theme="signals"] .crow-header { background: #fff; }
+
+    html[data-theme="signals"] .pri-High   { background: #F9E4E1; color: var(--neon-red); }
+    html[data-theme="signals"] .pri-Medium { background: #FDEBD3; color: var(--neon-amber); }
+    html[data-theme="signals"] .pri-Low    { background: #F1EFE8; color: var(--ink-3); }
+    html[data-theme="signals"] .s-act  { background: #FDEBD3; color: #9A5B0E; }
+    html[data-theme="signals"] .s-act .status-dot  { background: #9A5B0E; }
+    html[data-theme="signals"] .s-wait { background: #E6F1FB; color: #185FA5; }
+    html[data-theme="signals"] .s-wait .status-dot { background: #378ADD; }
+    html[data-theme="signals"] .s-stuck{ background: #F9E4E1; color: #C0392B; }
+    html[data-theme="signals"] .s-stuck .status-dot{ background: #C0392B; }
+    html[data-theme="signals"] .s-done { background: #F1EFE8; color: var(--ink-3); }
+    html[data-theme="signals"] .s-done .status-dot { background: var(--ink-3); }
+    html[data-theme="signals"] .follow-overdue  { background: #F9E4E1; color: #C0392B; }
+    html[data-theme="signals"] .follow-tomorrow { background: #FDEBD3; color: #9A5B0E; }
+    html[data-theme="signals"] .follow-today    { background: #FDEBD3; color: #9A5B0E; }
+    html[data-theme="signals"] .follow-future   { background: #E4EEE6; color: #3B7A5E; }
+    html[data-theme="signals"] .btn-close  { background: #E4EEE6; color: #3B7A5E; border-color: #C7DFCF; }
+    html[data-theme="signals"] .btn-delete { background: #F9E4E1; color: #C0392B; border-color: #F0997B; }
+    html[data-theme="signals"] .form-input { background: #fff; border-color: var(--glass-bd); }
+    html[data-theme="signals"] input[type="date"] { color-scheme: light; }
+    html[data-theme="signals"] input[type="date"]::-webkit-calendar-picker-indicator { filter: none; }
+    html[data-theme="signals"] .rte-toolbar { background: #F7F4EC; }
+    html[data-theme="signals"] #quick-box { box-shadow: 0 -8px 32px rgba(30,27,20,0.12); }
+    html[data-theme="signals"] .quick-input { background: #fff; border-color: var(--glass-bd); }
+    html[data-theme="signals"] .quick-input[type="date"] { color-scheme: light; }
+    html[data-theme="signals"] .task-item { border-bottom-color: var(--glass-bd); }
+    html[data-theme="signals"] .task-add-input { background: #fff; }
+    html[data-theme="signals"] .task-count-badge { background: #E6F1FB; color: #185FA5; }
+    html[data-theme="signals"] .task-edit-input { background: #fff; }
+    html[data-theme="signals"] option { background: #fff; color: var(--ink); }
+    html[data-theme="signals"] ::-webkit-scrollbar-thumb { background: var(--glass-bd); }
+    html[data-theme="signals"] #edit-pane { border-left-color: var(--glass-bd); }
+    html[data-theme="signals"] #detail-pane { border-left-color: var(--glass-bd); }
+    html[data-theme="signals"] #version { color: rgba(0,0,0,0.25); }
   </style>
 </head>
 <body>
@@ -383,6 +486,7 @@
   </div>
 </div>
 
+<div id="app-shell">
 <div id="header">
   <div id="header-left">
   <div>
@@ -422,6 +526,7 @@
   <div id="type-tabs"></div>
   <div id="status-tabs"></div>
   <div style="flex:1;"></div>
+  <button id="theme-toggle"></button>
   <div id="view-toggle"></div>
 </div>
 
@@ -429,6 +534,7 @@
   <div id="list-pane"><div class="loading-msg">Loading...</div></div>
   <div id="detail-pane"></div>
   <div id="edit-pane"></div>
+</div>
 </div>
 
 <div id="status-change-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
@@ -475,7 +581,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.38</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.40</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -503,6 +609,20 @@ function iconDockHtml(item) {
 let items = [];
 let selectedId = null;
 let filterStatus = "All";
+let theme = localStorage.getItem("gsd-theme") || "classic";
+document.documentElement.dataset.theme = theme;
+function renderThemeToggle() {
+  const btn = document.getElementById("theme-toggle");
+  btn.textContent = theme === "signals" ? "Classic" : "37signals";
+}
+document.getElementById("theme-toggle").onclick = () => {
+  theme = theme === "signals" ? "classic" : "signals";
+  localStorage.setItem("gsd-theme", theme);
+  document.documentElement.dataset.theme = theme;
+  renderThemeToggle();
+};
+renderThemeToggle();
+
 let viewMode = localStorage.getItem("gsd-view-mode") || "full";
 let lastRegularStatus = "All";
 let statusDropdownOpen = false;
@@ -674,6 +794,23 @@ function flagIcon(item, w, h) {
     return `<svg width="${w}" height="${h}" viewBox="0 0 28 18" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;border-radius:2px;cursor:pointer;" class="flag-btn" data-id="${item.id}">${stripes}<rect width="11" height="9.69" fill="#3c3b6e"/>${stars}</svg>`;
   }
   return `<svg width="${w}" height="${h}" viewBox="0 0 28 18" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;border-radius:2px;cursor:pointer;opacity:0.15;" class="flag-btn" data-id="${item.id}">${stripes}<rect width="11" height="9.69" fill="#3c3b6e"/></svg>`;
+}
+const AVATAR_COLORS = ["#E67E5A","#4F9E8C","#D9A441","#6C8EBF","#B15C8E","#8A8B4A","#C0392B","#3B7A5E"];
+function avatarInitials(name) {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+function avatarColor(name) {
+  const s = name || "";
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+function avatarChip(item, sm) {
+  const label = item.company || item.person || "?";
+  return `<span class="avatar-chip${sm ? " sm" : ""}" style="background:${avatarColor(label)}">${avatarInitials(label)}</span>`;
 }
 function hasOpenTasks(item) {
   return !!(item && item.tasks && item.tasks.some(t => !t.done));
@@ -924,7 +1061,7 @@ function renderList() {
       const touchLbl = touchDays === null ? "" : touchDays === 0 ? "Today" : touchDays === 1 ? "Yesterday" : `${touchDays}d ago`;
       const touchCls = touchDays !== null && touchDays >= 7 ? "crow-touch stale" : "crow-touch";
       return `<div class="crow${selectedId === item.id ? " selected" : ""}" data-id="${item.id}">
-        ${flagIcon(item, 22, 14)}
+        ${flagIcon(item, 22, 14)}${avatarChip(item, true)}
         <span class="crow-company">${item.company || ""}</span>
         <span class="crow-person">${item.person || ""}</span>
         <span class="crow-type">${item.type || ""}</span>
@@ -973,7 +1110,7 @@ function renderList() {
     return `<div class="card${selectedId === item.id ? " selected" : ""}${item.status === "Done" ? " done" : ""}${item.featured ? " starred" : ""}" data-id="${item.id}">
       <div class="card-body">
         <div class="card-row1">
-          <div class="card-name" style="display:flex;align-items:center;gap:10px;">${flagIcon(item, 28, 18)}<span>${item.company}</span>${openTaskCount(item) > 0 ? `<span class="task-count-badge">${openTaskCount(item)} open</span>` : ""}</div>
+          <div class="card-name" style="display:flex;align-items:center;gap:10px;">${flagIcon(item, 28, 18)}${avatarChip(item, false)}<span>${item.company}</span>${openTaskCount(item) > 0 ? `<span class="task-count-badge">${openTaskCount(item)} open</span>` : ""}</div>
         </div>
         <div class="card-row2">
           <span class="card-meta">${metaParts}</span>
