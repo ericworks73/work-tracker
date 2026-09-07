@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.45 -->
+<!DOCTYPE html><!-- v6.46 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
   <script>
     // Cache buster: check the live file for a newer version and force one reload if stale.
     (function () {
-      const CURRENT_VERSION = "v6.45";
+      const CURRENT_VERSION = "v6.46";
       const RELOAD_FLAG = "gsd_reloaded_for_" + CURRENT_VERSION;
       fetch(window.location.href, { cache: "no-store" })
         .then(r => r.text())
@@ -502,6 +502,16 @@
     html[data-theme="signals"] .detail-chips { margin-bottom: 22px; }
     html[data-theme="signals"] .detail-chips .status-badge,
     html[data-theme="signals"] .detail-chips .follow-chip { font-size: 13px; font-weight: 800; border-radius: 10px; padding: 8px 16px; }
+    .touch-chip { font-size: 13px; font-weight: 700; color: var(--ink-3); background: #F0ECE2; border-radius: 10px; padding: 8px 16px; }
+    .stat-row { display: flex; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+    .stat-card { flex: 1; min-width: 180px; display: flex; align-items: center; gap: 14px; background: #F7F4EC; border-radius: 14px; padding: 16px 18px; }
+    .stat-card-icon { width: 36px; height: 36px; border-radius: 10px; background: #E8E2D2; color: #8A8574; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .stat-card-icon svg { width: 18px; height: 18px; }
+    .stat-card-label { font-size: 11px; font-weight: 800; color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+    .stat-card-value { font-size: 16px; font-weight: 800; color: var(--ink); }
+    .callout-notes { background: #F3E9EE; }
+    .callout-notes .callout-icon { background: #9C4B6E; }
+    .callout-notes .field-label { color: #9C4B6E; }
     html[data-theme="signals"] .avatar-chip:not(.sm) { width: 64px; height: 64px; font-size: 22px; }
     html[data-theme="signals"] #detail-pane .icon-dock { background: transparent; border: none; gap: 8px; padding: 0; }
     html[data-theme="signals"] #detail-pane .icon-btn { width: 42px; height: 42px; background: #F7F4EC; }
@@ -678,7 +688,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.45</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.46</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -698,6 +708,17 @@ const ICON_DELETE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
 const ICON_FLAG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="3"/></svg>';
 const ICON_INFO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
 const ICON_CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+const ICON_USERS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+const ICON_DOLLAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>';
+const ICON_NOTE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
+function parseNotes(raw) {
+  const text = htmlToLines(raw).join(" ");
+  const whoMatch = text.match(/who'?s involved:\s*(.*?)(?:\s*value:|$)/i);
+  const valMatch = text.match(/value:\s*(.*)$/i);
+  const who = whoMatch && whoMatch[1].trim() && !/^n\/a$/i.test(whoMatch[1].trim()) ? whoMatch[1].trim() : null;
+  const value = valMatch && valMatch[1].trim() && !/^n\/a$/i.test(valMatch[1].trim()) ? valMatch[1].trim() : null;
+  return { who, value };
+}
 
 function iconDockHtml(item) {
   return `<button class="icon-btn ib-back" data-action="back" title="Back" aria-label="Back">${ICON_BACK}</button>
@@ -1429,7 +1450,29 @@ function renderPanel() {
     <div class="detail-chips">
       <span class="status-badge ${statusClass(item.status)}"><span class="status-dot"></span>${item.status}</span>
       ${item.followUpDate ? followChipHtml(item.followUpDate) : ""}
+      ${isSignals && item.date ? `<span class="touch-chip">Last touched ${fmtDate(item.date)}</span>` : ""}
     </div>`;
+
+  const touchHtml = isSignals
+    ? ""
+    : `<div class="section-box box-touch"><div class="field-label">Last Touch</div><div class="field-content" style="color:var(--ink-2)">${fmtDate(item.date)}</div></div>`;
+
+  let notesHtml = "";
+  if (item.notes) {
+    if (isSignals) {
+      const parsed = parseNotes(item.notes);
+      if (parsed.who || parsed.value) {
+        notesHtml = `<div class="stat-row">
+          ${parsed.who ? `<div class="stat-card"><div class="stat-card-icon">${ICON_USERS}</div><div><div class="stat-card-label">Stakeholders</div><div class="stat-card-value">${parsed.who}</div></div></div>` : ""}
+          ${parsed.value ? `<div class="stat-card"><div class="stat-card-icon">${ICON_DOLLAR}</div><div><div class="stat-card-label">Deal value</div><div class="stat-card-value">${parsed.value}</div></div></div>` : ""}
+        </div>`;
+      } else {
+        notesHtml = `<div class="callout callout-notes"><div class="callout-icon">${ICON_NOTE}</div><div><div class="field-label">Notes</div><div class="field-content">${item.notes}</div></div></div>`;
+      }
+    } else {
+      notesHtml = `<div class="section-box box-notes"><div class="field-label">Notes</div><div class="field-content" style="color:var(--ink-2)">${item.notes}</div></div>`;
+    }
+  }
 
   detail.innerHTML = `
     ${headerHtml}
@@ -1446,8 +1489,8 @@ function renderPanel() {
     </div>
     ${contextHtml}
     ${activityHtml}
-    <div class="section-box box-touch"><div class="field-label">Last Touch</div><div class="field-content" style="color:var(--ink-2)">${fmtDate(item.date)}</div></div>
-    ${item.notes ? `<div class="section-box box-notes"><div class="field-label">Notes</div><div class="field-content" style="color:var(--ink-2)">${item.notes}</div></div>` : ""}
+    ${touchHtml}
+    ${notesHtml}
     <div class="icon-dock-row bottom"><div class="icon-dock">${iconDockHtml(item)}</div></div>`;
 
   // Render tasks
