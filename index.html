@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.40 -->
+<!DOCTYPE html><!-- v6.42 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
   <script>
     // Cache buster: check the live file for a newer version and force one reload if stale.
     (function () {
-      const CURRENT_VERSION = "v6.40";
+      const CURRENT_VERSION = "v6.42";
       const RELOAD_FLAG = "gsd_reloaded_for_" + CURRENT_VERSION;
       fetch(window.location.href, { cache: "no-store" })
         .then(r => r.text())
@@ -442,6 +442,80 @@
     html[data-theme="signals"] #edit-pane { border-left-color: var(--glass-bd); }
     html[data-theme="signals"] #detail-pane { border-left-color: var(--glass-bd); }
     html[data-theme="signals"] #version { color: rgba(0,0,0,0.25); }
+
+    /* Bold everything */
+    html[data-theme="signals"] #dt-time { font-size: 24px; font-weight: 800; }
+    html[data-theme="signals"] .stat-val { font-size: 17px; font-weight: 800; }
+    html[data-theme="signals"] #add-btn { font-size: 16px; font-weight: 800; padding: 12px 22px; border-radius: 12px; }
+    html[data-theme="signals"] .date-chip { font-weight: 800; }
+    html[data-theme="signals"] #status-drop-btn, html[data-theme="signals"] #type-drop-btn { font-weight: 800; }
+    html[data-theme="signals"] .field-content { font-size: 16px; }
+    html[data-theme="signals"] .task-text { font-size: 15px; font-weight: 600; }
+    html[data-theme="signals"] .task-count-badge { font-weight: 800; }
+
+    /* Board (kanban) */
+    html[data-theme="signals"] #view-toggle { display: none; }
+    html[data-theme="signals"] #list-pane { padding: 20px 28px 28px; }
+    .board-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 20px; width: 100%; align-content: start; }
+    .board-col-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .board-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .board-col-label { font-size: 14px; font-weight: 800; color: var(--ink); }
+    .board-col-count { font-size: 12px; font-weight: 700; color: var(--ink-3); margin-left: auto; }
+    .board-col-body { display: flex; flex-direction: column; gap: 12px; }
+    .board-tile { background: #fff; border-radius: 14px; padding: 16px; cursor: pointer; transition: background .15s; }
+    .board-tile:hover { background: #FAF8F2; }
+    .board-tile.selected { background: #F9E4E1; }
+    .board-tile-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .board-tile-name { font-size: 16px; font-weight: 800; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .board-tile-next { font-size: 13px; font-weight: 500; color: var(--ink-2); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .board-tile-due { font-size: 12px; font-weight: 800; margin-top: 8px; color: var(--ink-3); }
+    .board-tile-due.overdue { color: #C0392B; }
+    .board-tile-due.today { color: #9A5B0E; }
+
+    /* Bold detail header */
+    html[data-theme="signals"] .detail-header { margin-bottom: 16px; align-items: center; }
+    html[data-theme="signals"] .detail-name { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    html[data-theme="signals"] .detail-meta { font-size: 14px; font-weight: 600; }
+    html[data-theme="signals"] .detail-chips { margin-bottom: 22px; }
+    html[data-theme="signals"] .detail-chips .status-badge,
+    html[data-theme="signals"] .detail-chips .follow-chip { font-size: 13px; font-weight: 800; border-radius: 10px; padding: 8px 16px; }
+    html[data-theme="signals"] .avatar-chip:not(.sm) { width: 64px; height: 64px; font-size: 22px; }
+    html[data-theme="signals"] #detail-pane .icon-dock { background: transparent; border: none; gap: 8px; padding: 0; }
+    html[data-theme="signals"] #detail-pane .icon-btn { width: 42px; height: 42px; background: #F7F4EC; }
+    html[data-theme="signals"] #detail-pane .icon-btn svg { width: 20px; height: 20px; }
+    html[data-theme="signals"] #detail-pane .ib-delete { color: #C0392B; }
+    html[data-theme="signals"] #detail-pane .ib-back, html[data-theme="signals"] #detail-pane .ib-edit { color: var(--ink); }
+
+    /* Callout boxes for Next / Context */
+    .callout { display: flex; gap: 14px; align-items: flex-start; border-radius: 14px; padding: 18px 20px; margin-bottom: 18px; }
+    .callout-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; font-size: 18px; }
+    .callout-icon svg { width: 18px; height: 18px; }
+    .callout-next { background: #F9E4E1; }
+    .callout-next .callout-icon { background: #C0392B; }
+    .callout-next .field-label { color: #C0392B; }
+    .callout-context { background: #EFF3F8; }
+    .callout-context .callout-icon { background: #3B6EA5; }
+    .callout-context .field-label { color: #3B6EA5; }
+    .callout .field-label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+    .callout .field-content { font-size: 16px; font-weight: 600; color: var(--ink); line-height: 1.5; }
+    .callout-context .field-content { font-size: 15px; font-weight: 400; color: var(--ink-2); }
+
+    /* Activity timeline replacing Last Action */
+    html[data-theme="signals"] .box-activity { background: transparent; padding: 0 0 16px; border-bottom: 1px solid #F0ECE2; margin-bottom: 18px; }
+    html[data-theme="signals"] .box-activity .field-label { font-size: 13px; font-weight: 800; color: var(--ink-3); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 12px; }
+    .activity-row { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+    .activity-row:last-child { margin-bottom: 0; }
+    .activity-dot { width: 30px; height: 30px; border-radius: 50%; background: #B0AA96; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+    .activity-dot svg { width: 15px; height: 15px; }
+    .activity-dot.recent { background: #3B6EA5; }
+    .activity-body { flex: 1; background: #F7F4EC; border-radius: 10px; padding: 10px 14px; min-width: 0; }
+    .activity-date { font-size: 11px; font-weight: 800; color: var(--ink-3); margin-bottom: 2px; }
+    .activity-date.recent { color: #3B6EA5; }
+    .activity-text { font-size: 14px; color: var(--ink); line-height: 1.45; }
+
+    /* Flatten remaining plain sections (tasks/touch/notes) */
+    html[data-theme="signals"] .section-box:not(.box-activity) { background: transparent; border-radius: 0; padding: 0 0 16px; margin-bottom: 16px; border-bottom: 1px solid #F0ECE2; }
+    html[data-theme="signals"] .section-box:not(.box-activity):last-of-type { border-bottom: none; margin-bottom: 8px; }
   </style>
 </head>
 <body>
@@ -581,7 +655,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.40</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.42</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -598,6 +672,9 @@ const ICON_BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
 const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 const ICON_DELETE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+const ICON_FLAG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="3"/></svg>';
+const ICON_INFO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+const ICON_CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
 
 function iconDockHtml(item) {
   return `<button class="icon-btn ib-back" data-action="back" title="Back" aria-label="Back">${ICON_BACK}</button>
@@ -620,6 +697,7 @@ document.getElementById("theme-toggle").onclick = () => {
   localStorage.setItem("gsd-theme", theme);
   document.documentElement.dataset.theme = theme;
   renderThemeToggle();
+  if (typeof render === "function") render();
 };
 renderThemeToggle();
 
@@ -776,6 +854,24 @@ function daysUntil(d) {
 function stripHtml(html) {
   if (!html) return "";
   return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+function htmlToLines(html) {
+  if (!html) return [];
+  const withBreaks = html.replace(/<\/(p|div|li)>/gi, "\n").replace(/<br\s*\/?>/gi, "\n");
+  const text = withBreaks.replace(/<[^>]+>/g, "").replace(/&nbsp;/gi, " ");
+  return text.split(/\n+/).map(l => l.replace(/\s+/g, " ").trim()).filter(Boolean);
+}
+function parseActivityEntries(html) {
+  const lines = htmlToLines(html);
+  const dateRe = /^(\d{1,2}\/\d{1,2}):\s*(.*)$/;
+  const entries = [];
+  lines.forEach(line => {
+    const m = line.match(dateRe);
+    if (m) entries.push({ date: m[1], text: m[2] });
+    else if (entries.length) entries[entries.length - 1].text += " " + line;
+    else entries.push({ date: "", text: line });
+  });
+  return entries;
 }
 function todayStr() {
   const d = new Date();
@@ -1040,6 +1136,43 @@ function renderList() {
     const testHtml = ctx ? `<div class="card-context">(${ctx})</div>` : "";
   }
 
+  if (document.documentElement.dataset.theme === "signals") {
+    const cols = [
+      { key: "I Need To Act", label: "Need to act", dot: "#9A5B0E" },
+      { key: "Waiting On Them", label: "Waiting", dot: "#3B6EA5" },
+      { key: "Stuck", label: "Stuck", dot: "#C0392B" },
+      { key: "Done", label: "Done", dot: "#948F80" }
+    ];
+    const byStatus = {};
+    filtered.forEach(it => { (byStatus[it.status] || (byStatus[it.status] = [])).push(it); });
+    const activeCols = cols.filter(c => byStatus[c.key] && byStatus[c.key].length);
+    pane.innerHTML = `<div class="board-grid">${activeCols.map(c => `
+      <div class="board-col">
+        <div class="board-col-header"><span class="board-dot" style="background:${c.dot}"></span><span class="board-col-label">${c.label}</span><span class="board-col-count">${byStatus[c.key].length}</span></div>
+        <div class="board-col-body">${byStatus[c.key].map(item => {
+          const nxt = item.nextAction ? stripHtml(item.nextAction) : "";
+          const days = item.followUpDate ? daysUntil(item.followUpDate) : null;
+          const dueCls = days === null ? "" : days < 0 ? "overdue" : days === 0 ? "today" : "";
+          const dueLbl = days === null ? "" : days < 0 ? fmtDate(item.followUpDate) : days === 0 ? "Today" : fmtDate(item.followUpDate);
+          return `<div class="board-tile${selectedId === item.id ? " selected" : ""}" data-id="${item.id}">
+            <div class="board-tile-top">${avatarChip(item, true)}<span class="board-tile-name">${item.company || ""}</span></div>
+            ${nxt ? `<div class="board-tile-next">${nxt}</div>` : ""}
+            ${dueLbl ? `<div class="board-tile-due ${dueCls}">${dueLbl}</div>` : ""}
+          </div>`;
+        }).join("")}</div>
+      </div>`).join("")}</div>`;
+    pane.querySelectorAll(".board-tile").forEach(tile => {
+      tile.addEventListener("click", () => {
+        const clickedId = parseInt(tile.dataset.id);
+        selectedId = (selectedId === clickedId) ? null : clickedId;
+        isAdding = false;
+        editingItem = null;
+        render();
+      });
+    });
+    return;
+  }
+
   if (viewMode === "compact") {
     pane.innerHTML = `<div>
     <div class="crow-header">
@@ -1186,12 +1319,57 @@ function renderPanel() {
   if (!item) { detail.className = ""; return; }
 
   detail.className = "open";
-  const metaParts = [item.company, item.customerType, item.type].filter(Boolean).join(" · ");
-        const starHtml = item.featured ? '<span style="color:#c8a96e;font-size:14px;margin-right:3px;">★</span>' : '';
+  const metaParts = [item.person, item.customerType, item.type].filter(Boolean).join(" · ");
+  const isSignals = document.documentElement.dataset.theme === "signals";
+
+  const nextHtml = item.nextAction
+    ? (isSignals
+        ? `<div class="callout callout-next"><div class="callout-icon">${ICON_FLAG}</div><div><div class="field-label">Next</div><div class="field-content">${item.nextAction}</div></div></div>`
+        : `<div class="section-box box-next"><div class="field-label">Next Action</div><div class="field-content">${item.nextAction}</div></div>`)
+    : "";
+
+  const contextHtml = item.context
+    ? (isSignals
+        ? `<div class="callout callout-context"><div class="callout-icon">${ICON_INFO}</div><div><div class="field-label">Context</div><div class="field-content">${item.context}</div></div></div>`
+        : `<div class="section-box box-context"><div class="field-label">Context</div><div class="field-content">${item.context}</div></div>`)
+    : "";
+
+  let activityHtml = "";
+  if (isSignals) {
+    const entries = parseActivityEntries(item.lastAction);
+    if (entries.length) {
+      activityHtml = `<div class="section-box box-activity"><div class="field-label">Activity</div>${entries.map((e, i) => `
+        <div class="activity-row">
+          <div class="activity-dot ${i === 0 ? "recent" : ""}">${ICON_CLOCK}</div>
+          <div class="activity-body">
+            ${e.date ? `<div class="activity-date ${i === 0 ? "recent" : ""}">${e.date}</div>` : ""}
+            <div class="activity-text">${e.text}</div>
+          </div>
+        </div>`).join("")}</div>`;
+    }
+  } else if (item.lastAction) {
+    activityHtml = `<div class="section-box box-last"><div class="field-label">Last Action</div><div class="field-content">${item.lastAction}</div></div>`;
+  }
+
+  const headerHtml = `
+    <div class="detail-header">
+      <div style="display:flex;align-items:center;gap:14px;min-width:0;">
+        ${avatarChip(item, false)}
+        <div style="min-width:0;">
+          <div class="detail-name">${item.company || ""}</div>
+          <div class="detail-meta">${metaParts}</div>
+        </div>
+      </div>
+      <div class="icon-dock">${iconDockHtml(item)}</div>
+    </div>
+    <div class="detail-chips">
+      <span class="status-badge ${statusClass(item.status)}"><span class="status-dot"></span>${item.status}</span>
+      ${item.followUpDate ? followChipHtml(item.followUpDate) : ""}
+    </div>`;
 
   detail.innerHTML = `
-    <div class="icon-dock-row top"><div class="icon-dock">${iconDockHtml(item)}</div></div>
-    ${item.nextAction ? `<div class="section-box box-next"><div class="field-label">Next Action</div><div class="field-content">${item.nextAction}</div></div>` : ""}
+    ${headerHtml}
+    ${nextHtml}
     <div class="section-box box-tasks">
       <div class="field-label" id="task-header-label">Things To Be Done</div>
       <div class="task-section">
@@ -1202,8 +1380,8 @@ function renderPanel() {
         </div>
       </div>
     </div>
-    ${item.context ? `<div class="section-box box-context"><div class="field-label">Context</div><div class="field-content">${item.context}</div></div>` : ""}
-    ${item.lastAction ? `<div class="section-box box-last"><div class="field-label">Last Action</div><div class="field-content">${item.lastAction}</div></div>` : ""}
+    ${contextHtml}
+    ${activityHtml}
     <div class="section-box box-touch"><div class="field-label">Last Touch</div><div class="field-content" style="color:var(--ink-2)">${fmtDate(item.date)}</div></div>
     ${item.notes ? `<div class="section-box box-notes"><div class="field-label">Notes</div><div class="field-content" style="color:var(--ink-2)">${item.notes}</div></div>` : ""}
     <div class="icon-dock-row bottom"><div class="icon-dock">${iconDockHtml(item)}</div></div>`;
