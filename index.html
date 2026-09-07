@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.43 -->
+<!DOCTYPE html><!-- v6.44 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
   <script>
     // Cache buster: check the live file for a newer version and force one reload if stale.
     (function () {
-      const CURRENT_VERSION = "v6.43";
+      const CURRENT_VERSION = "v6.44";
       const RELOAD_FLAG = "gsd_reloaded_for_" + CURRENT_VERSION;
       fetch(window.location.href, { cache: "no-store" })
         .then(r => r.text())
@@ -453,25 +453,39 @@
     html[data-theme="signals"] .task-text { font-size: 15px; font-weight: 600; }
     html[data-theme="signals"] .task-count-badge { font-weight: 800; }
 
-    /* Board (kanban) */
+    /* Needs attention / On deck / Needs cleanup */
     html[data-theme="signals"] #view-toggle { display: none; }
-    html[data-theme="signals"] #list-pane { padding: 20px 28px 28px; }
-    .board-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 340px)); gap: 20px; width: 100%; align-content: start; justify-content: start; }
-    .board-col-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-    .board-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .board-col-label { font-size: 14px; font-weight: 800; color: var(--ink); }
-    .board-col-count { font-size: 12px; font-weight: 700; color: var(--ink-3); margin-left: auto; }
-    .board-col-body { display: flex; flex-direction: column; gap: 12px; }
-    .board-tile { background: #fff; border: 1px solid #EFEBE1; box-shadow: 0 1px 2px rgba(30,27,20,0.04); border-radius: 14px; padding: 16px; cursor: pointer; transition: background .15s, box-shadow .15s; }
-    .board-tile:hover { background: #FAF8F2; box-shadow: 0 2px 6px rgba(30,27,20,0.08); }
-    .board-tile.selected { background: #F9E4E1; border-color: #F0997B; }
-    html[data-theme="signals"] #list-pane { background: #FBF9F4; }
-    .board-tile-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-    .board-tile-name { font-size: 16px; font-weight: 800; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .board-tile-next { font-size: 13px; font-weight: 500; color: var(--ink-2); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .board-tile-due { font-size: 12px; font-weight: 800; margin-top: 8px; color: var(--ink-3); }
-    .board-tile-due.overdue { color: #C0392B; }
-    .board-tile-due.today { color: #9A5B0E; }
+    html[data-theme="signals"] #list-pane { padding: 20px 28px 28px; background: #FBF9F4; display: block; }
+    .bucket-section { margin-bottom: 28px; }
+    .bucket-section:last-child { margin-bottom: 0; }
+    .bucket-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .bucket-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .attention-dot { background: #C0392B; }
+    .ondeck-dot { background: #3B6EA5; }
+    .cleanup-dot { background: #B0AA96; }
+    .bucket-title { font-size: 15px; font-weight: 800; color: var(--ink); }
+    .bucket-count { font-size: 12px; color: var(--ink-3); }
+    .bucket-sub { font-size: 12px; color: var(--ink-3); }
+    .bucket-list { display: flex; flex-direction: column; gap: 8px; }
+    .bucket-card { display: flex; align-items: center; gap: 12px; border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: background .15s, box-shadow .15s; }
+    .bucket-card-body { flex: 1; min-width: 0; }
+    .bucket-card-name { font-size: 14px; font-weight: 700; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bucket-card-next { font-size: 13px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bucket-badge { font-size: 11px; font-weight: 800; border-radius: 6px; padding: 4px 9px; flex-shrink: 0; white-space: nowrap; }
+    .attention-card { background: #fff; border: 1px solid #EFEBE1; box-shadow: 0 1px 2px rgba(30,27,20,0.04); }
+    .attention-card:hover { box-shadow: 0 2px 6px rgba(30,27,20,0.08); }
+    .attention-card.selected { background: #F9E4E1; border-color: #F0997B; }
+    .attention-badge { color: #fff; background: #C0392B; }
+    .ondeck-card { background: #fff; border: 1px solid #EFEBE1; }
+    .ondeck-card:hover { background: #FAF8F2; }
+    .ondeck-card.selected { background: #EFF3F8; border-color: #B5D4F4; }
+    .ondeck-badge { color: #3B6EA5; background: #EFF3F8; }
+    .cleanup-card { background: #F3EFE6; opacity: 0.85; }
+    .cleanup-card:hover { opacity: 1; }
+    .cleanup-card.selected { background: #EFEBE1; opacity: 1; }
+    .cleanup-card .bucket-card-name { color: var(--ink-2); font-weight: 600; }
+    .cleanup-card .bucket-card-next { color: var(--ink-3); }
+    .cleanup-badge { color: var(--ink-3); background: transparent; border: 1px solid var(--glass-bd); }
 
     /* Bold detail header */
     html[data-theme="signals"] .detail-header { margin-bottom: 16px; align-items: center; }
@@ -656,7 +670,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.43</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.44</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -1138,33 +1152,62 @@ function renderList() {
   }
 
   if (document.documentElement.dataset.theme === "signals") {
-    const cols = [
-      { key: "I Need To Act", label: "Need to act", dot: "#9A5B0E" },
-      { key: "Waiting On Them", label: "Waiting", dot: "#3B6EA5" },
-      { key: "Stuck", label: "Stuck", dot: "#C0392B" },
-      { key: "Done", label: "Done", dot: "#948F80" }
-    ];
-    const byStatus = {};
-    filtered.forEach(it => { (byStatus[it.status] || (byStatus[it.status] = [])).push(it); });
-    const activeCols = cols.filter(c => byStatus[c.key] && byStatus[c.key].length);
-    pane.innerHTML = `<div class="board-grid">${activeCols.map(c => `
-      <div class="board-col">
-        <div class="board-col-header"><span class="board-dot" style="background:${c.dot}"></span><span class="board-col-label">${c.label}</span><span class="board-col-count">${byStatus[c.key].length}</span></div>
-        <div class="board-col-body">${byStatus[c.key].map(item => {
-          const nxt = item.nextAction ? stripHtml(item.nextAction) : "";
-          const days = item.followUpDate ? daysUntil(item.followUpDate) : null;
-          const dueCls = days === null ? "" : days < 0 ? "overdue" : days === 0 ? "today" : "";
-          const dueLbl = days === null ? "" : days < 0 ? fmtDate(item.followUpDate) : days === 0 ? "Today" : fmtDate(item.followUpDate);
-          return `<div class="board-tile${selectedId === item.id ? " selected" : ""}" data-id="${item.id}">
-            <div class="board-tile-top">${avatarChip(item, true)}<span class="board-tile-name">${item.company || ""}</span></div>
-            ${nxt ? `<div class="board-tile-next">${nxt}</div>` : ""}
-            ${dueLbl ? `<div class="board-tile-due ${dueCls}">${dueLbl}</div>` : ""}
-          </div>`;
-        }).join("")}</div>
-      </div>`).join("")}</div>`;
-    pane.querySelectorAll(".board-tile").forEach(tile => {
-      tile.addEventListener("click", () => {
-        const clickedId = parseInt(tile.dataset.id);
+    const open = filtered.filter(it => it.status !== "Done");
+    const attention = [];
+    const onDeck = [];
+    const cleanup = [];
+    open.forEach(item => {
+      const days = item.followUpDate ? daysUntil(item.followUpDate) : null;
+      if (item.status === "Stuck") {
+        attention.push({ item, sortKey: -Infinity, badge: "Stuck" });
+      } else if (days !== null && days <= 0) {
+        attention.push({ item, sortKey: days, badge: days < 0 ? `${Math.abs(days)}d overdue` : "Today" });
+      } else if (days !== null && days > 0) {
+        onDeck.push({ item, sortKey: days, badge: fmtDate(item.followUpDate) });
+      } else {
+        const touchDays = item.date ? Math.floor((new Date() - new Date(item.date + "T12:00:00")) / 86400000) : 9999;
+        cleanup.push({ item, touchDays, badge: touchDays >= 9999 ? "No follow-up date set" : `Not touched in ${touchDays}d` });
+      }
+    });
+    attention.sort((a, b) => a.sortKey - b.sortKey);
+    onDeck.sort((a, b) => a.sortKey - b.sortKey);
+    cleanup.sort((a, b) => b.touchDays - a.touchDays);
+
+    function bucketCard(entry, cls, badgeCls) {
+      const item = entry.item;
+      const nxt = item.nextAction ? stripHtml(item.nextAction) : "";
+      return `<div class="bucket-card ${cls}${selectedId === item.id ? " selected" : ""}" data-id="${item.id}">
+        ${avatarChip(item, true)}
+        <div class="bucket-card-body">
+          <div class="bucket-card-name">${item.company || ""}</div>
+          <div class="bucket-card-next">${nxt}</div>
+        </div>
+        <span class="bucket-badge ${badgeCls}">${entry.badge}</span>
+      </div>`;
+    }
+
+    const sections = [];
+    if (attention.length) sections.push(`
+      <div class="bucket-section">
+        <div class="bucket-header"><span class="bucket-dot attention-dot"></span><span class="bucket-title">Needs attention</span><span class="bucket-count">${attention.length}</span></div>
+        <div class="bucket-list">${attention.map(e => bucketCard(e, "attention-card", "attention-badge")).join("")}</div>
+      </div>`);
+    if (onDeck.length) sections.push(`
+      <div class="bucket-section">
+        <div class="bucket-header"><span class="bucket-dot ondeck-dot"></span><span class="bucket-title">On deck</span><span class="bucket-sub">nothing to do yet</span></div>
+        <div class="bucket-list">${onDeck.map(e => bucketCard(e, "ondeck-card", "ondeck-badge")).join("")}</div>
+      </div>`);
+    if (cleanup.length) sections.push(`
+      <div class="bucket-section">
+        <div class="bucket-header"><span class="bucket-dot cleanup-dot"></span><span class="bucket-title">Needs cleanup</span><span class="bucket-sub">no date set or gone quiet</span></div>
+        <div class="bucket-list">${cleanup.map(e => bucketCard(e, "cleanup-card", "cleanup-badge")).join("")}</div>
+      </div>`);
+
+    pane.innerHTML = sections.join("") || `<div class="loading-msg">Nothing here.</div>`;
+
+    pane.querySelectorAll(".bucket-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const clickedId = parseInt(card.dataset.id);
         selectedId = (selectedId === clickedId) ? null : clickedId;
         isAdding = false;
         editingItem = null;
