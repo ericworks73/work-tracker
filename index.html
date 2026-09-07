@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.44 -->
+<!DOCTYPE html><!-- v6.45 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
   <script>
     // Cache buster: check the live file for a newer version and force one reload if stale.
     (function () {
-      const CURRENT_VERSION = "v6.44";
+      const CURRENT_VERSION = "v6.45";
       const RELOAD_FLAG = "gsd_reloaded_for_" + CURRENT_VERSION;
       fetch(window.location.href, { cache: "no-store" })
         .then(r => r.text())
@@ -444,11 +444,14 @@
     html[data-theme="signals"] #version { color: rgba(0,0,0,0.25); }
 
     /* Bold everything */
-    html[data-theme="signals"] #dt-time { font-size: 24px; font-weight: 800; }
-    html[data-theme="signals"] .stat-val { font-size: 17px; font-weight: 800; }
-    html[data-theme="signals"] #add-btn { font-size: 16px; font-weight: 800; padding: 12px 22px; border-radius: 12px; }
-    html[data-theme="signals"] .date-chip { font-weight: 800; }
-    html[data-theme="signals"] #status-drop-btn, html[data-theme="signals"] #type-drop-btn { font-weight: 800; }
+    html[data-theme="signals"] #dt-time { font-size: 28px; font-weight: 800; }
+    html[data-theme="signals"] .stat-val { font-size: 18px; font-weight: 800; }
+    html[data-theme="signals"] #add-btn { font-size: 18px; font-weight: 800; padding: 14px 26px; border-radius: 12px; }
+    html[data-theme="signals"] .date-chip { font-weight: 800; font-size: 14px; padding: 9px 16px; }
+    html[data-theme="signals"] #status-drop-btn, html[data-theme="signals"] #type-drop-btn { font-weight: 800; font-size: 14px; padding: 9px 16px; }
+    html[data-theme="signals"] #search-input { font-size: 14px; }
+    html[data-theme="signals"] #search-bar { padding: 10px 0; }
+    html[data-theme="signals"] #theme-toggle { font-size: 13px; font-weight: 800; padding: 9px 16px; }
     html[data-theme="signals"] .field-content { font-size: 16px; }
     html[data-theme="signals"] .task-text { font-size: 15px; font-weight: 600; }
     html[data-theme="signals"] .task-count-badge { font-weight: 800; }
@@ -456,22 +459,26 @@
     /* Needs attention / On deck / Needs cleanup */
     html[data-theme="signals"] #view-toggle { display: none; }
     html[data-theme="signals"] #list-pane { padding: 20px 28px 28px; background: #FBF9F4; display: block; }
-    .bucket-section { margin-bottom: 28px; }
+    .bucket-section { margin-bottom: 32px; }
     .bucket-section:last-child { margin-bottom: 0; }
-    .bucket-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-    .bucket-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .bucket-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; cursor: pointer; user-select: none; }
+    .bucket-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
     .attention-dot { background: #C0392B; }
     .ondeck-dot { background: #3B6EA5; }
     .cleanup-dot { background: #B0AA96; }
-    .bucket-title { font-size: 15px; font-weight: 800; color: var(--ink); }
-    .bucket-count { font-size: 12px; color: var(--ink-3); }
-    .bucket-sub { font-size: 12px; color: var(--ink-3); }
-    .bucket-list { display: flex; flex-direction: column; gap: 8px; }
-    .bucket-card { display: flex; align-items: center; gap: 12px; border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: background .15s, box-shadow .15s; }
+    .bucket-title { font-size: 19px; font-weight: 800; color: var(--ink); }
+    .bucket-count { font-size: 13px; font-weight: 700; color: var(--ink-3); }
+    .bucket-sub { font-size: 13px; color: var(--ink-3); }
+    .bucket-chevron { margin-left: auto; width: 28px; height: 28px; border-radius: 50%; background: #F0ECE2; display: flex; align-items: center; justify-content: center; transition: transform .15s; flex-shrink: 0; }
+    .bucket-chevron svg { width: 16px; height: 16px; color: var(--ink-2); }
+    .bucket-section.collapsed .bucket-chevron { transform: rotate(-90deg); }
+    .bucket-section.collapsed .bucket-list { display: none; }
+    .bucket-list { display: flex; flex-direction: column; gap: 10px; }
+    .bucket-card { display: flex; align-items: center; gap: 16px; border-radius: 14px; padding: 18px 20px; cursor: pointer; transition: background .15s, box-shadow .15s; }
     .bucket-card-body { flex: 1; min-width: 0; }
-    .bucket-card-name { font-size: 14px; font-weight: 700; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .bucket-card-next { font-size: 13px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .bucket-badge { font-size: 11px; font-weight: 800; border-radius: 6px; padding: 4px 9px; flex-shrink: 0; white-space: nowrap; }
+    .bucket-card-name { font-size: 18px; font-weight: 800; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bucket-card-next { font-size: 15px; font-weight: 500; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+    .bucket-badge { font-size: 13px; font-weight: 800; border-radius: 10px; padding: 8px 14px; flex-shrink: 0; white-space: nowrap; }
     .attention-card { background: #fff; border: 1px solid #EFEBE1; box-shadow: 0 1px 2px rgba(30,27,20,0.04); }
     .attention-card:hover { box-shadow: 0 2px 6px rgba(30,27,20,0.08); }
     .attention-card.selected { background: #F9E4E1; border-color: #F0997B; }
@@ -483,9 +490,10 @@
     .cleanup-card { background: #F3EFE6; opacity: 0.85; }
     .cleanup-card:hover { opacity: 1; }
     .cleanup-card.selected { background: #EFEBE1; opacity: 1; }
-    .cleanup-card .bucket-card-name { color: var(--ink-2); font-weight: 600; }
+    .cleanup-card .bucket-card-name { color: var(--ink-2); font-weight: 700; }
     .cleanup-card .bucket-card-next { color: var(--ink-3); }
-    .cleanup-badge { color: var(--ink-3); background: transparent; border: 1px solid var(--glass-bd); }
+    .cleanup-badge { color: var(--ink-3); background: transparent; border: 2px solid var(--glass-bd); }
+    html[data-theme="signals"] .bucket-card .avatar-chip { width: 44px; height: 44px; font-size: 15px; }
 
     /* Bold detail header */
     html[data-theme="signals"] .detail-header { margin-bottom: 16px; align-items: center; }
@@ -670,7 +678,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.44</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.45</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -1187,24 +1195,36 @@ function renderList() {
     }
 
     const sections = [];
+    const collapsed = JSON.parse(localStorage.getItem("gsd-bucket-collapsed") || "{}");
+    const chevron = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
     if (attention.length) sections.push(`
-      <div class="bucket-section">
-        <div class="bucket-header"><span class="bucket-dot attention-dot"></span><span class="bucket-title">Needs attention</span><span class="bucket-count">${attention.length}</span></div>
+      <div class="bucket-section${collapsed.attention ? " collapsed" : ""}" data-bucket="attention">
+        <div class="bucket-header"><span class="bucket-dot attention-dot"></span><span class="bucket-title">Needs attention</span><span class="bucket-count">${attention.length}</span><span class="bucket-chevron">${chevron}</span></div>
         <div class="bucket-list">${attention.map(e => bucketCard(e, "attention-card", "attention-badge")).join("")}</div>
       </div>`);
     if (onDeck.length) sections.push(`
-      <div class="bucket-section">
-        <div class="bucket-header"><span class="bucket-dot ondeck-dot"></span><span class="bucket-title">On deck</span><span class="bucket-sub">nothing to do yet</span></div>
+      <div class="bucket-section${collapsed.ondeck ? " collapsed" : ""}" data-bucket="ondeck">
+        <div class="bucket-header"><span class="bucket-dot ondeck-dot"></span><span class="bucket-title">On deck</span><span class="bucket-sub">nothing to do yet</span><span class="bucket-chevron">${chevron}</span></div>
         <div class="bucket-list">${onDeck.map(e => bucketCard(e, "ondeck-card", "ondeck-badge")).join("")}</div>
       </div>`);
     if (cleanup.length) sections.push(`
-      <div class="bucket-section">
-        <div class="bucket-header"><span class="bucket-dot cleanup-dot"></span><span class="bucket-title">Needs cleanup</span><span class="bucket-sub">no date set or gone quiet</span></div>
+      <div class="bucket-section${collapsed.cleanup ? " collapsed" : ""}" data-bucket="cleanup">
+        <div class="bucket-header"><span class="bucket-dot cleanup-dot"></span><span class="bucket-title">Needs cleanup</span><span class="bucket-sub">no date set or gone quiet</span><span class="bucket-chevron">${chevron}</span></div>
         <div class="bucket-list">${cleanup.map(e => bucketCard(e, "cleanup-card", "cleanup-badge")).join("")}</div>
       </div>`);
 
     pane.innerHTML = sections.join("") || `<div class="loading-msg">Nothing here.</div>`;
 
+    pane.querySelectorAll(".bucket-header").forEach(header => {
+      header.addEventListener("click", () => {
+        const section = header.closest(".bucket-section");
+        const key = section.dataset.bucket;
+        const isCollapsed = section.classList.toggle("collapsed");
+        const state = JSON.parse(localStorage.getItem("gsd-bucket-collapsed") || "{}");
+        state[key] = isCollapsed;
+        localStorage.setItem("gsd-bucket-collapsed", JSON.stringify(state));
+      });
+    });
     pane.querySelectorAll(".bucket-card").forEach(card => {
       card.addEventListener("click", () => {
         const clickedId = parseInt(card.dataset.id);
