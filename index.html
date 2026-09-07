@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.42 -->
+<!DOCTYPE html><!-- v6.43 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
   <script>
     // Cache buster: check the live file for a newer version and force one reload if stale.
     (function () {
-      const CURRENT_VERSION = "v6.42";
+      const CURRENT_VERSION = "v6.43";
       const RELOAD_FLAG = "gsd_reloaded_for_" + CURRENT_VERSION;
       fetch(window.location.href, { cache: "no-store" })
         .then(r => r.text())
@@ -456,15 +456,16 @@
     /* Board (kanban) */
     html[data-theme="signals"] #view-toggle { display: none; }
     html[data-theme="signals"] #list-pane { padding: 20px 28px 28px; }
-    .board-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 20px; width: 100%; align-content: start; }
+    .board-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 340px)); gap: 20px; width: 100%; align-content: start; justify-content: start; }
     .board-col-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
     .board-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     .board-col-label { font-size: 14px; font-weight: 800; color: var(--ink); }
     .board-col-count { font-size: 12px; font-weight: 700; color: var(--ink-3); margin-left: auto; }
     .board-col-body { display: flex; flex-direction: column; gap: 12px; }
-    .board-tile { background: #fff; border-radius: 14px; padding: 16px; cursor: pointer; transition: background .15s; }
-    .board-tile:hover { background: #FAF8F2; }
-    .board-tile.selected { background: #F9E4E1; }
+    .board-tile { background: #fff; border: 1px solid #EFEBE1; box-shadow: 0 1px 2px rgba(30,27,20,0.04); border-radius: 14px; padding: 16px; cursor: pointer; transition: background .15s, box-shadow .15s; }
+    .board-tile:hover { background: #FAF8F2; box-shadow: 0 2px 6px rgba(30,27,20,0.08); }
+    .board-tile.selected { background: #F9E4E1; border-color: #F0997B; }
+    html[data-theme="signals"] #list-pane { background: #FBF9F4; }
     .board-tile-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
     .board-tile-name { font-size: 16px; font-weight: 800; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .board-tile-next { font-size: 13px; font-weight: 500; color: var(--ink-2); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -655,7 +656,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.42</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.43</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
