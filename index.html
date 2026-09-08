@@ -15,7 +15,7 @@
   <script>
     // Cache buster: check the live file for a newer version and force one reload if stale.
     (function () {
-      const CURRENT_VERSION = "v6.52";
+      const CURRENT_VERSION = "v6.53";
       const RELOAD_FLAG = "gsd_reloaded_for_" + CURRENT_VERSION;
       fetch(window.location.href, { cache: "no-store" })
         .then(r => r.text())
@@ -390,7 +390,6 @@
     .avatar-chip { display: none; width: 34px; height: 34px; border-radius: 50%; color: #fff; font-size: 12px; font-weight: 700; align-items: center; justify-content: center; flex-shrink: 0; }
     .avatar-chip.sm { width: 24px; height: 24px; font-size: 10px; }
     html[data-theme="signals"] .avatar-chip { display: flex; }
-    html[data-theme="signals"] .flag-btn { display: none; }
 
     /* Flatten cards/rows into dividered list style */
     html[data-theme="signals"] #list-pane { background: #fff; gap: 0; padding: 8px 32px 24px; }
@@ -456,50 +455,20 @@
     html[data-theme="signals"] .task-text { font-size: 15px; font-weight: 600; }
     html[data-theme="signals"] .task-count-badge { font-weight: 800; }
 
-    /* Needs attention / On deck / Needs cleanup */
+    /* Flat list, same filter/sort as Classic, 37signals look */
     html[data-theme="signals"] #view-toggle { display: none; }
     html[data-theme="signals"] #list-pane { padding: 20px 28px 28px; background: #FBF9F4; display: block; }
-    .bucket-section { margin-bottom: 32px; }
-    .bucket-section:last-child { margin-bottom: 0; }
-    .bucket-header { display: flex; align-items: center; gap: 14px; margin: 0 -28px 18px; padding: 20px 28px; cursor: pointer; user-select: none; }
-    .bucket-section[data-bucket="attention"] .bucket-header { background: #C46A5C; }
-    .bucket-section[data-bucket="ondeck"] .bucket-header { background: #6E93BC; }
-    .bucket-section[data-bucket="cleanup"] .bucket-header { background: #8A8574; }
-    .bucket-header .bucket-icon-plain { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; }
-    .bucket-header .bucket-icon-plain svg { width: 28px; height: 28px; }
-    .bucket-header .bucket-title { color: #fff; }
-    .bucket-header .bucket-count { color: rgba(255,255,255,0.75); background: rgba(255,255,255,0.15); border-radius: 20px; padding: 3px 12px; }
-    .bucket-header .bucket-sub { color: rgba(255,255,255,0.75); }
-    .bucket-header .bucket-chevron { background: rgba(255,255,255,0.15); }
-    .bucket-header .bucket-chevron svg { color: #fff; }
-    .bucket-title { font-size: 23px; font-weight: 800; color: var(--ink); letter-spacing: -0.3px; }
-    .bucket-count { font-size: 14px; font-weight: 700; color: var(--ink-3); }
-    .bucket-sub { font-size: 14px; color: var(--ink-3); }
-    .bucket-chevron { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; background: #F0ECE2; display: flex; align-items: center; justify-content: center; transition: transform .15s; flex-shrink: 0; }
-    .bucket-chevron svg { width: 18px; height: 18px; color: var(--ink-2); }
-    .bucket-section.collapsed .bucket-chevron { transform: rotate(-90deg); }
-    .bucket-section.collapsed .bucket-list { display: none; }
     .bucket-list { display: flex; flex-direction: column; gap: 10px; }
-    .bucket-card { display: flex; align-items: center; gap: 16px; border-radius: 14px; padding: 18px 20px; cursor: pointer; transition: background .15s, box-shadow .15s; }
+    .bucket-card { display: flex; align-items: center; gap: 16px; border-radius: 14px; padding: 18px 20px; cursor: pointer; transition: background .15s, box-shadow .15s; background: #fff; border: 1px solid #EFEBE1; box-shadow: 0 1px 2px rgba(30,27,20,0.04); }
+    .bucket-card:hover { box-shadow: 0 2px 6px rgba(30,27,20,0.08); }
+    .bucket-card.selected { background: #F9E4E1; border-color: #F0997B; }
+    .bucket-card.done { opacity: 0.6; }
     .bucket-card-body { flex: 1; min-width: 0; }
     .bucket-card-name { font-size: 18px; font-weight: 800; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .bucket-card-next { font-size: 15px; font-weight: 500; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
-    .bucket-badge { font-size: 13px; font-weight: 800; border-radius: 10px; padding: 8px 14px; flex-shrink: 0; white-space: nowrap; }
-    .attention-card { background: #fff; border: 1px solid #EFEBE1; box-shadow: 0 1px 2px rgba(30,27,20,0.04); }
-    .attention-card:hover { box-shadow: 0 2px 6px rgba(30,27,20,0.08); }
-    .attention-card.selected { background: #F9E4E1; border-color: #F0997B; }
-    .attention-badge { color: #fff; background: #C46A5C; }
-    .ondeck-card { background: #fff; border: 1px solid #EFEBE1; }
-    .ondeck-card:hover { background: #FAF8F2; }
-    .ondeck-card.selected { background: #EFF3F8; border-color: #B5D4F4; }
-    .ondeck-badge { color: #6E93BC; background: #EFF3F8; }
-    .cleanup-card { background: #F3EFE6; opacity: 0.85; }
-    .cleanup-card:hover { opacity: 1; }
-    .cleanup-card.selected { background: #EFEBE1; opacity: 1; }
-    .cleanup-card .bucket-card-name { color: var(--ink-2); font-weight: 700; }
-    .cleanup-card .bucket-card-next { color: var(--ink-3); }
-    .cleanup-badge { color: var(--ink-3); background: transparent; border: 2px solid var(--glass-bd); }
+    .bucket-card-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
     html[data-theme="signals"] .bucket-card .avatar-chip { width: 44px; height: 44px; font-size: 15px; }
+    html[data-theme="signals"] .bucket-card .flag-btn { flex-shrink: 0; }
 
     /* Bold detail header */
     html[data-theme="signals"] .detail-header { margin-bottom: 16px; align-items: center; }
@@ -1190,78 +1159,47 @@ function renderList() {
   }
 
   if (document.documentElement.dataset.theme === "signals") {
-    const open = filtered.filter(it => it.status !== "Done");
-    const attention = [];
-    const onDeck = [];
-    const cleanup = [];
-    open.forEach(item => {
-      const days = item.followUpDate ? daysUntil(item.followUpDate) : null;
-      if (item.status === "Stuck") {
-        attention.push({ item, sortKey: -Infinity, badge: "Stuck" });
-      } else if (days !== null && days <= 0) {
-        attention.push({ item, sortKey: days, badge: days < 0 ? `${Math.abs(days)}d overdue` : "Today" });
-      } else if (days !== null && days > 0) {
-        onDeck.push({ item, sortKey: days, badge: fmtDate(item.followUpDate) });
-      } else {
-        const touchDays = item.date ? Math.floor((new Date() - new Date(item.date + "T12:00:00")) / 86400000) : 9999;
-        cleanup.push({ item, touchDays, badge: touchDays >= 9999 ? "No follow-up date set" : `Not touched in ${touchDays}d` });
-      }
-    });
-    attention.sort((a, b) => a.sortKey - b.sortKey);
-    onDeck.sort((a, b) => a.sortKey - b.sortKey);
-    cleanup.sort((a, b) => b.touchDays - a.touchDays);
-
-    function bucketCard(entry, cls, badgeCls) {
-      const item = entry.item;
+    // Same filter + sort as Classic (getFiltered already applied above as `filtered`):
+    // Done last, featured first, followUpDate ascending. No separate bucketing logic.
+    function signalsCard(item) {
       const nxt = item.nextAction ? stripHtml(item.nextAction) : "";
-      return `<div class="bucket-card ${cls}${selectedId === item.id ? " selected" : ""}" data-id="${item.id}">
-        ${avatarChip(item, true)}
+      return `<div class="bucket-card${selectedId === item.id ? " selected" : ""}${item.status === "Done" ? " done" : ""}" data-id="${item.id}">
+        ${flagIcon(item, 28, 18)}
+        ${avatarChip(item, false)}
         <div class="bucket-card-body">
           <div class="bucket-card-name">${item.company || ""}</div>
           <div class="bucket-card-next">${nxt}</div>
         </div>
-        <span class="bucket-badge ${badgeCls}">${entry.badge}</span>
+        <div class="bucket-card-meta">
+          <span class="status-badge ${statusClass(item.status)}"><span class="status-dot"></span>${item.status}</span>
+          ${item.followUpDate ? followChipHtml(item.followUpDate) : ""}
+        </div>
       </div>`;
     }
 
-    const sections = [];
-    const collapsed = JSON.parse(localStorage.getItem("gsd-bucket-collapsed") || "{}");
-    const chevron = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
-    if (attention.length) sections.push(`
-      <div class="bucket-section${collapsed.attention ? " collapsed" : ""}" data-bucket="attention">
-        <div class="bucket-header"><span class="bucket-icon-plain">${ICON_ALERT}</span><span class="bucket-title">Needs attention</span><span class="bucket-count">${attention.length}</span><span class="bucket-chevron">${chevron}</span></div>
-        <div class="bucket-list">${attention.map(e => bucketCard(e, "attention-card", "attention-badge")).join("")}</div>
-      </div>`);
-    if (onDeck.length) sections.push(`
-      <div class="bucket-section${collapsed.ondeck ? " collapsed" : ""}" data-bucket="ondeck">
-        <div class="bucket-header"><span class="bucket-icon-plain">${ICON_CALENDAR}</span><span class="bucket-title">On deck</span><span class="bucket-sub">nothing to do yet</span><span class="bucket-chevron">${chevron}</span></div>
-        <div class="bucket-list">${onDeck.map(e => bucketCard(e, "ondeck-card", "ondeck-badge")).join("")}</div>
-      </div>`);
-    if (cleanup.length) sections.push(`
-      <div class="bucket-section${collapsed.cleanup ? " collapsed" : ""}" data-bucket="cleanup">
-        <div class="bucket-header"><span class="bucket-icon-plain">${ICON_BROOM}</span><span class="bucket-title">Needs cleanup</span><span class="bucket-sub">no date set or gone quiet</span><span class="bucket-chevron">${chevron}</span></div>
-        <div class="bucket-list">${cleanup.map(e => bucketCard(e, "cleanup-card", "cleanup-badge")).join("")}</div>
-      </div>`);
+    pane.innerHTML = filtered.length
+      ? `<div class="bucket-list">${filtered.map(signalsCard).join("")}</div>`
+      : `<div class="loading-msg">${searchQuery ? "No results." : "Nothing here. Hit GSD to start."}</div>`;
 
-    pane.innerHTML = sections.join("") || `<div class="loading-msg">Nothing here.</div>`;
-
-    pane.querySelectorAll(".bucket-header").forEach(header => {
-      header.addEventListener("click", () => {
-        const section = header.closest(".bucket-section");
-        const key = section.dataset.bucket;
-        const isCollapsed = section.classList.toggle("collapsed");
-        const state = JSON.parse(localStorage.getItem("gsd-bucket-collapsed") || "{}");
-        state[key] = isCollapsed;
-        localStorage.setItem("gsd-bucket-collapsed", JSON.stringify(state));
-      });
-    });
     pane.querySelectorAll(".bucket-card").forEach(card => {
-      card.addEventListener("click", () => {
+      card.addEventListener("click", e => {
+        if (e.target.closest(".flag-btn")) return;
         const clickedId = parseInt(card.dataset.id);
         selectedId = (selectedId === clickedId) ? null : clickedId;
         isAdding = false;
         editingItem = null;
         render();
+      });
+    });
+    pane.querySelectorAll(".flag-btn").forEach(btn => {
+      btn.addEventListener("click", async e => {
+        e.stopPropagation();
+        const id = parseInt(btn.dataset.id);
+        const item = items.find(i => i.id === id);
+        if (!item) return;
+        item.featured = !item.featured;
+        await upsert(item);
+        renderList();
       });
     });
     return;
