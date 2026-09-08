@@ -1,4 +1,4 @@
-<!DOCTYPE html><!-- v6.51 -->
+<!DOCTYPE html><!-- v6.52 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -15,7 +15,7 @@
   <script>
     // Cache buster: check the live file for a newer version and force one reload if stale.
     (function () {
-      const CURRENT_VERSION = "v6.51";
+      const CURRENT_VERSION = "v6.52";
       const RELOAD_FLAG = "gsd_reloaded_for_" + CURRENT_VERSION;
       fetch(window.location.href, { cache: "no-store" })
         .then(r => r.text())
@@ -63,13 +63,13 @@
       --ink-2:      #6E6A5D;
       --ink-3:      #948F80;
       --neon-purple:#6E4A9E;
-      --neon-blue:  #3B6EA5;
+      --neon-blue:  #6E93BC;
       --neon-green: #3B7A5E;
       --neon-amber: #9A5B0E;
-      --neon-red:   #C0392B;
+      --neon-red:   #C46A5C;
       --neon-pink:  #9C4B6E;
-      --accent-red: #C0392B;
-      --accent-blue:#3B6EA5;
+      --accent-red: #C46A5C;
+      --accent-blue:#6E93BC;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: var(--bg0); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; color: var(--ink); font-size: 15px; }
@@ -416,16 +416,16 @@
     html[data-theme="signals"] .s-act .status-dot  { background: #9A5B0E; }
     html[data-theme="signals"] .s-wait { background: #E6F1FB; color: #185FA5; }
     html[data-theme="signals"] .s-wait .status-dot { background: #378ADD; }
-    html[data-theme="signals"] .s-stuck{ background: #F9E4E1; color: #C0392B; }
-    html[data-theme="signals"] .s-stuck .status-dot{ background: #C0392B; }
+    html[data-theme="signals"] .s-stuck{ background: #F9E4E1; color: #C46A5C; }
+    html[data-theme="signals"] .s-stuck .status-dot{ background: #C46A5C; }
     html[data-theme="signals"] .s-done { background: #F1EFE8; color: var(--ink-3); }
     html[data-theme="signals"] .s-done .status-dot { background: var(--ink-3); }
-    html[data-theme="signals"] .follow-overdue  { background: #F9E4E1; color: #C0392B; }
+    html[data-theme="signals"] .follow-overdue  { background: #F9E4E1; color: #C46A5C; }
     html[data-theme="signals"] .follow-tomorrow { background: #FDEBD3; color: #9A5B0E; }
     html[data-theme="signals"] .follow-today    { background: #FDEBD3; color: #9A5B0E; }
     html[data-theme="signals"] .follow-future   { background: #E4EEE6; color: #3B7A5E; }
     html[data-theme="signals"] .btn-close  { background: #E4EEE6; color: #3B7A5E; border-color: #C7DFCF; }
-    html[data-theme="signals"] .btn-delete { background: #F9E4E1; color: #C0392B; border-color: #F0997B; }
+    html[data-theme="signals"] .btn-delete { background: #F9E4E1; color: #C46A5C; border-color: #F0997B; }
     html[data-theme="signals"] .form-input { background: #fff; border-color: var(--glass-bd); }
     html[data-theme="signals"] input[type="date"] { color-scheme: light; }
     html[data-theme="signals"] input[type="date"]::-webkit-calendar-picker-indicator { filter: none; }
@@ -462,8 +462,8 @@
     .bucket-section { margin-bottom: 32px; }
     .bucket-section:last-child { margin-bottom: 0; }
     .bucket-header { display: flex; align-items: center; gap: 14px; margin: 0 -28px 18px; padding: 20px 28px; cursor: pointer; user-select: none; }
-    .bucket-section[data-bucket="attention"] .bucket-header { background: #C0392B; }
-    .bucket-section[data-bucket="ondeck"] .bucket-header { background: #3B6EA5; }
+    .bucket-section[data-bucket="attention"] .bucket-header { background: #C46A5C; }
+    .bucket-section[data-bucket="ondeck"] .bucket-header { background: #6E93BC; }
     .bucket-section[data-bucket="cleanup"] .bucket-header { background: #8A8574; }
     .bucket-header .bucket-icon-plain { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; }
     .bucket-header .bucket-icon-plain svg { width: 28px; height: 28px; }
@@ -488,11 +488,11 @@
     .attention-card { background: #fff; border: 1px solid #EFEBE1; box-shadow: 0 1px 2px rgba(30,27,20,0.04); }
     .attention-card:hover { box-shadow: 0 2px 6px rgba(30,27,20,0.08); }
     .attention-card.selected { background: #F9E4E1; border-color: #F0997B; }
-    .attention-badge { color: #fff; background: #C0392B; }
+    .attention-badge { color: #fff; background: #C46A5C; }
     .ondeck-card { background: #fff; border: 1px solid #EFEBE1; }
     .ondeck-card:hover { background: #FAF8F2; }
     .ondeck-card.selected { background: #EFF3F8; border-color: #B5D4F4; }
-    .ondeck-badge { color: #3B6EA5; background: #EFF3F8; }
+    .ondeck-badge { color: #6E93BC; background: #EFF3F8; }
     .cleanup-card { background: #F3EFE6; opacity: 0.85; }
     .cleanup-card:hover { opacity: 1; }
     .cleanup-card.selected { background: #EFEBE1; opacity: 1; }
@@ -522,7 +522,7 @@
     html[data-theme="signals"] #detail-pane .icon-dock { background: transparent; border: none; gap: 8px; padding: 0; }
     html[data-theme="signals"] #detail-pane .icon-btn { width: 42px; height: 42px; background: #F7F4EC; }
     html[data-theme="signals"] #detail-pane .icon-btn svg { width: 20px; height: 20px; }
-    html[data-theme="signals"] #detail-pane .ib-delete { color: #C0392B; }
+    html[data-theme="signals"] #detail-pane .ib-delete { color: #C46A5C; }
     html[data-theme="signals"] #detail-pane .ib-back, html[data-theme="signals"] #detail-pane .ib-edit { color: var(--ink); }
 
     /* Callout boxes for Next / Context */
@@ -530,11 +530,11 @@
     .callout-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; font-size: 18px; }
     .callout-icon svg { width: 18px; height: 18px; }
     .callout-next { background: #F9E4E1; }
-    .callout-next .callout-icon { background: #C0392B; }
-    .callout-next .field-label { color: #C0392B; }
+    .callout-next .callout-icon { background: #C46A5C; }
+    .callout-next .field-label { color: #C46A5C; }
     .callout-context { background: #EFF3F8; }
-    .callout-context .callout-icon { background: #3B6EA5; }
-    .callout-context .field-label { color: #3B6EA5; }
+    .callout-context .callout-icon { background: #6E93BC; }
+    .callout-context .field-label { color: #6E93BC; }
     .callout .field-label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
     .callout .field-content { font-size: 16px; font-weight: 600; color: var(--ink); line-height: 1.5; }
     .callout-context .field-content { font-size: 15px; font-weight: 400; color: var(--ink-2); }
@@ -546,10 +546,10 @@
     .activity-row:last-child { margin-bottom: 0; }
     .activity-dot { width: 30px; height: 30px; border-radius: 50%; background: #B0AA96; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
     .activity-dot svg { width: 15px; height: 15px; }
-    .activity-dot.recent { background: #3B6EA5; }
+    .activity-dot.recent { background: #6E93BC; }
     .activity-body { flex: 1; background: #F7F4EC; border-radius: 10px; padding: 10px 14px; min-width: 0; }
     .activity-date { font-size: 11px; font-weight: 800; color: var(--ink-3); margin-bottom: 2px; }
-    .activity-date.recent { color: #3B6EA5; }
+    .activity-date.recent { color: #6E93BC; }
     .activity-text { font-size: 14px; color: var(--ink); line-height: 1.45; }
 
     /* Flatten remaining plain sections (tasks/touch/notes) */
@@ -694,7 +694,7 @@
   </div>
 </div>
 
-<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.51</div>
+<div id="version" style="position:fixed;bottom:6px;right:10px;font-size:9px;color:rgba(255,255,255,0.4);pointer-events:none;z-index:999;">v6.52</div>
 
 <script>
 const x9f2 = "karvox-7Hunjit-plwesk";
@@ -944,7 +944,7 @@ function flagIcon(item, w, h) {
   }
   return `<svg width="${w}" height="${h}" viewBox="0 0 28 18" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;border-radius:2px;cursor:pointer;opacity:0.15;" class="flag-btn" data-id="${item.id}">${stripes}<rect width="11" height="9.69" fill="#3c3b6e"/></svg>`;
 }
-const AVATAR_COLORS = ["#E67E5A","#4F9E8C","#D9A441","#6C8EBF","#B15C8E","#8A8B4A","#C0392B","#3B7A5E"];
+const AVATAR_COLORS = ["#E67E5A","#4F9E8C","#D9A441","#6C8EBF","#B15C8E","#8A8B4A","#C46A5C","#3B7A5E"];
 function avatarInitials(name) {
   if (!name) return "?";
   const parts = name.trim().split(/\s+/);
